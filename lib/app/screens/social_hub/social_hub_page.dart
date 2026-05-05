@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import '../../shared/custom_bottom_nav.dart';
 import 'widgets/activity_list.dart';
 import 'widgets/messages_list.dart';
 import 'widgets/social_hub_tabs.dart';
@@ -24,6 +24,7 @@ class _SocialHubPageState extends State<SocialHubPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF050608),
+      bottomNavigationBar: const CustomBottomNav(currentIndex: 1),
       body: SafeArea(
         child: Column(
           children: [

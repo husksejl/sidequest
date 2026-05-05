@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../shared/custom_bottom_nav.dart';
+
 import 'models/group_challenge.dart';
 import 'widgets/challenge_card.dart';
 import 'widgets/challenge_category_chip.dart';
@@ -159,7 +161,7 @@ class _GroupChallengeDiscoveryPageState
           ),
         ),
       ),
-      bottomNavigationBar: _buildBottomNav(),
+      bottomNavigationBar: const CustomBottomNav(currentIndex: 3),
     );
   }
 
@@ -266,71 +268,6 @@ class _GroupChallengeDiscoveryPageState
           );
         },
       ),
-    );
-  }
-
-  Widget _buildBottomNav() {
-    return Container(
-      height: 74,
-      decoration: const BoxDecoration(
-        color: Color(0xFF090B0E),
-        border: Border(
-          top: BorderSide(
-            color: Color(0xFF191D22),
-          ),
-        ),
-      ),
-      child: const Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _BottomNavItem(icon: Icons.home_rounded, label: 'Home'),
-          _BottomNavItem(icon: Icons.chat_bubble_outline, label: 'Chats'),
-          _BottomNavItem(icon: Icons.add_circle, label: 'Create'),
-          _BottomNavItem(
-            icon: Icons.groups_rounded,
-            label: 'Groups',
-            isActive: true,
-          ),
-          _BottomNavItem(icon: Icons.person_outline, label: 'Profile'),
-        ],
-      ),
-    );
-  }
-}
-
-class _BottomNavItem extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final bool isActive;
-
-  const _BottomNavItem({
-    required this.icon,
-    required this.label,
-    this.isActive = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final color = isActive ? const Color(0xFF00D7E8) : Colors.white38;
-
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(
-          icon,
-          color: color,
-          size: 21,
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: TextStyle(
-            color: color,
-            fontSize: 10,
-            fontWeight: isActive ? FontWeight.w700 : FontWeight.w400,
-          ),
-        ),
-      ],
     );
   }
 }

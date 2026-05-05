@@ -73,7 +73,7 @@ class CustomBottomNav extends StatelessWidget {
           ),
           Expanded(
             child: NavItem(
-              icon: Icons.bolt_rounded,
+              icon: Icons.forum_rounded,
               label: 'SOCIAL',
               isActive: currentIndex == 1,
               onTap: () => _navigateToPage(context, 1),

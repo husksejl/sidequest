@@ -24,6 +24,51 @@ class NavItem extends StatelessWidget {
         ? const Color(0xFF00B2AA)
         : const Color(0xFF6D727B);
 
+    if (isCenter) {
+      return GestureDetector(
+        onTap: onTap,
+        child: Transform.translate(
+          offset: const Offset(0, -18),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 62,
+                height: 62,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEB5D4F),
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFFEB5D4F).withOpacity(0.35),
+                      blurRadius: 18,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.add_rounded,
+                  color: Colors.black,
+                  size: 38,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                label,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: itemColor,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.6,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(18),
@@ -36,7 +81,7 @@ class NavItem extends StatelessWidget {
             Icon(
               icon,
               color: itemColor,
-              size: isCenter ? 30 : 24,
+              size: 24,
             ),
             const SizedBox(height: 4),
             Text(

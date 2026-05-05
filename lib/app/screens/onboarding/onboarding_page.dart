@@ -6,7 +6,7 @@ import 'widgets/onboarding_card.dart';
 import 'widgets/onboarding_progress.dart';
 
 class OnboardingPage extends StatefulWidget {
-  final VoidCallback? onFinished;
+  final void Function(BuildContext context)? onFinished;
 
   const OnboardingPage({
     super.key,
@@ -72,7 +72,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
   void _finishOnboarding() {
     if (widget.onFinished != null) {
-      widget.onFinished!();
+      widget.onFinished!(context);
       return;
     }
 
@@ -128,7 +128,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
                     ],
                   ),
                 ),
+
                 const SizedBox(height: 4),
+
                 Expanded(
                   child: PageView.builder(
                     controller: _pageController,
@@ -146,6 +148,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                     },
                   ),
                 ),
+
                 Padding(
                   padding: const EdgeInsets.fromLTRB(28, 0, 28, 14),
                   child: Column(
@@ -154,7 +157,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
                         currentIndex: _currentIndex,
                         totalSteps: _steps.length,
                       ),
+
                       const SizedBox(height: 16),
+
                       OnboardingActionButton(
                         text: _steps[_currentIndex].buttonText,
                         icon: _isLastStep
@@ -162,20 +167,25 @@ class _OnboardingPageState extends State<OnboardingPage> {
                             : Icons.arrow_forward_rounded,
                         onPressed: _nextStep,
                       ),
+
                       const SizedBox(height: 16),
+
                       AnimatedOpacity(
                         duration: const Duration(milliseconds: 220),
                         opacity: _isLastStep ? 1 : 0,
-                        child: TextButton(
-                          onPressed: _isLastStep ? _finishOnboarding : null,
-                          style: TextButton.styleFrom(
-                            foregroundColor: Colors.white.withOpacity(0.5),
-                          ),
-                          child: const Text(
-                            'Already have an account? Sign in',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
+                        child: IgnorePointer(
+                          ignoring: !_isLastStep,
+                          child: TextButton(
+                            onPressed: _isLastStep ? _finishOnboarding : null,
+                            style: TextButton.styleFrom(
+                              foregroundColor: Colors.white.withOpacity(0.5),
+                            ),
+                            child: const Text(
+                              'Already have an account? Sign in',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
                           ),
                         ),
