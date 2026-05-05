@@ -13,7 +13,7 @@ class GroupQuestCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(22, 52, 22, 46),
+      padding: const EdgeInsets.fromLTRB(22, 30, 22, 30),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(56).copyWith(
         ),
@@ -34,7 +34,7 @@ class GroupQuestCard extends StatelessWidget {
             textAlign: TextAlign.center,
             style: const TextStyle(
               color: Color(0xFFE5ECEC),
-              fontSize: 25,
+              fontSize: 20,
               height: 1.35,
               fontWeight: FontWeight.w700,
             ),

@@ -40,7 +40,7 @@ class CreateScreenPage extends StatelessWidget {
 
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.fromLTRB(22, 24, 22, 28),
+                padding: const EdgeInsets.fromLTRB(22, 20, 22, 20),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(38),
                   gradient: const LinearGradient(
@@ -86,13 +86,13 @@ class CreateScreenPage extends StatelessWidget {
                     const SizedBox(height: 16),
                     const SoloQuestCard(quest: soloQuest),
 
-                    const SizedBox(height: 34),
+                    const SizedBox(height: 20),
                     const QuestSectionLabel(label: 'GROUPS'),
 
-                    const SizedBox(height: 30),
+                    const SizedBox(height: 16),
                     const GroupQuestCard(quest: groupQuest),
 
-                    const SizedBox(height: 42),
+                    const SizedBox(height: 20),
 
                     const Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,

@@ -13,7 +13,7 @@ class SoloQuestCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 28),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(42),
         border: Border.all(
@@ -44,7 +44,7 @@ class SoloQuestCard extends StatelessWidget {
             textAlign: TextAlign.center,
             style: const TextStyle(
               color: Color(0xFFE5ECEC),
-              fontSize: 25,
+              fontSize: 20,
               height: 1.35,
               fontWeight: FontWeight.w700,
             ),
