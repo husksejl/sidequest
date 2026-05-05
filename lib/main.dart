@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../app/screens/home_screen/home_screen.dart';
+
+import 'app/screens/splash_screen/splash_screen_page.dart';
 
 void main() {
   runApp(const SideQuestApp());
@@ -15,10 +16,10 @@ class SideQuestApp extends StatelessWidget {
       title: 'SideQuest',
       theme: ThemeData(
         brightness: Brightness.dark,
-        scaffoldBackgroundColor: const Color(0xFF0E0E0E),
+        scaffoldBackgroundColor: const Color(0xFF050608),
         useMaterial3: true,
       ),
-      home: const HomeScreen(),
+      home: const SplashScreenPage(),
     );
   }
 }

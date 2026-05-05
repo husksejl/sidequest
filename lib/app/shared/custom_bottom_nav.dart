@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 
 import 'nav_item.dart';
 
+import '../screens/home_screen/home_screen.dart';
+import '../screens/social_hub/social_hub_page.dart';
 import '../screens/create/create_screen_page.dart';
+import '../screens/group_challenge_discovery/group_challenge_discovery_page.dart';
+import '../screens/own_profile/own_profile_page.dart';
 
 class CustomBottomNav extends StatelessWidget {
   final int currentIndex;
@@ -11,6 +15,39 @@ class CustomBottomNav extends StatelessWidget {
     super.key,
     this.currentIndex = 0,
   });
+
+  void _navigateToPage(BuildContext context, int index) {
+    if (index == currentIndex) return;
+
+    Widget page;
+
+    switch (index) {
+      case 0:
+        page = const HomeScreen();
+        break;
+      case 1:
+        page = const SocialHubPage();
+        break;
+      case 2:
+        page = const CreateScreenPage();
+        break;
+      case 3:
+        page = const GroupChallengeDiscoveryPage();
+        break;
+      case 4:
+        page = const OwnProfilePage();
+        break;
+      default:
+        page = const HomeScreen();
+    }
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => page,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,6 +68,7 @@ class CustomBottomNav extends StatelessWidget {
               icon: Icons.home_rounded,
               label: 'HOME',
               isActive: currentIndex == 0,
+              onTap: () => _navigateToPage(context, 0),
             ),
           ),
           Expanded(
@@ -38,6 +76,7 @@ class CustomBottomNav extends StatelessWidget {
               icon: Icons.bolt_rounded,
               label: 'SOCIAL',
               isActive: currentIndex == 1,
+              onTap: () => _navigateToPage(context, 1),
             ),
           ),
           Expanded(
@@ -46,14 +85,7 @@ class CustomBottomNav extends StatelessWidget {
               label: 'CREATE',
               isCenter: true,
               isActive: currentIndex == 2,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const CreateScreenPage(),
-                  ),
-                );
-              },
+              onTap: () => _navigateToPage(context, 2),
             ),
           ),
           Expanded(
@@ -61,6 +93,7 @@ class CustomBottomNav extends StatelessWidget {
               icon: Icons.groups_rounded,
               label: 'GROUPS',
               isActive: currentIndex == 3,
+              onTap: () => _navigateToPage(context, 3),
             ),
           ),
           Expanded(
@@ -68,6 +101,7 @@ class CustomBottomNav extends StatelessWidget {
               icon: Icons.person_rounded,
               label: 'PROFILE',
               isActive: currentIndex == 4,
+              onTap: () => _navigateToPage(context, 4),
             ),
           ),
         ],
