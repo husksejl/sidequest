@@ -15,7 +15,7 @@ class SideQuestApp extends StatelessWidget {
       title: 'SideQuest',
       theme: ThemeData(
         brightness: Brightness.dark,
-        scaffoldBackgroundColor: const Color(0xFF050608),
+        scaffoldBackgroundColor: const Color(0xFF0E0E0E),
         useMaterial3: true,
       ),
       home: const HomeScreen(),

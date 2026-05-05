@@ -13,21 +13,21 @@ class StoryItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 62,
+      width: 65,
       child: Column(
         children: [
           Container(
             width: 58,
             height: 58,
-            padding: const EdgeInsets.all(2),
+            padding: const EdgeInsets.all(2.5),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               gradient: story.isAdd
                   ? const LinearGradient(
-                colors: [Color(0xFF18D7FF), Color(0xFF0B2C35)],
+                colors: [Color(0xFF00B2AA), Color(0xFF0B2C35)],
               )
                   : const LinearGradient(
-                colors: [Color(0xFFFF9B8F), Color(0xFF18D7FF)],
+                colors: [Color(0xFFEB5D4F), Color(0xFF00B2AA)],
               ),
             ),
             child: Container(
@@ -38,7 +38,7 @@ class StoryItem extends StatelessWidget {
               child: story.isAdd
                   ? const Icon(
                 Icons.add,
-                color: Color(0xFF18D7FF),
+                color: Color(0xFF00B2AA),
                 size: 22,
               )
                   : const CircleAvatar(

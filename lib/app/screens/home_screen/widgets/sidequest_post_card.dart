@@ -33,7 +33,7 @@ class SideQuestPostCard extends StatelessWidget {
                 decoration: const BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: LinearGradient(
-                    colors: [Color(0xFFFF9B8F), Color(0xFF18D7FF)],
+                    colors: [Color(0xFFEB5D4F), Color(0xFF00B2AA)],
                   ),
                 ),
                 child: const CircleAvatar(
@@ -73,91 +73,32 @@ class SideQuestPostCard extends StatelessWidget {
           ),
           const SizedBox(height: 12),
 
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              gradient: const LinearGradient(
-                colors: [
-                  Color(0xFF1C2B1F),
-                  Color(0xFF0E1813),
-                  Color(0xFF16231E),
-                ],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-            ),
-            child: Column(
-              children: [
-                Text(
-                  post.title,
-                  style: const TextStyle(
-                    color: Color(0xFFE8E1D6),
-                    fontSize: 20,
-                    letterSpacing: 1.2,
-                  ),
-                ),
-                const SizedBox(height: 18),
-                Container(
-                  height: 190,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(18),
-                    gradient: const LinearGradient(
-                      colors: [
-                        Color(0xFF334D38),
-                        Color(0xFF1D2D23),
-                        Color(0xFF0F1712),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                  ),
-                  child: Center(
-                    child: Text(
-                      post.imageEmoji,
-                      style: const TextStyle(fontSize: 58),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  post.imageLabelTop,
-                  style: const TextStyle(
-                    color: Color(0xFFE8E1D6),
-                    fontSize: 10,
-                    letterSpacing: 6,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  post.imageLabelBottom,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: Color(0xFFCFD3CD),
-                    fontSize: 10,
-                    letterSpacing: 2.8,
-                  ),
-                ),
-              ],
+          ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: Image.asset(
+              post.userName == 'Charles L.'
+                  ? 'assets/Charles.jpg'
+                  : 'assets/Max.jpg',
+              height: 350,
+              width: double.infinity,
+              fit: BoxFit.cover,
             ),
           ),
 
-          const SizedBox(height: 12),
+          const SizedBox(height: 20),
 
           Row(
             children: [
               PostStat(
                 icon: Icons.favorite,
                 value: '${post.likes}',
-                iconColor: const Color(0xFFFF8D84),
+                iconColor: const Color(0xFFEB5D4F),
               ),
               const SizedBox(width: 8),
               PostStat(
                 icon: Icons.mode_comment_rounded,
                 value: '${post.comments}',
-                iconColor: const Color(0xFF18D7FF),
+                iconColor: const Color(0xFF00B2AA),
               ),
               const Spacer(),
               Container(
@@ -214,7 +155,7 @@ class SideQuestPostCard extends StatelessWidget {
                       child: VoteButton(
                         label: 'Completed',
                         count: post.completedVotes,
-                        color: const Color(0xFF18D7FF),
+                        color: const Color(0xFF00B2AA),
                         icon: Icons.check_circle_rounded,
                       ),
                     ),
@@ -223,7 +164,7 @@ class SideQuestPostCard extends StatelessWidget {
                       child: VoteButton(
                         label: 'Not yet',
                         count: post.notCompletedVotes,
-                        color: const Color(0xFFFF8D84),
+                        color: const Color(0xFFEB5D4F),
                         icon: Icons.cancel_rounded,
                       ),
                     ),

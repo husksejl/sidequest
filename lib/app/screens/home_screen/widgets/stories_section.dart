@@ -7,7 +7,7 @@ class StoriesSection extends StatelessWidget {
   const StoriesSection({super.key});
 
   static const List<StoryItemModel> stories = [
-    StoryItemModel(name: 'Your Quest', isAdd: true),
+    StoryItemModel(name: 'Add Story', isAdd: true),
     StoryItemModel(name: 'Sarah'),
     StoryItemModel(name: 'Mike'),
     StoryItemModel(name: 'Lara'),

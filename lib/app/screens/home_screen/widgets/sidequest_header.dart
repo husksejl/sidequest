@@ -6,10 +6,10 @@ class SideQuestHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      children: const [
-        Expanded(
+      children: [
+        const Expanded(
           child: Text(
-            "Today's SideQuests",
+            "New SideQuest",
             style: TextStyle(
               color: Colors.white,
               fontSize: 22,
@@ -17,10 +17,10 @@ class SideQuestHeader extends StatelessWidget {
             ),
           ),
         ),
-        Text(
+        const Text(
           'LIVE FEED',
           style: TextStyle(
-            color: Color(0xFF18D7FF),
+            color: Color(0xFF00B2AA),
             fontSize: 11,
             letterSpacing: 1.1,
             fontWeight: FontWeight.w700,

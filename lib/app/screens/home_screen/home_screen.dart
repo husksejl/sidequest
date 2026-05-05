@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 import '../../shared/custom_bottom_nav.dart';
 import 'models/sidequest_post.dart';
 import 'widgets/header_section.dart';
-import 'widgets/streak_status_section.dart';
 import 'widgets/stories_section.dart';
 import 'widgets/today_sidequest_card.dart';
-import 'widgets/sidequest_header.dart';
 import 'widgets/sidequest_post_card.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -15,30 +13,30 @@ class HomeScreen extends StatelessWidget {
 
   static const List<SideQuestPost> posts = [
     SideQuestPost(
-      userName: 'Alex Rivera',
+      userName: 'Max V.',
       timeAgo: '20m ago',
-      location: 'Rooftop Garden',
+      location: 'Melbourne',
       title: 'URBAN OASIS',
       imageEmoji: '🌿',
       imageLabelTop: 'Y O U R S',
       imageLabelBottom: 'SAFE  •  SOFT  •  WILD',
       caption:
-      'Found this gem on 5th Ave! Who knew a library roof could look like a jungle?',
+      'I put on a wig and suddenly have opinions #quirky',
       likes: 124,
       comments: 18,
       completedVotes: 21,
       notCompletedVotes: 3,
     ),
     SideQuestPost(
-      userName: 'Sarah Kim',
+      userName: 'Charles L.',
       timeAgo: '42m ago',
-      location: 'Old Town',
+      location: 'Monte Carlo',
       title: 'SMILE HUNT',
       imageEmoji: '📸',
       imageLabelTop: 'M O M E N T',
       imageLabelBottom: 'LIGHT  •  JOY  •  CITY',
       caption:
-      'Today’s SideQuest actually worked. Random little things made me smile all day.',
+      'The mask told me to do it 🤪',
       likes: 89,
       comments: 11,
       completedVotes: 17,
@@ -53,28 +51,119 @@ class HomeScreen extends StatelessWidget {
       bottomNavigationBar: const CustomBottomNav(),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
+          padding: const EdgeInsets.fromLTRB(12, 10, 12, 20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const HeaderSection(),
               const SizedBox(height: 18),
-              const StreakStatusSection(),
-              const SizedBox(height: 18),
+
               const StoriesSection(),
               const SizedBox(height: 18),
+
               const TodaySideQuestCard(),
+              const SizedBox(height: 24),
+
+              const SearchBarHome(),
               const SizedBox(height: 20),
-              const SideQuestHeader(),
-              const SizedBox(height: 14),
+
+              const Text(
+                "Today's Missions",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              const MissionTabs(),
+              const SizedBox(height: 18),
+
               for (final post in posts) ...[
                 SideQuestPostCard(post: post),
-                const SizedBox(height: 14),
+                const SizedBox(height: 16),
               ],
             ],
           ),
         ),
       ),
+    );
+  }
+}
+
+class SearchBarHome extends StatelessWidget {
+  const SearchBarHome({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 50,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: Colors.white70),
+      ),
+      child: const Row(
+        children: [
+          Icon(Icons.search, color: Colors.white70, size: 30),
+        ],
+      ),
+    );
+  }
+}
+
+class MissionTabs extends StatelessWidget {
+  const MissionTabs({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: Container(
+            height: 40,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(999),
+              border: Border.all(color: Colors.white),
+              color: Color(0xFF1A1A1A),
+            ),
+            child: const Center(
+              child: Text(
+                'FOLLOWING',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 1,
+                ),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 26),
+        Expanded(
+          child: Container(
+            height: 40,
+            decoration: BoxDecoration(
+              border: Border.all(color: Color(0xFF1A1A1A)),
+              borderRadius: BorderRadius.circular(999),
+            ),
+            child: const Center(
+              child: Text(
+                'FOR YOU',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 1,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

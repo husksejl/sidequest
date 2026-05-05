@@ -54,17 +54,16 @@ class _TodaySideQuestCardState extends State<TodaySideQuestCard> {
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(18, 20, 18, 22),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: BorderRadius.circular(50),
         gradient: const LinearGradient(
           colors: [
-            Color(0xFF1A171B),
-            Color(0xFF101317),
-            Color(0xFF0A1618),
+            Color(0xFF3C1F1C),
+            Color(0xFF000000),
+            Color(0xFF3C1F1C),
           ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+          begin: Alignment.topRight,
+          end: Alignment.bottomLeft,
         ),
-        border: Border.all(color: Colors.white12),
         boxShadow: [
           BoxShadow(
             color: const Color(0xFF18D7FF).withOpacity(0.08),
@@ -73,8 +72,36 @@ class _TodaySideQuestCardState extends State<TodaySideQuestCard> {
           ),
         ],
       ),
-      child: Column(
+      child: Stack(
         children: [
+        Positioned(
+        top: 15,
+        right: 18,
+        child: Container(
+          width: 28,
+          height: 28,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(color: Colors.white, width: 1.5),
+          ),
+          child: const Center(
+            child: Text(
+              '?',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ),
+      ),
+
+      Align(
+        alignment: Alignment.center,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
             decoration: BoxDecoration(
@@ -83,9 +110,9 @@ class _TodaySideQuestCardState extends State<TodaySideQuestCard> {
               border: Border.all(color: Colors.white.withOpacity(0.05)),
             ),
             child: const Text(
-              "TODAY'S SIDEQUEST",
+              "NEW SIDEQUEST",
               style: TextStyle(
-                color: Color(0xFF18D7FF),
+                color: Color(0xFF00B2AA),
                 fontSize: 12,
                 letterSpacing: 1.3,
                 fontWeight: FontWeight.w700,
@@ -101,8 +128,8 @@ class _TodaySideQuestCardState extends State<TodaySideQuestCard> {
               color: Colors.white.withOpacity(0.04),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF18D7FF).withOpacity(0.16),
-                  blurRadius: 26,
+                  color: const Color(0xFFFFFFFF).withOpacity(0.16),
+                  blurRadius: 10,
                   spreadRadius: 2,
                 ),
               ],
@@ -110,8 +137,8 @@ class _TodaySideQuestCardState extends State<TodaySideQuestCard> {
             ),
             child: const Icon(
               Icons.camera_alt_rounded,
-              color: Color(0xFFFF8D84),
-              size: 38,
+              color: Color(0xFFEB5D4F),
+              size: 50,
             ),
           ),
           const SizedBox(height: 28),
@@ -125,19 +152,9 @@ class _TodaySideQuestCardState extends State<TodaySideQuestCard> {
               fontWeight: FontWeight.w800,
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 40),
           const Text(
-            'Capture a moment of joy and share it\nwith the world.',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Color(0xFF8A8F98),
-              fontSize: 15,
-              height: 1.5,
-            ),
-          ),
-          const SizedBox(height: 28),
-          const Text(
-            'SIDEQUEST EXPIRES IN',
+            'QUEST EXPIRES IN',
             style: TextStyle(
               color: Color(0xFF5D626B),
               fontSize: 11,
@@ -155,29 +172,9 @@ class _TodaySideQuestCardState extends State<TodaySideQuestCard> {
             ),
           ),
           const SizedBox(height: 28),
-          Container(
-            width: double.infinity,
-            height: 58,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(999),
-              gradient: const LinearGradient(
-                colors: [
-                  Color(0xFFFF9B8F),
-                  Color(0xFF18D7FF),
-                ],
-              ),
-            ),
-            child: const Center(
-              child: Text(
-                'Start SideQuest',
-                style: TextStyle(
-                  color: Colors.black,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 18,
-                ),
-              ),
-            ),
-          ),
+          ],
+        ),
+      ),
         ],
       ),
     );
