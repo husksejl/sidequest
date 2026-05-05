@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../models/message_thread.dart';
+import '../../group_chat/group_chat_page.dart';
 import '../widgets/messages_thread_card.dart';
 
 class MessagesList extends StatelessWidget {
@@ -37,8 +38,19 @@ class MessagesList extends StatelessWidget {
       children: [
         buildSearchBar(),
         const SizedBox(height: 20),
+
         for (int i = 0; i < threads.length; i++)
-          MessageThreadCard(thread: threads[i]),
+          MessageThreadCard(
+            thread: threads[i],
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const GroupChatPage(),
+                ),
+              );
+            },
+          ),
       ],
     );
   }

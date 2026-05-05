@@ -4,38 +4,43 @@ import '../models/message_thread.dart';
 
 class MessageThreadCard extends StatelessWidget {
   final MessageThread thread;
+  final VoidCallback onTap;
 
   const MessageThreadCard({
     super.key,
     required this.thread,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 14),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFF151515),
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: Row(
-        children: [
-          buildAvatar(),
-          const SizedBox(width: 14),
-          Expanded(
-            child: buildTextContent(),
-          ),
-          const SizedBox(width: 8),
-          Text(
-            thread.time.toUpperCase(),
-            style: const TextStyle(
-              color: Colors.grey,
-              fontSize: 9,
-              fontWeight: FontWeight.bold,
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 14),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: const Color(0xFF151515),
+          borderRadius: BorderRadius.circular(24),
+        ),
+        child: Row(
+          children: [
+            buildAvatar(),
+            const SizedBox(width: 14),
+            Expanded(
+              child: buildTextContent(),
             ),
-          ),
-        ],
+            const SizedBox(width: 8),
+            Text(
+              thread.time.toUpperCase(),
+              style: const TextStyle(
+                color: Colors.grey,
+                fontSize: 9,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
