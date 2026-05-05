@@ -83,7 +83,7 @@ class CreateScreenPage extends StatelessWidget {
                       ],
                     ),
 
-                    const SizedBox(height: 38),
+                    const SizedBox(height: 16),
                     const SoloQuestCard(quest: soloQuest),
 
                     const SizedBox(height: 34),
