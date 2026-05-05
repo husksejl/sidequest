@@ -11,7 +11,7 @@ class QuestSectionLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
         color: const Color(0xFF1A1A1A),
         borderRadius: BorderRadius.circular(999),
@@ -20,7 +20,7 @@ class QuestSectionLabel extends StatelessWidget {
         label,
         style: const TextStyle(
           color: Color(0xFF00B2AA),
-          fontSize: 15,
+          fontSize: 10,
           fontWeight: FontWeight.w800,
           letterSpacing: 4,
         ),

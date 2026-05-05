@@ -66,12 +66,6 @@ class SoloQuestCard extends StatelessWidget {
               color: Colors.white,
               fontSize: 32,
               fontWeight: FontWeight.w800,
-              shadows: [
-                Shadow(
-                  color: Color(0xFF00FFF0),
-                  blurRadius: 18,
-                ),
-              ],
             ),
           ),
         ],

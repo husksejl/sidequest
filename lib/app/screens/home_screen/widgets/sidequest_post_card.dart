@@ -77,8 +77,8 @@ class SideQuestPostCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(20),
             child: Image.asset(
               post.userName == 'Charles L.'
-                  ? 'assets/Charles.jpg'
-                  : 'assets/Max.jpg',
+                  ? 'assets/images/Charles.jpg'
+                  : 'assets/images/Max.jpg',
               height: 350,
               width: double.infinity,
               fit: BoxFit.cover,

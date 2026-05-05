@@ -36,17 +36,13 @@ class CreateScreenPage extends StatelessWidget {
           child: Column(
             children: [
               const CreateHeader(),
-              const SizedBox(height: 34),
+              const SizedBox(height: 10),
 
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.fromLTRB(22, 24, 22, 28),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(38),
-                  border: Border.all(
-                    color: const Color(0xFFEB5D4F),
-                    width: 1.4,
-                  ),
                   gradient: const LinearGradient(
                     colors: [
                       Color(0xFF100C0C),

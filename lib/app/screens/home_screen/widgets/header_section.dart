@@ -8,7 +8,7 @@ class HeaderSection extends StatelessWidget {
     return Row(
       children: [
         Image.asset(
-          'assets/LOGO.png',
+          'assets/images/LOGO.png',
           height: 50,
         ),
 

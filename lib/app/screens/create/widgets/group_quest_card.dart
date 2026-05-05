@@ -15,9 +15,7 @@ class GroupQuestCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(22, 52, 22, 46),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(0).copyWith(
-          topRight: const Radius.circular(56),
-          bottomLeft: const Radius.circular(56),
+        borderRadius: BorderRadius.circular(56).copyWith(
         ),
         gradient: const LinearGradient(
           colors: [
@@ -58,12 +56,6 @@ class GroupQuestCard extends StatelessWidget {
               color: Colors.white,
               fontSize: 32,
               fontWeight: FontWeight.w800,
-              shadows: [
-                Shadow(
-                  color: Color(0xFF00FFF0),
-                  blurRadius: 18,
-                ),
-              ],
             ),
           ),
         ],
