@@ -5,6 +5,7 @@ class NavItem extends StatelessWidget {
   final String label;
   final bool isActive;
   final bool isCenter;
+  final VoidCallback? onTap;
 
   const NavItem({
     super.key,
@@ -12,6 +13,7 @@ class NavItem extends StatelessWidget {
     required this.label,
     this.isActive = false,
     this.isCenter = false,
+    this.onTap,
   });
 
   @override
@@ -22,7 +24,9 @@ class NavItem extends StatelessWidget {
         ? const Color(0xFF00B2AA)
         : const Color(0xFF6D727B);
 
-    return Column(
+    return GestureDetector(
+        onTap: onTap,
+        child: Column(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -43,6 +47,7 @@ class NavItem extends StatelessWidget {
           ),
         ),
       ],
+        ),
     );
   }
 }
