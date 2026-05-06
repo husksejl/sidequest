@@ -9,6 +9,7 @@ enum VoteStatus {
   completed,
   failed,
   undecided,
+  open,
 }
 
 class ProfilePost {
@@ -16,6 +17,7 @@ class ProfilePost {
   final String timeAgo;
   final String location;
   final String caption;
+  final String questTitle;
   final String assetPath;
   final ProfilePostType type;
   final VoteStatus voteStatus;
@@ -28,6 +30,7 @@ class ProfilePost {
     required this.timeAgo,
     required this.location,
     required this.caption,
+    required this.questTitle,
     required this.assetPath,
     required this.type,
     required this.voteStatus,

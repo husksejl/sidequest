@@ -44,7 +44,7 @@ class ProfilePostGrid extends StatelessWidget {
   }
 }
 
-class ProfilePostDetailPage extends StatelessWidget {
+class ProfilePostDetailPage extends StatefulWidget {
   final List<ProfilePost> posts;
   final int initialIndex;
 
@@ -55,9 +55,33 @@ class ProfilePostDetailPage extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    final controller = PageController(initialPage: initialIndex);
+  State<ProfilePostDetailPage> createState() => _ProfilePostDetailPageState();
+}
 
+class _ProfilePostDetailPageState extends State<ProfilePostDetailPage> {
+  final ScrollController _scrollController = ScrollController();
+
+  static const double estimatedPostHeight = 560;
+
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollController.jumpTo(
+        widget.initialIndex * estimatedPostHeight,
+      );
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF050608),
       appBar: AppBar(
@@ -73,12 +97,13 @@ class ProfilePostDetailPage extends StatelessWidget {
         ),
       ),
       body: ListView.builder(
+        controller: _scrollController,
         padding: const EdgeInsets.fromLTRB(14, 12, 14, 24),
-        itemCount: posts.length,
+        itemCount: widget.posts.length,
         itemBuilder: (context, index) {
           return Padding(
             padding: const EdgeInsets.only(bottom: 16),
-            child: ProfilePostDetailCard(post: posts[index]),
+            child: ProfilePostDetailCard(post: widget.posts[index]),
           );
         },
       ),

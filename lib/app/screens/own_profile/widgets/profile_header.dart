@@ -39,7 +39,7 @@ class ProfileHeader extends StatelessWidget {
         const SizedBox(height: 16),
 
         const Text(
-          'Charles Verstappen',
+          'Franz Hermann',
           style: TextStyle(
             color: Colors.white,
             fontSize: 22,

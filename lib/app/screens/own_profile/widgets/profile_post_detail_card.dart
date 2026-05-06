@@ -15,6 +15,8 @@ class ProfilePostDetailCard extends StatelessWidget {
         return const Color(0xFF00B2AA);
       case VoteStatus.failed:
         return const Color(0xFFEB5D4F);
+      case VoteStatus.open:
+        return const Color(0xFF00B2AA);
       case VoteStatus.undecided:
         return const Color(0xFF8A8F98);
     }
@@ -22,15 +24,41 @@ class ProfilePostDetailCard extends StatelessWidget {
 
   String get statusText {
     if (post.votingOpen) return 'Voting open';
+
     switch (post.voteStatus) {
       case VoteStatus.completed:
         return 'Quest completed';
       case VoteStatus.failed:
         return 'Quest failed';
+      case VoteStatus.open:
+        return 'Voting open';
       case VoteStatus.undecided:
         return 'Vote undecided';
     }
   }
+
+  int get xpValue {
+    switch (post.voteStatus) {
+      case VoteStatus.completed:
+        return 100;
+
+      case VoteStatus.open:
+        return 50;
+
+      case VoteStatus.undecided:
+        return 50;
+
+      case VoteStatus.failed:
+        return 0;
+    }
+  }
+
+  Color get xpColor {
+    if (xpValue == 100) return const Color(0xFF00B2AA);
+    if (xpValue == 50) return Colors.white70;
+    return const Color(0xFFEB5D4F);
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -73,29 +101,203 @@ class ProfilePostDetailCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                Icon(
-                  post.type == ProfilePostType.video
-                      ? Icons.play_arrow_rounded
-                      : post.type == ProfilePostType.audio
-                      ? Icons.graphic_eq_rounded
-                      : post.type == ProfilePostType.text
-                      ? Icons.title_rounded
-                      : Icons.image_rounded,
-                  color: Colors.white54,
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: xpColor.withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(999),
+                        border: Border.all(color: xpColor.withOpacity(0.7)),
+                      ),
+                      child: Text(
+                        '+$xpValue XP',
+                        style: TextStyle(
+                          color: xpColor,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Icon(
+                      post.type == ProfilePostType.video
+                          ? Icons.play_arrow_rounded
+                          : post.type == ProfilePostType.audio
+                          ? Icons.graphic_eq_rounded
+                          : post.type == ProfilePostType.text
+                          ? Icons.title_rounded
+                          : Icons.image_rounded,
+                      color: Colors.white54,
+                    ),
+                  ],
                 ),
               ],
             ),
 
             const SizedBox(height: 14),
 
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(
+                horizontal: 14,
+                vertical: 12,
+              ),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(18),
+                gradient: LinearGradient(
+                  colors: [
+                    const Color(0xFFEB5D4F).withOpacity(0.14),
+                    const Color(0xFF050608),
+                    const Color(0xFF00B2AA).withOpacity(0.12),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.04),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 54,
+                    height: 54,
+                    child: Padding(
+                      padding: const EdgeInsets.all(2),
+                      child: Image.asset(
+                        'assets/images/LOGO.png',
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(width: 12),
+
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 4),
+
+                        Text(
+                          post.questTitle,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 13,
+                            height: 1.3,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 14),
+
             ClipRRect(
               borderRadius: BorderRadius.circular(20),
-              child: Image.asset(
-                post.assetPath,
+              child: post.type == ProfilePostType.text || post.type == ProfilePostType.audio
+                  ? Container(
                 height: 390,
                 width: double.infinity,
-                fit: BoxFit.cover,
+                padding: const EdgeInsets.all(28),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      const Color(0xFFEB5D4F).withOpacity(0.22),
+                      const Color(0xFF050608),
+                      const Color(0xFF00B2AA).withOpacity(0.18),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+                child: Stack(
+                  children: [
+                    Positioned(
+                      top: -20,
+                      right: -10,
+                      child: Container(
+                        width: 120,
+                        height: 120,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: const Color(0xFFEB5D4F).withOpacity(0.16),
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      bottom: -30,
+                      left: -20,
+                      child: Container(
+                        width: 140,
+                        height: 140,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: const Color(0xFF00B2AA).withOpacity(0.14),
+                        ),
+                      ),
+                    ),
+                    Center(
+                      child: post.type == ProfilePostType.audio
+                          ? const Icon(
+                        Icons.graphic_eq_rounded,
+                        color: Colors.white,
+                        size: 92,
+                      )
+                          : const Text(
+                        '"I complimented\nthree strangers today\nand honestly...\nit healed me a little."',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 28,
+                          height: 1.35,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              )
+                  : SizedBox(
+                height: 390,
+                width: double.infinity,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Image.asset(
+                      post.assetPath,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                    ),
+
+                  if (post.type == ProfilePostType.video)
+                    Container(
+                      color: Colors.black.withOpacity(0.18),
+                      child: Center(
+                        child: Container(
+                          width: 74,
+                          height: 74,
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.45),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.play_arrow_rounded,
+                            color: Colors.white,
+                            size: 46,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
               ),
+            ),
             ),
 
             const SizedBox(height: 14),
