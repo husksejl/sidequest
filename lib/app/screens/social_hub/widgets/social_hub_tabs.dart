@@ -13,53 +13,92 @@ class SocialHubTabs extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 4, 20, 16),
-      child: Row(
-        children: [
-          buildTabButton('Activity', 0),
-          const SizedBox(width: 28),
-          buildTabButton('Messages', 1),
-        ],
+      padding: const EdgeInsets.fromLTRB(20, 4, 20, 18),
+      child: Container(
+        height: 54,
+        padding: const EdgeInsets.all(5),
+        decoration: BoxDecoration(
+          color: const Color(0xFF0B0E0F),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: const Color(0xFF1C2A2C),
+          ),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: buildTabButton(
+                text: 'Activity',
+                index: 0,
+                icon: Icons.notifications_none_rounded,
+              ),
+            ),
+            const SizedBox(width: 6),
+            Expanded(
+              child: buildTabButton(
+                text: 'Messages',
+                index: 1,
+                icon: Icons.chat_bubble_outline_rounded,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget buildTabButton(String text, int index) {
+  Widget buildTabButton({
+    required String text,
+    required int index,
+    required IconData icon,
+  }) {
     final bool isSelected = selectedTabIndex == index;
 
     return GestureDetector(
       onTap: () {
         onTabChanged(index);
       },
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            text,
-            style: TextStyle(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 220),
+        curve: Curves.easeOut,
+        height: double.infinity,
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFF102326) : Colors.transparent,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: isSelected
+                ? const Color(0xFF00E5FF).withOpacity(0.6)
+                : Colors.transparent,
+          ),
+          boxShadow: isSelected
+              ? [
+            BoxShadow(
+              color: const Color(0xFF00E5FF).withOpacity(0.15),
+              blurRadius: 14,
+              offset: const Offset(0, 4),
+            ),
+          ]
+              : [],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
               color: isSelected ? const Color(0xFF00E5FF) : Colors.grey,
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
+              size: 20,
             ),
-          ),
-          const SizedBox(height: 7),
-          Container(
-            width: isSelected ? 34 : 0,
-            height: 3,
-            decoration: BoxDecoration(
-              color: const Color(0xFF00E5FF),
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: isSelected
-                  ? [
-                BoxShadow(
-                  color: const Color(0xFF00E5FF).withOpacity(0.8),
-                  blurRadius: 8,
-                ),
-              ]
-                  : [],
+            const SizedBox(width: 8),
+            Text(
+              text,
+              style: TextStyle(
+                color: isSelected ? const Color(0xFF00E5FF) : Colors.grey,
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

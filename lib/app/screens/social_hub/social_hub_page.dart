@@ -55,14 +55,6 @@ class _SocialHubPageState extends State<SocialHubPage> {
             size: 24,
           ),
           const SizedBox(width: 16),
-          const Text(
-            'SideQuest Hub',
-            style: TextStyle(
-              color: Color(0xFFFF7A66),
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
           const Spacer(),
           Container(
             width: 38,
