@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../home_screen/home_screen.dart';
 import '../onboarding/onboarding_page.dart';
 
 class SplashScreenPage extends StatefulWidget {
@@ -60,8 +62,63 @@ class _SplashScreenPageState extends State<SplashScreenPage>
       if (!mounted) return;
 
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (context) => const OnboardingPage(),
+        PageRouteBuilder(
+          transitionDuration: const Duration(milliseconds: 520),
+          reverseTransitionDuration: const Duration(milliseconds: 360),
+          pageBuilder: (context, animation, secondaryAnimation) {
+            return OnboardingPage(
+              onFinished: (context) {
+                Navigator.of(context).pushReplacement(
+                  PageRouteBuilder(
+                    transitionDuration: const Duration(milliseconds: 520),
+                    reverseTransitionDuration:
+                    const Duration(milliseconds: 360),
+                    pageBuilder: (context, animation, secondaryAnimation) {
+                      return const HomeScreen();
+                    },
+                    transitionsBuilder: (
+                        context,
+                        animation,
+                        secondaryAnimation,
+                        child,
+                        ) {
+                      final curvedAnimation = CurvedAnimation(
+                        parent: animation,
+                        curve: Curves.easeOutCubic,
+                      );
+
+                      return FadeTransition(
+                        opacity: curvedAnimation,
+                        child: SlideTransition(
+                          position: Tween<Offset>(
+                            begin: const Offset(0, 0.04),
+                            end: Offset.zero,
+                          ).animate(curvedAnimation),
+                          child: child,
+                        ),
+                      );
+                    },
+                  ),
+                );
+              },
+            );
+          },
+          transitionsBuilder: (
+              context,
+              animation,
+              secondaryAnimation,
+              child,
+              ) {
+            final curvedAnimation = CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeOutCubic,
+            );
+
+            return FadeTransition(
+              opacity: curvedAnimation,
+              child: child,
+            );
+          },
         ),
       );
     });
@@ -88,8 +145,8 @@ class _SplashScreenPageState extends State<SplashScreenPage>
                 child: Transform.scale(
                   scale: scaleAnimation.value,
                   child: Container(
-                    width: 190,
-                    height: 190,
+                    width: 150,
+                    height: 150,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       boxShadow: [
@@ -105,9 +162,12 @@ class _SplashScreenPageState extends State<SplashScreenPage>
                         ),
                       ],
                     ),
-                    child: Image.asset(
-                      'assets/images/LOGO-icon.png',
-                      fit: BoxFit.contain,
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Image.asset(
+                        'assets/images/LOGO-icon.png',
+                        fit: BoxFit.contain,
+                      ),
                     ),
                   ),
                 ),
