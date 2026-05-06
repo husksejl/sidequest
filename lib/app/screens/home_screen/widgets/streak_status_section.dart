@@ -5,8 +5,8 @@ class StreakStatusSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: const [
+    return const Row(
+      children: [
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

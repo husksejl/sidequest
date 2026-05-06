@@ -15,19 +15,21 @@ class PostStat extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.05),
         borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: Colors.white.withOpacity(0.04)),
       ),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: iconColor, size: 16),
-          const SizedBox(width: 6),
+          Icon(icon, color: iconColor, size: 17),
+          const SizedBox(width: 5),
           Text(
             value,
             style: const TextStyle(
-              color: Colors.white,
+              color: Colors.white70,
               fontSize: 12,
               fontWeight: FontWeight.w700,
             ),

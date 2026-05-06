@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 class TodaySideQuestCard extends StatefulWidget {
@@ -31,9 +32,7 @@ class _TodaySideQuestCardState extends State<TodaySideQuestCard> {
   }
 
   String _formatTime(Duration duration) {
-    String twoDigits(int number) {
-      return number.toString().padLeft(2, '0');
-    }
+    String twoDigits(int number) => number.toString().padLeft(2, '0');
 
     final hours = twoDigits(duration.inHours);
     final minutes = twoDigits(duration.inMinutes.remainder(60));

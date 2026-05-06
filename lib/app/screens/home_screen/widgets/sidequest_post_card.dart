@@ -72,7 +72,6 @@ class SideQuestPostCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-
           ClipRRect(
             borderRadius: BorderRadius.circular(20),
             child: Image.asset(
@@ -84,9 +83,7 @@ class SideQuestPostCard extends StatelessWidget {
               fit: BoxFit.cover,
             ),
           ),
-
           const SizedBox(height: 20),
-
           Row(
             children: [
               PostStat(
@@ -116,9 +113,7 @@ class SideQuestPostCard extends StatelessWidget {
               ),
             ],
           ),
-
           const SizedBox(height: 12),
-
           Text(
             post.caption,
             style: const TextStyle(
@@ -127,9 +122,7 @@ class SideQuestPostCard extends StatelessWidget {
               height: 1.45,
             ),
           ),
-
           const SizedBox(height: 14),
-
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(

@@ -21,8 +21,8 @@ class NavItem extends StatelessWidget {
     final Color itemColor = isCenter
         ? const Color(0xFFEB5D4F)
         : isActive
-        ? const Color(0xFF00B2AA)
-        : const Color(0xFF6D727B);
+            ? const Color(0xFF18D7FF)
+            : const Color(0xFF6D727B);
 
     if (isCenter) {
       return GestureDetector(

@@ -24,11 +24,11 @@ class StoryItem extends StatelessWidget {
               shape: BoxShape.circle,
               gradient: story.isAdd
                   ? const LinearGradient(
-                colors: [Color(0xFF00B2AA), Color(0xFF0B2C35)],
-              )
+                      colors: [Color(0xFF00B2AA), Color(0xFF0B2C35)],
+                    )
                   : const LinearGradient(
-                colors: [Color(0xFFEB5D4F), Color(0xFF00B2AA)],
-              ),
+                      colors: [Color(0xFFEB5D4F), Color(0xFF00B2AA)],
+                    ),
             ),
             child: Container(
               decoration: const BoxDecoration(
@@ -37,18 +37,18 @@ class StoryItem extends StatelessWidget {
               ),
               child: story.isAdd
                   ? const Icon(
-                Icons.add,
-                color: Color(0xFF00B2AA),
-                size: 22,
-              )
+                      Icons.add,
+                      color: Color(0xFF00B2AA),
+                      size: 22,
+                    )
                   : const CircleAvatar(
-                backgroundColor: Color(0xFF222831),
-                child: Icon(
-                  Icons.person,
-                  color: Colors.white70,
-                  size: 20,
-                ),
-              ),
+                      backgroundColor: Color(0xFF222831),
+                      child: Icon(
+                        Icons.person,
+                        color: Colors.white70,
+                        size: 20,
+                      ),
+                    ),
             ),
           ),
           const SizedBox(height: 8),

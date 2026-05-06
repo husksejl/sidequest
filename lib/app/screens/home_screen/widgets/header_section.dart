@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../settings_screen/settings_screen.dart';
+
 class HeaderSection extends StatelessWidget {
   const HeaderSection({super.key});
 
@@ -15,9 +17,10 @@ class HeaderSection extends StatelessWidget {
         const Spacer(),
 
         IconButton(
-          onPressed: () {},
+          tooltip: 'Settings',
+          onPressed: () => Navigator.pushNamed(context, SettingsScreen.routeName),
           icon: const Icon(
-            Icons.notifications_rounded,
+            Icons.settings_rounded,
             color: Colors.white70,
           ),
         ),

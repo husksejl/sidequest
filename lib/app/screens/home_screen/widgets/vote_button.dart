@@ -17,23 +17,26 @@ class VoteButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 48,
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
       decoration: BoxDecoration(
         color: color.withOpacity(0.10),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: color.withOpacity(0.28)),
+        border: Border.all(color: color.withOpacity(0.18)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, color: color, size: 18),
-          const SizedBox(width: 8),
-          Text(
-            '$label  ($count)',
-            style: TextStyle(
-              color: color,
-              fontSize: 12.5,
-              fontWeight: FontWeight.w700,
+          Icon(icon, color: color, size: 17),
+          const SizedBox(width: 6),
+          Flexible(
+            child: Text(
+              '$label • $count',
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: color,
+                fontSize: 12,
+                fontWeight: FontWeight.w800,
+              ),
             ),
           ),
         ],

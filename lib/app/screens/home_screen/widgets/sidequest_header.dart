@@ -12,18 +12,27 @@ class SideQuestHeader extends StatelessWidget {
             "New SideQuest",
             style: TextStyle(
               color: Colors.white,
-              fontSize: 22,
+              fontSize: 18,
               fontWeight: FontWeight.w800,
+              letterSpacing: 0.8,
             ),
           ),
         ),
-        const Text(
-          'LIVE FEED',
-          style: TextStyle(
-            color: Color(0xFF00B2AA),
-            fontSize: 11,
-            letterSpacing: 1.1,
-            fontWeight: FontWeight.w700,
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+          decoration: BoxDecoration(
+            color: const Color(0xFF18D7FF).withOpacity(0.10),
+            borderRadius: BorderRadius.circular(999),
+            border: Border.all(color: const Color(0xFF18D7FF).withOpacity(0.18)),
+          ),
+          child: const Text(
+            'EXPLORE',
+            style: TextStyle(
+              color: Color(0xFF18D7FF),
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 1.0,
+            ),
           ),
         ),
       ],

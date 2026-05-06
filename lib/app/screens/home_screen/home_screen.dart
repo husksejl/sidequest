@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../shared/custom_bottom_nav.dart';
 import 'models/sidequest_post.dart';
 import 'widgets/header_section.dart';
@@ -9,6 +10,7 @@ import 'widgets/sidequest_post_card.dart';
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
+  static const String routeName = '/';
   static const Color bgColor = Color(0xFF050608);
 
   static const List<SideQuestPost> posts = [
@@ -21,7 +23,7 @@ class HomeScreen extends StatelessWidget {
       imageLabelTop: 'Y O U R S',
       imageLabelBottom: 'SAFE  •  SOFT  •  WILD',
       caption:
-      'I put on a wig and suddenly have opinions #quirky',
+          'I put on a wig and suddenly have opinions #quirky',
       likes: 124,
       comments: 18,
       completedVotes: 21,
@@ -36,7 +38,7 @@ class HomeScreen extends StatelessWidget {
       imageLabelTop: 'M O M E N T',
       imageLabelBottom: 'LIGHT  •  JOY  •  CITY',
       caption:
-      'The mask told me to do it 🤪',
+          'The mask told me to do it 🤪',
       likes: 89,
       comments: 11,
       completedVotes: 17,

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../screens/create_screen/create_screen.dart';
+import '../screens/home_screen/home_screen.dart';
+import '../screens/own_profile_screen/own_profile_screen.dart';
 import 'nav_item.dart';
 
 import '../screens/home_screen/home_screen.dart';
@@ -49,6 +52,12 @@ class CustomBottomNav extends StatelessWidget {
     );
   }
 
+  void _goTo(BuildContext context, String routeName) {
+    final currentRoute = ModalRoute.of(context)?.settings.name;
+    if (currentRoute == routeName) return;
+    Navigator.pushNamed(context, routeName);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -64,14 +73,17 @@ class CustomBottomNav extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: NavItem(
-              icon: Icons.home_rounded,
-              label: 'HOME',
-              isActive: currentIndex == 0,
+            child: InkWell(
+              onTap: () => _goTo(context, HomeScreen.routeName),
+              child: const NavItem(
+                icon: Icons.home_rounded,
+                label: 'HOME',
+                isActive: currentIndex == 0,
               onTap: () => _navigateToPage(context, 0),
+              ),
             ),
           ),
-          Expanded(
+          const Expanded(
             child: NavItem(
               icon: Icons.forum_rounded,
               label: 'SOCIAL',
@@ -80,15 +92,16 @@ class CustomBottomNav extends StatelessWidget {
             ),
           ),
           Expanded(
-            child: NavItem(
-              icon: Icons.add_circle,
-              label: 'CREATE',
-              isCenter: true,
-              isActive: currentIndex == 2,
-              onTap: () => _navigateToPage(context, 2),
+            child: InkWell(
+              onTap: () => _goTo(context, CreateScreen.routeName),
+              child: const NavItem(
+                icon: Icons.add_circle,
+                label: 'CREATE',
+                isCenter: true,
+              ),
             ),
           ),
-          Expanded(
+          const Expanded(
             child: NavItem(
               icon: Icons.groups_rounded,
               label: 'GROUPS',
@@ -97,11 +110,12 @@ class CustomBottomNav extends StatelessWidget {
             ),
           ),
           Expanded(
-            child: NavItem(
-              icon: Icons.person_rounded,
-              label: 'PROFILE',
-              isActive: currentIndex == 4,
-              onTap: () => _navigateToPage(context, 4),
+            child: InkWell(
+              onTap: () => _goTo(context, OwnProfileScreen.routeName),
+              child: const NavItem(
+                icon: Icons.person_rounded,
+                label: 'PROFILE',
+              ),
             ),
           ),
         ],

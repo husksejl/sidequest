@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 
+import 'app/screens/create_account_screen/create_account_screen.dart';
+import 'app/screens/create_screen/create_screen.dart';
 import 'app/screens/splash_screen/splash_screen_page.dart';
+import 'app/screens/login_screen/login_screen.dart';
+import 'app/screens/own_profile_screen/own_profile_screen.dart';
+import 'app/screens/settings_screen/settings_screen.dart';
 
 void main() {
   runApp(const SideQuestApp());
@@ -20,7 +25,15 @@ class SideQuestApp extends StatelessWidget {
         useMaterial3: true,
         fontFamily: 'Inter',
       ),
-      home: const SplashScreenPage(),
+      initialRoute: HomeScreen.routeName,
+      routes: {
+        HomeScreen.routeName: (context) => const SplashScreenPage(),
+        LoginScreen.routeName: (context) => const LoginScreen(),
+        CreateScreen.routeName: (context) => const CreateScreen(),
+        OwnProfileScreen.routeName: (context) => const OwnProfileScreen(),
+        CreateAccountScreen.routeName: (context) => const CreateAccountScreen(),
+        SettingsScreen.routeName: (context) => const SettingsScreen(),
+      },
     );
   }
 }
