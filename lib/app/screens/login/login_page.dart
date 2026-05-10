@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../home_screen/home_screen.dart';
 import '../signup/signup_page.dart';
 import '../login/models/login_form_card.dart';
 import '../login/models/login_header.dart';
@@ -20,7 +21,16 @@ class LoginScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const LoginHeader(),
+              LoginHeader(
+                onCloseTap: () {
+                  Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(
+                      builder: (context) => const HomeScreen(),
+                    ),
+                        (route) => false,
+                  );
+                },
+              ),
               const SizedBox(height: 34),
               const Text(
                 'WELCOME BACK',
@@ -54,10 +64,13 @@ class LoginScreen extends StatelessWidget {
               ),
               const SizedBox(height: 26),
               LoginFormCard(
-                onCreateProfileTap: () => Navigator.pushNamed(
-                  context,
-                  CreateAccountScreen.routeName,
-                ),
+                onCreateProfileTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const CreateAccountScreen(),
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 22),
               Center(

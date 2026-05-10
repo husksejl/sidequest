@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../login/login_page.dart';
 import 'create_account_text_field.dart';
 import 'profile_photo_picker.dart';
 
@@ -140,10 +141,10 @@ class _CreateAccountFormCardState extends State<CreateAccountFormCard> {
                     ),
                     child: _acceptedTerms
                         ? const Icon(
-                            Icons.check_rounded,
-                            color: Colors.black,
-                            size: 20,
-                          )
+                      Icons.check_rounded,
+                      color: Colors.black,
+                      size: 20,
+                    )
                         : null,
                   ),
                   const SizedBox(width: 12),
@@ -218,7 +219,13 @@ class _CreateAccountFormCardState extends State<CreateAccountFormCard> {
           ),
           const SizedBox(height: 20),
           GestureDetector(
-            onTap: () => Navigator.maybePop(context),
+            onTap: () {
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                  builder: (context) => const LoginScreen(),
+                ),
+              );
+            },
             child: const Text.rich(
               TextSpan(
                 text: 'Already have an account? ',

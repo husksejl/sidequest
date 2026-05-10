@@ -35,51 +35,43 @@ class _OnboardingPageState extends State<OnboardingPage> {
     OnboardingStep(
       eyebrow: 'Daily Challenge',
       title: 'One challenge\n',
-      highlightedTitle: 'per day.',
+      highlightedTitle: 'every day.',
       description:
-      'No clutter, no pressure. Just one small quest every 24 hours to get you moving, creating or connecting.',
+      'Each day brings a small quest. It could be creative, social, weird, wholesome or completely chaotic.',
       imagePath: 'assets/images/onboarding_daily.png',
-      buttonText: 'Next',
+      buttonText: 'Next Quest',
     ),
     OnboardingStep(
-      eyebrow: 'Share Moments',
-      title: 'Share real moments\n',
-      highlightedTitle: 'with others.',
+      eyebrow: 'Share Your Proof',
+      title: 'Capture it.\n',
+      highlightedTitle: 'Post it.',
       description:
-      'Capture your quest, see how others solved theirs and turn simple challenges into shared memories.',
+      'Upload your solution, see how others solved the same challenge and collect tiny memories along the way.',
       imagePath: 'assets/images/onboarding_share.png',
-      buttonText: 'Start your journey',
+      buttonText: 'Continue',
+    ),
+    OnboardingStep(
+      eyebrow: 'Group Quests',
+      title: 'Join forces.\n',
+      highlightedTitle: 'Create chaos.',
+      description:
+      'Take on challenges with friends, groups or strangers and turn everyday moments into shared missions.',
+      imagePath: 'assets/images/onboarding_groups.png',
+      buttonText: 'Get Started',
     ),
   ];
 
-  bool get _isLastStep => _currentIndex == _steps.length - 1;
+  bool get _isLastPage => _currentIndex == _steps.length - 1;
 
-  void _nextStep() {
-    if (_isLastStep) {
-      _finishOnboarding();
+  void _handleButtonPressed() {
+    if (_isLastPage) {
+      widget.onFinished?.call(context);
       return;
     }
 
     _pageController.nextPage(
-      duration: const Duration(milliseconds: 320),
+      duration: const Duration(milliseconds: 420),
       curve: Curves.easeOutCubic,
-    );
-  }
-
-  void _skipOnboarding() {
-    _finishOnboarding();
-  }
-
-  void _finishOnboarding() {
-    if (widget.onFinished != null) {
-      widget.onFinished!(context);
-      return;
-    }
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Onboarding finished. Connect this to your signup page.'),
-      ),
     );
   }
 
@@ -91,176 +83,61 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
   @override
   Widget build(BuildContext context) {
+    final currentStep = _steps[_currentIndex];
+
     return Scaffold(
       backgroundColor: const Color(0xFF050608),
       body: SafeArea(
-        child: Stack(
-          children: [
-            const _BackgroundGlow(),
-            Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(22, 16, 22, 0),
-                  child: Row(
-                    children: [
-                      const Text(
-                        'SideQuest',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: -0.4,
-                        ),
-                      ),
-                      const Spacer(),
-                      TextButton(
-                        onPressed: _skipOnboarding,
-                        style: TextButton.styleFrom(
-                          foregroundColor: Colors.white.withOpacity(0.62),
-                        ),
-                        child: const Text(
-                          'Skip',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                    ],
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(22, 18, 22, 24),
+          child: Column(
+            children: [
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () {
+                    widget.onFinished?.call(context);
+                  },
+                  child: const Text(
+                    'Skip',
+                    style: TextStyle(
+                      color: Color(0xFF8B8F98),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
-
-                const SizedBox(height: 4),
-
-                Expanded(
-                  child: PageView.builder(
-                    controller: _pageController,
-                    itemCount: _steps.length,
-                    onPageChanged: (index) {
-                      setState(() {
-                        _currentIndex = index;
-                      });
-                    },
-                    itemBuilder: (context, index) {
-                      return OnboardingCard(
-                        step: _steps[index],
-                        index: index,
-                      );
-                    },
-                  ),
+              ),
+              Expanded(
+                child: PageView.builder(
+                  controller: _pageController,
+                  itemCount: _steps.length,
+                  onPageChanged: (index) {
+                    setState(() {
+                      _currentIndex = index;
+                    });
+                  },
+                  itemBuilder: (context, index) {
+                    return OnboardingCard(
+                      step: _steps[index],
+                      index: index,
+                    );
+                  },
                 ),
-
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(28, 0, 28, 14),
-                  child: Column(
-                    children: [
-                      OnboardingProgress(
-                        currentIndex: _currentIndex,
-                        totalSteps: _steps.length,
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      OnboardingActionButton(
-                        text: _steps[_currentIndex].buttonText,
-                        icon: _isLastStep
-                            ? Icons.rocket_launch_rounded
-                            : Icons.arrow_forward_rounded,
-                        onPressed: _nextStep,
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      AnimatedOpacity(
-                        duration: const Duration(milliseconds: 220),
-                        opacity: _isLastStep ? 1 : 0,
-                        child: IgnorePointer(
-                          ignoring: !_isLastStep,
-                          child: TextButton(
-                            onPressed: _isLastStep ? _finishOnboarding : null,
-                            style: TextButton.styleFrom(
-                              foregroundColor: Colors.white.withOpacity(0.5),
-                            ),
-                            child: const Text(
-                              'Already have an account? Sign in',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _BackgroundGlow extends StatelessWidget {
-  const _BackgroundGlow();
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Positioned(
-          top: -90,
-          right: -70,
-          child: _GlowCircle(
-            size: 220,
-            color: const Color(0xFF00D9E8).withOpacity(0.18),
+              ),
+              const SizedBox(height: 18),
+              OnboardingProgress(
+                currentIndex: _currentIndex,
+                totalSteps: _steps.length,
+              ),
+              const SizedBox(height: 24),
+              OnboardingActionButton(
+                text: currentStep.buttonText,
+                onPressed: _handleButtonPressed,
+              ),
+            ],
           ),
         ),
-        Positioned(
-          bottom: 150,
-          left: -100,
-          child: _GlowCircle(
-            size: 240,
-            color: const Color(0xFFFF7F6F).withOpacity(0.13),
-          ),
-        ),
-        Positioned(
-          bottom: -80,
-          right: -80,
-          child: _GlowCircle(
-            size: 220,
-            color: const Color(0xFF00D9E8).withOpacity(0.12),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _GlowCircle extends StatelessWidget {
-  final double size;
-  final Color color;
-
-  const _GlowCircle({
-    required this.size,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: size,
-      width: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            color: color,
-            blurRadius: 120,
-            spreadRadius: 60,
-          ),
-        ],
       ),
     );
   }
