@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../settings_screen/settings_screen.dart';
+import '../../settings/settings_page.dart';
 
 class HeaderSection extends StatelessWidget {
   const HeaderSection({super.key});

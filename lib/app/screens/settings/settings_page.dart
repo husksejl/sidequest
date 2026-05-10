@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../create_account_screen/create_account_screen.dart';
-import '../login_screen/login_screen.dart';
-import 'widgets/danger_zone_card.dart';
+import '../signup/signup_page.dart';
+import '../login/login_page.dart';
+import '../settings/widgets/danger_zone_card.dart';
 import 'widgets/settings_header.dart';
 import 'widgets/settings_profile_card.dart';
 import 'widgets/settings_section.dart';
