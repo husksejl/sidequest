@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/profile_post.dart';
+import 'dart:io';
 
 class ProfilePostTile extends StatelessWidget {
   final ProfilePost post;
@@ -102,7 +103,6 @@ class ProfilePostTile extends StatelessWidget {
                           ),
                         ),
                       ),
-
                       Positioned(
                         bottom: -25,
                         left: -20,
@@ -115,7 +115,6 @@ class ProfilePostTile extends StatelessWidget {
                           ),
                         ),
                       ),
-
                       Center(
                         child: post.type == ProfilePostType.audio
                             ? const Icon(
@@ -137,9 +136,16 @@ class ProfilePostTile extends StatelessWidget {
                     ],
                   ),
                 )
-                    : Image.asset(
+                    : post.assetPath.startsWith('assets/')
+                    ? Image.asset(
                   post.assetPath,
                   fit: BoxFit.cover,
+                  width: double.infinity,
+                )
+                    : Image.file(
+                  File(post.assetPath),
+                  fit: BoxFit.cover,
+                  width: double.infinity,
                 ),
                 if (overlayIcon != null &&
                     post.type != ProfilePostType.audio &&

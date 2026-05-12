@@ -7,6 +7,7 @@ import 'widgets/profile_action_buttons.dart';
 import 'widgets/profile_post_grid.dart';
 import 'widgets/profile_level_bar.dart';
 import '../../shared/widgets/top_bar.dart';
+import '../../data/profile_post_storage.dart';
 
 class OwnProfilePage extends StatelessWidget {
   const OwnProfilePage({super.key});
@@ -135,7 +136,12 @@ class OwnProfilePage extends StatelessWidget {
               ),
 
               const SizedBox(height: 14),
-              ProfilePostGrid(posts: posts),
+              ProfilePostGrid(
+                posts: [
+                  ...ProfilePostStorage.posts,
+                  ...posts,
+                ],
+              ),
             ],
           ),
         ),

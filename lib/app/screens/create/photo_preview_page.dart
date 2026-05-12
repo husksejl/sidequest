@@ -2,8 +2,11 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'models/create_quest.dart';
+import '../../data/profile_post_storage.dart';
+import '../own_profile/models/profile_post.dart';
+import '../own_profile/own_profile_page.dart';
 
-class PhotoPreviewPage extends StatelessWidget {
+class PhotoPreviewPage extends StatefulWidget {
   const PhotoPreviewPage({
     super.key,
     required this.imagePath,
@@ -12,6 +15,15 @@ class PhotoPreviewPage extends StatelessWidget {
 
   final String imagePath;
   final CreateQuest quest;
+
+  @override
+  State<PhotoPreviewPage> createState() =>
+      _PhotoPreviewPageState();
+}
+
+class _PhotoPreviewPageState extends State<PhotoPreviewPage> {
+  final TextEditingController captionController =
+  TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -99,7 +111,7 @@ class PhotoPreviewPage extends StatelessWidget {
                               ),
                               const SizedBox(height: 8),
                               Text(
-                                quest.title.replaceAll('\n', ' '),
+                                widget.quest.title.replaceAll('\n', ' '),
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 16,
@@ -120,7 +132,7 @@ class PhotoPreviewPage extends StatelessWidget {
                             borderRadius: BorderRadius.circular(999),
                           ),
                           child: Text(
-                            quest.isGroupQuest ? 'GROUP' : 'SOLO',
+                            widget.quest.isGroupQuest ? 'GROUP' : 'SOLO',
                             style: TextStyle(
                               color: const Color(0xFF00B2AA),
                               fontSize: 10,
@@ -137,7 +149,7 @@ class PhotoPreviewPage extends StatelessWidget {
                     Align(
                       alignment: Alignment.bottomRight,
                       child: Text(
-                        'Expires in ${quest.expiresIn}',
+                        'Expires in ${widget.quest.expiresIn}',
                         style: TextStyle(
                           color: Colors.white.withOpacity(0.42),
                           fontSize: 11,
@@ -156,7 +168,7 @@ class PhotoPreviewPage extends StatelessWidget {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(28),
                   child: Image.file(
-                    File(imagePath),
+                    File(widget.imagePath),
                     width: double.infinity,
                     fit: BoxFit.cover,
                   ),
@@ -178,7 +190,8 @@ class PhotoPreviewPage extends StatelessWidget {
                     color: Colors.white.withOpacity(0.06),
                   ),
                 ),
-                child: const TextField(
+                child: TextField(
+                  controller: captionController,
                   style: TextStyle(
                     color: Colors.white,
                   ),
@@ -215,9 +228,49 @@ class PhotoPreviewPage extends StatelessWidget {
                   const SizedBox(width: 14),
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: () {
-                        // später: Post speichern
+                      onPressed: () async {
+                        showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (context) {
+                            return const Center(
+                              child: CircularProgressIndicator(
+                                color: Color(0xFFFF7668),
+                              ),
+                            );
+                          },
+                        );
+
+                        await Future.delayed(const Duration(seconds: 1));
+
+                        ProfilePostStorage.posts.insert(
+                          0,
+                          ProfilePost(
+                            userName: 'Franz Hermann',
+                            timeAgo: 'now',
+                            location: 'Vienna',
+                            questTitle: widget.quest.title.replaceAll('\n', ' '),
+                            caption: captionController.text.isEmpty
+                                ? 'No caption'
+                                : captionController.text,
+                            assetPath: widget.imagePath,
+                            type: ProfilePostType.image,
+                            voteStatus: VoteStatus.open,
+                            votingOpen: true,
+                            likes: 0,
+                            comments: 0,
+                          ),
+                        );
+
                         Navigator.pop(context);
+
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const OwnProfilePage(),
+                          ),
+                              (route) => false,
+                        );
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFFF7668),

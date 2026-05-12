@@ -1,13 +1,25 @@
 import 'package:flutter/material.dart';
 import '../models/profile_post.dart';
+import 'dart:io';
+import '../../../data/profile_post_storage.dart';
+import '../own_profile_page.dart';
 
-class ProfilePostDetailCard extends StatelessWidget {
+class ProfilePostDetailCard extends StatefulWidget {
   final ProfilePost post;
 
   const ProfilePostDetailCard({
     super.key,
     required this.post,
   });
+
+  @override
+  State<ProfilePostDetailCard> createState() => _ProfilePostDetailCardState();
+}
+
+class _ProfilePostDetailCardState extends State<ProfilePostDetailCard> {
+  bool isLiked = false;
+
+  ProfilePost get post => widget.post;
 
   Color get statusColor {
     switch (post.voteStatus) {
@@ -270,10 +282,121 @@ class ProfilePostDetailCard extends StatelessWidget {
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    Image.asset(
+                    post.assetPath.startsWith('assets/')
+                        ? Image.asset(
                       post.assetPath,
                       width: double.infinity,
                       fit: BoxFit.cover,
+                    )
+                        : Image.file(
+                      File(post.assetPath),
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                    ),
+
+                    Positioned(
+                      top: 12,
+                      right: 12,
+                      child: PopupMenuButton<String>(
+                        color: const Color(0xFF15181D),
+                        icon: Container(
+                          padding: const EdgeInsets.all(7),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.45),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.more_horiz_rounded,
+                            color: Colors.white,
+                            size: 22,
+                          ),
+                        ),
+                        onSelected: (value) {
+                          if (value == 'delete') {
+                            showDialog(
+                              context: context,
+                              builder: (context) {
+                                return AlertDialog(
+                                  backgroundColor: const Color(0xFF101216),
+                                  title: const Text(
+                                    'Delete post?',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                  content: const Text(
+                                    'This post will be removed from your profile.',
+                                    style: TextStyle(color: Colors.white70),
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(context),
+                                      child: const Text('Cancel'),
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        ProfilePostStorage.posts.remove(widget.post);
+
+                                        Navigator.pop(context);
+
+                                        Navigator.pushAndRemoveUntil(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => const OwnProfilePage(),
+                                          ),
+                                              (route) => false,
+                                        );
+                                      },
+                                      child: const Text(
+                                        'Delete',
+                                        style: TextStyle(color: Color(0xFFEB5D4F)),
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          }
+
+                          if (value == 'edit') {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Edit caption coming soon')),
+                            );
+                          }
+
+                          if (value == 'save') {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Save image coming soon')),
+                            );
+                          }
+
+                          if (value == 'share') {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Share post coming soon')),
+                            );
+                          }
+                        },
+                        itemBuilder: (context) => const [
+                          PopupMenuItem(
+                            value: 'edit',
+                            child: Text('Edit caption'),
+                          ),
+                          PopupMenuItem(
+                            value: 'save',
+                            child: Text('Save image'),
+                          ),
+                          PopupMenuItem(
+                            value: 'share',
+                            child: Text('Share post'),
+                          ),
+                          PopupMenuDivider(),
+                          PopupMenuItem(
+                            value: 'delete',
+                            child: Text(
+                              'Delete post',
+                              style: TextStyle(color: Color(0xFFEB5D4F)),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
 
                   if (post.type == ProfilePostType.video)
@@ -304,10 +427,17 @@ class ProfilePostDetailCard extends StatelessWidget {
 
             Row(
               children: [
-                _SmallStat(
-                  icon: Icons.favorite,
-                  value: '${post.likes}',
-                  color: const Color(0xFFEB5D4F),
+                GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      isLiked = !isLiked;
+                    });
+                  },
+                  child: _SmallStat(
+                    icon: isLiked ? Icons.favorite : Icons.favorite_border_rounded,
+                    value: '${widget.post.likes + (isLiked ? 1 : 0)}',
+                    color: const Color(0xFFEB5D4F),
+                  ),
                 ),
                 const SizedBox(width: 8),
                 _SmallStat(
@@ -442,7 +572,7 @@ class _VotePreviewButton extends StatelessWidget {
         border: Border.all(color: color),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(icon, color: color, size: 18),
           const SizedBox(width: 6),
