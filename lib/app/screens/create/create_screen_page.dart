@@ -15,7 +15,7 @@ class CreateScreenPage extends StatelessWidget {
 
   static const Color bgColor = Color(0xFF050608);
 
-  Future<void> openCamera(BuildContext context) async {
+  Future<void> openCamera(BuildContext context, CreateQuest quest) async {
     final ImagePicker picker = ImagePicker();
 
     final XFile? photo = await picker.pickImage(
@@ -29,6 +29,7 @@ class CreateScreenPage extends StatelessWidget {
       MaterialPageRoute(
         builder: (context) => PhotoPreviewPage(
           imagePath: photo.path,
+          quest: quest,
         ),
       ),
     );
@@ -37,11 +38,13 @@ class CreateScreenPage extends StatelessWidget {
   static const CreateQuest soloQuest = CreateQuest(
     title: 'Take a photo of\nsomething that made\nyou smile today',
     expiresIn: '23  :  58  :  12',
+    isGroupQuest: false,
   );
 
   static const CreateQuest groupQuest = CreateQuest(
     title: 'Take a selfie with\nsomething yellow',
     expiresIn: '23  :  58  :  12',
+    isGroupQuest: true,
   );
 
   @override
@@ -120,7 +123,7 @@ class CreateScreenPage extends StatelessWidget {
                         const CreateActionButton(icon: Icons.graphic_eq_rounded),
 
                         GestureDetector(
-                          onTap: () => openCamera(context),
+                          onTap: () => openCamera(context, soloQuest),
                           child: const CreateActionButton(
                             icon: Icons.camera_alt_rounded,
                           ),
