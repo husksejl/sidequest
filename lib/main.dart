@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
-
+import 'package:firebase_core/firebase_core.dart';
 import 'app/screens/onboarding/onboarding_page.dart';
 import 'app/screens/signup/signup_page.dart';
 import 'app/screens/settings/settings_page.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp();
+
   runApp(const SideQuestApp());
 }
 

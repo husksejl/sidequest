@@ -4,7 +4,7 @@ import 'models/chat_message.dart';
 import 'widgets/chat_bubble.dart';
 import 'widgets/message_input_bar.dart';
 import 'widgets/quest_header_card.dart';
-import '../../shared/top_bar.dart';
+import '../../shared/widgets/top_bar.dart';
 
 class GroupChatPage extends StatelessWidget {
   const GroupChatPage({super.key});

@@ -1,1 +1,1 @@
-import '../../shared/top_bar.dart';
+import '../../shared/widgets/top_bar.dart';

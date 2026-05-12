@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 
 import 'nav_item.dart';
 
-import '../screens/home_screen/home_screen.dart';
-import '../screens/social_hub/social_hub_page.dart';
-import '../screens/create/create_screen_page.dart';
-import '../screens/group_challenge_discovery/group_challenge_discovery_page.dart';
-import '../screens/own_profile/own_profile_page.dart';
+import '../../screens/home_screen/home_screen.dart';
+import '../../screens/social_hub/social_hub_page.dart';
+import '../../screens/create/create_screen_page.dart';
+import '../../screens/group_challenge_discovery/group_challenge_discovery_page.dart';
+import '../../screens/own_profile/own_profile_page.dart';
 
 class CustomBottomNav extends StatelessWidget {
   final int currentIndex;

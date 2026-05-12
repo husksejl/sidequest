@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-import '../../shared/custom_bottom_nav.dart';
+import '../../shared/widgets/custom_bottom_nav.dart';
 
 import 'models/group_challenge.dart';
 import 'widgets/challenge_card.dart';
 import 'widgets/challenge_category_chip.dart';
 import 'widgets/challenge_detail_page.dart';
-import '../../shared/top_bar.dart';
+import '../../shared/widgets/top_bar.dart';
 
 class GroupChallengeDiscoveryPage extends StatefulWidget {
   const GroupChallengeDiscoveryPage({super.key});

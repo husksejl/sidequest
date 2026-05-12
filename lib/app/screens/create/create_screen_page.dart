@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-import '../../shared/custom_bottom_nav.dart';
+import '../../shared/widgets/custom_bottom_nav.dart';
 import 'models/create_quest.dart';
 import 'widgets/quest_section_label.dart';
 import 'widgets/solo_quest_card.dart';
 import 'widgets/group_quest_card.dart';
 import 'widgets/create_action_button.dart';
-import '../../shared/top_bar.dart';
+import '../../shared/widgets/top_bar.dart';
 import 'package:image_picker/image_picker.dart';
 import 'photo_preview_page.dart';
 

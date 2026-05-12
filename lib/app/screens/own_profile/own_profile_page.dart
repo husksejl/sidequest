@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-import '../../shared/custom_bottom_nav.dart';
+import '../../shared/widgets/custom_bottom_nav.dart';
 import 'models/profile_post.dart';
 import 'widgets/profile_header.dart';
 import 'widgets/profile_action_buttons.dart';
 import 'widgets/profile_post_grid.dart';
 import 'widgets/profile_level_bar.dart';
-import '../../shared/top_bar.dart';
+import '../../shared/widgets/top_bar.dart';
 
 class OwnProfilePage extends StatelessWidget {
   const OwnProfilePage({super.key});

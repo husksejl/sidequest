@@ -7,7 +7,7 @@ import 'widgets/settings_profile_card.dart';
 import 'widgets/settings_section.dart';
 import 'widgets/settings_switch_tile.dart';
 import 'widgets/settings_tile.dart';
-import '../../shared/top_bar.dart';
+import '../../shared/widgets/top_bar.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});

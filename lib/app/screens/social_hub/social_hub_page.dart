@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import '../../shared/custom_bottom_nav.dart';
+import '../../shared/widgets/custom_bottom_nav.dart';
 import 'widgets/activity_list.dart';
 import 'widgets/messages_list.dart';
 import 'widgets/social_hub_tabs.dart';
-import '../../shared/top_bar.dart';
+import '../../shared/widgets/top_bar.dart';
 
 class SocialHubPage extends StatefulWidget {
   const SocialHubPage({super.key});
