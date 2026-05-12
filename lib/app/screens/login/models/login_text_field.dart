@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 class LoginTextField extends StatelessWidget {
+  final TextEditingController controller;
   final String label;
   final String hintText;
   final IconData trailingIcon;
@@ -10,6 +11,7 @@ class LoginTextField extends StatelessWidget {
 
   const LoginTextField({
     super.key,
+    required this.controller,
     required this.label,
     required this.hintText,
     required this.trailingIcon,
@@ -50,6 +52,7 @@ class LoginTextField extends StatelessWidget {
             ],
           ),
           child: TextField(
+            controller: controller,
             obscureText: obscureText,
             keyboardType: keyboardType,
             style: const TextStyle(

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+//@yvonne: upload für profilbilder bei signup ermöglichen
+
 class ProfilePhotoPicker extends StatelessWidget {
   const ProfilePhotoPicker({super.key});
 

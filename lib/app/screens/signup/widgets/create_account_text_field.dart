@@ -1,21 +1,25 @@
 import 'package:flutter/material.dart';
 
 class CreateAccountTextField extends StatelessWidget {
+  final TextEditingController? controller;
   final String label;
   final String hintText;
   final IconData trailingIcon;
   final bool obscureText;
   final TextInputType keyboardType;
   final Widget? extraTrailing;
+  final TextInputAction textInputAction;
 
   const CreateAccountTextField({
     super.key,
+    this.controller,
     required this.label,
     required this.hintText,
     required this.trailingIcon,
     this.obscureText = false,
     this.keyboardType = TextInputType.text,
     this.extraTrailing,
+    this.textInputAction = TextInputAction.next,
   });
 
   @override
@@ -50,8 +54,12 @@ class CreateAccountTextField extends StatelessWidget {
             ],
           ),
           child: TextField(
+            controller: controller,
             obscureText: obscureText,
             keyboardType: keyboardType,
+            textInputAction: textInputAction,
+            autocorrect: !obscureText,
+            enableSuggestions: !obscureText,
             style: const TextStyle(
               color: Colors.white,
               fontSize: 16,

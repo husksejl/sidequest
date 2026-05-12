@@ -1,5 +1,8 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import '../../../shared/services/auth_service.dart';
+import '../../home_screen/home_screen.dart';
 import '../../login/login_page.dart';
 import 'create_account_text_field.dart';
 import 'profile_photo_picker.dart';
@@ -12,9 +15,156 @@ class CreateAccountFormCard extends StatefulWidget {
 }
 
 class _CreateAccountFormCardState extends State<CreateAccountFormCard> {
+  final TextEditingController _fullNameController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+  TextEditingController();
+
+  final AuthService _authService = AuthService();
+
   bool _acceptedTerms = true;
   bool _showPassword = false;
   bool _showConfirmPassword = false;
+  bool _isLoading = false;
+
+  String? _errorMessage;
+
+  @override
+  void dispose() {
+    _fullNameController.dispose();
+    _usernameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _createAccount() async {
+    FocusScope.of(context).unfocus();
+
+    final String fullName = _fullNameController.text.trim();
+    final String username = _usernameController.text.trim();
+    final String email = _emailController.text.trim();
+    final String password = _passwordController.text.trim();
+    final String confirmPassword = _confirmPasswordController.text.trim();
+
+    final String? validationError = _validateInput(
+      fullName: fullName,
+      username: username,
+      email: email,
+      password: password,
+      confirmPassword: confirmPassword,
+    );
+
+    if (validationError != null) {
+      setState(() {
+        _errorMessage = validationError;
+      });
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      await _authService.register(
+        fullName: fullName,
+        username: username,
+        email: email,
+        password: password,
+      );
+
+      if (!mounted) return;
+
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(
+          builder: (context) => const HomeScreen(),
+        ),
+            (route) => false,
+      );
+    } on FirebaseAuthException catch (error) {
+      setState(() {
+        _errorMessage = _getReadableFirebaseError(error.code);
+      });
+    } catch (error) {
+      setState(() {
+        _errorMessage = 'Something went wrong. Please try again.';
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  String? _validateInput({
+    required String fullName,
+    required String username,
+    required String email,
+    required String password,
+    required String confirmPassword,
+  }) {
+    if (fullName.isEmpty) {
+      return 'Please enter your full name.';
+    }
+
+    if (username.isEmpty) {
+      return 'Please choose a username.';
+    }
+
+    if (username.length < 3) {
+      return 'Your username must be at least 3 characters long.';
+    }
+
+    if (email.isEmpty) {
+      return 'Please enter your email address.';
+    }
+
+    if (!email.contains('@') || !email.contains('.')) {
+      return 'Please enter a valid email address.';
+    }
+
+    if (password.isEmpty) {
+      return 'Please enter a password.';
+    }
+
+    if (password.length < 6) {
+      return 'Your password must be at least 6 characters long.';
+    }
+
+    if (password != confirmPassword) {
+      return 'The passwords do not match.';
+    }
+
+    if (!_acceptedTerms) {
+      return 'Please accept the Terms & Privacy Policy.';
+    }
+
+    return null;
+  }
+
+  String _getReadableFirebaseError(String code) {
+    switch (code) {
+      case 'email-already-in-use':
+        return 'This email is already in use.';
+      case 'invalid-email':
+        return 'Please enter a valid email address.';
+      case 'weak-password':
+        return 'Your password is too weak.';
+      case 'operation-not-allowed':
+        return 'Email signup is not enabled in Firebase.';
+      case 'network-request-failed':
+        return 'Please check your internet connection.';
+      default:
+        return 'Signup failed. Please check your details.';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,20 +195,23 @@ class _CreateAccountFormCardState extends State<CreateAccountFormCard> {
         children: [
           const ProfilePhotoPicker(),
           const SizedBox(height: 26),
-          const CreateAccountTextField(
+          CreateAccountTextField(
+            controller: _fullNameController,
             label: 'FULL NAME',
             hintText: 'Alex Explorer',
             trailingIcon: Icons.person_outline_rounded,
             keyboardType: TextInputType.name,
           ),
           const SizedBox(height: 16),
-          const CreateAccountTextField(
+          CreateAccountTextField(
+            controller: _usernameController,
             label: 'USERNAME',
             hintText: 'alexexplores',
             trailingIcon: Icons.alternate_email_rounded,
           ),
           const SizedBox(height: 16),
-          const CreateAccountTextField(
+          CreateAccountTextField(
+            controller: _emailController,
             label: 'EMAIL',
             hintText: 'alex@example.com',
             trailingIcon: Icons.mail_outline_rounded,
@@ -66,6 +219,7 @@ class _CreateAccountFormCardState extends State<CreateAccountFormCard> {
           ),
           const SizedBox(height: 16),
           CreateAccountTextField(
+            controller: _passwordController,
             label: 'PASSWORD',
             hintText: '••••••••••••',
             trailingIcon: Icons.lock_outline_rounded,
@@ -87,10 +241,12 @@ class _CreateAccountFormCardState extends State<CreateAccountFormCard> {
           ),
           const SizedBox(height: 16),
           CreateAccountTextField(
+            controller: _confirmPasswordController,
             label: 'CONFIRM PASSWORD',
             hintText: '••••••••••••',
             trailingIcon: Icons.lock_outline_rounded,
             obscureText: !_showConfirmPassword,
+            textInputAction: TextInputAction.done,
             extraTrailing: GestureDetector(
               onTap: () {
                 setState(() {
@@ -106,10 +262,16 @@ class _CreateAccountFormCardState extends State<CreateAccountFormCard> {
               ),
             ),
           ),
+          if (_errorMessage != null) ...[
+            const SizedBox(height: 18),
+            _SignupErrorBox(message: _errorMessage!),
+          ],
           const SizedBox(height: 18),
           InkWell(
             borderRadius: BorderRadius.circular(18),
-            onTap: () {
+            onTap: _isLoading
+                ? null
+                : () {
               setState(() {
                 _acceptedTerms = !_acceptedTerms;
               });
@@ -178,10 +340,15 @@ class _CreateAccountFormCardState extends State<CreateAccountFormCard> {
             child: DecoratedBox(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(999),
-                gradient: const LinearGradient(
-                  colors: [
+                gradient: LinearGradient(
+                  colors: _acceptedTerms
+                      ? const [
                     Color(0xFF18D7FF),
                     Color(0xFFFF9B8F),
+                  ]
+                      : [
+                    Colors.white.withOpacity(0.12),
+                    Colors.white.withOpacity(0.08),
                   ],
                   begin: Alignment.centerLeft,
                   end: Alignment.centerRight,
@@ -195,7 +362,8 @@ class _CreateAccountFormCardState extends State<CreateAccountFormCard> {
                 ],
               ),
               child: ElevatedButton(
-                onPressed: _acceptedTerms ? () {} : null,
+                onPressed:
+                _acceptedTerms && !_isLoading ? _createAccount : null,
                 style: ElevatedButton.styleFrom(
                   elevation: 0,
                   backgroundColor: Colors.transparent,
@@ -205,7 +373,16 @@ class _CreateAccountFormCardState extends State<CreateAccountFormCard> {
                     borderRadius: BorderRadius.circular(999),
                   ),
                 ),
-                child: const Text(
+                child: _isLoading
+                    ? const SizedBox(
+                  width: 22,
+                  height: 22,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.5,
+                    color: Colors.black,
+                  ),
+                )
+                    : const Text(
                   'CREATE ACCOUNT',
                   style: TextStyle(
                     color: Colors.black,
@@ -219,7 +396,9 @@ class _CreateAccountFormCardState extends State<CreateAccountFormCard> {
           ),
           const SizedBox(height: 20),
           GestureDetector(
-            onTap: () {
+            onTap: _isLoading
+                ? null
+                : () {
               Navigator.of(context).pushReplacement(
                 MaterialPageRoute(
                   builder: (context) => const LoginScreen(),
@@ -244,6 +423,51 @@ class _CreateAccountFormCardState extends State<CreateAccountFormCard> {
                 color: Color(0xFF9AA0AA),
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SignupErrorBox extends StatelessWidget {
+  final String message;
+
+  const _SignupErrorBox({
+    required this.message,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFF4D6D).withOpacity(0.14),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: const Color(0xFFFF4D6D).withOpacity(0.42),
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(
+            Icons.error_outline_rounded,
+            color: Color(0xFFFFB3C0),
+            size: 20,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              message,
+              style: const TextStyle(
+                color: Color(0xFFFFC2CC),
+                fontSize: 13,
+                height: 1.35,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ),

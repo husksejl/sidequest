@@ -11,6 +11,15 @@ class LoginScreen extends StatelessWidget {
   static const String routeName = '/login';
   static const Color bgColor = Color(0xFF050608);
 
+  void _goToHome(BuildContext context) {
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(
+        builder: (context) => const HomeScreen(),
+      ),
+          (route) => false,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -23,12 +32,7 @@ class LoginScreen extends StatelessWidget {
             children: [
               LoginHeader(
                 onCloseTap: () {
-                  Navigator.of(context).pushAndRemoveUntil(
-                    MaterialPageRoute(
-                      builder: (context) => const HomeScreen(),
-                    ),
-                        (route) => false,
-                  );
+                  _goToHome(context);
                 },
               ),
               const SizedBox(height: 34),
@@ -64,6 +68,9 @@ class LoginScreen extends StatelessWidget {
               ),
               const SizedBox(height: 26),
               LoginFormCard(
+                onLoginSuccess: () {
+                  _goToHome(context);
+                },
                 onCreateProfileTap: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(
