@@ -8,13 +8,14 @@ import 'widgets/group_quest_card.dart';
 import 'widgets/create_action_button.dart';
 import '../../shared/top_bar.dart';
 import 'package:image_picker/image_picker.dart';
+import 'photo_preview_page.dart';
 
 class CreateScreenPage extends StatelessWidget {
   const CreateScreenPage({super.key});
 
   static const Color bgColor = Color(0xFF050608);
 
-  Future<void> openCamera() async {
+  Future<void> openCamera(BuildContext context) async {
     final ImagePicker picker = ImagePicker();
 
     final XFile? photo = await picker.pickImage(
@@ -23,7 +24,14 @@ class CreateScreenPage extends StatelessWidget {
 
     if (photo == null) return;
 
-    print('Foto gespeichert unter: ${photo.path}');
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PhotoPreviewPage(
+          imagePath: photo.path,
+        ),
+      ),
+    );
   }
 
   static const CreateQuest soloQuest = CreateQuest(
@@ -112,7 +120,7 @@ class CreateScreenPage extends StatelessWidget {
                         const CreateActionButton(icon: Icons.graphic_eq_rounded),
 
                         GestureDetector(
-                          onTap: openCamera,
+                          onTap: () => openCamera(context),
                           child: const CreateActionButton(
                             icon: Icons.camera_alt_rounded,
                           ),
