@@ -6,6 +6,7 @@ import 'widgets/profile_header.dart';
 import 'widgets/profile_action_buttons.dart';
 import 'widgets/profile_post_grid.dart';
 import 'widgets/profile_level_bar.dart';
+import '../../shared/top_bar.dart';
 
 class OwnProfilePage extends StatelessWidget {
   const OwnProfilePage({super.key});
@@ -102,8 +103,7 @@ class OwnProfilePage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const _ProfileTopBar(),
-              const SizedBox(height: 22),
+              const AppTopBar(),
 
               const ProfileHeader(),
               const SizedBox(height: 18),
@@ -140,30 +140,6 @@ class OwnProfilePage extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _ProfileTopBar extends StatelessWidget {
-  const _ProfileTopBar();
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Image.asset(
-          'assets/images/LOGO.png',
-          height: 34,
-        ),
-        const Spacer(),
-        IconButton(
-          onPressed: () {},
-          icon: const Icon(
-            Icons.settings_rounded,
-            color: Colors.white70,
-          ),
-        ),
-      ],
     );
   }
 }

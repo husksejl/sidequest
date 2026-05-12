@@ -3,6 +3,7 @@ import '../../shared/custom_bottom_nav.dart';
 import 'widgets/activity_list.dart';
 import 'widgets/messages_list.dart';
 import 'widgets/social_hub_tabs.dart';
+import '../../shared/top_bar.dart';
 
 class SocialHubPage extends StatefulWidget {
   const SocialHubPage({super.key});
@@ -28,7 +29,7 @@ class _SocialHubPageState extends State<SocialHubPage> {
       body: SafeArea(
         child: Column(
           children: [
-            buildHeader(),
+            const AppTopBar(),
             SocialHubTabs(
               selectedTabIndex: selectedTabIndex,
               onTabChanged: changeTab,
@@ -40,39 +41,6 @@ class _SocialHubPageState extends State<SocialHubPage> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget buildHeader() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 18, 20, 16),
-      child: Row(
-        children: [
-          const Icon(
-            Icons.menu,
-            color: Color(0xFF00E5FF),
-            size: 24,
-          ),
-          const SizedBox(width: 16),
-          const Spacer(),
-          Container(
-            width: 38,
-            height: 38,
-            decoration: BoxDecoration(
-              color: const Color(0xFF102326),
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: const Color(0xFF00E5FF).withOpacity(0.4),
-              ),
-            ),
-            child: const Icon(
-              Icons.person,
-              color: Colors.white,
-              size: 22,
-            ),
-          ),
-        ],
       ),
     );
   }

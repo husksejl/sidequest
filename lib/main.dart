@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'app/screens/onboarding/onboarding_page.dart';
 import 'app/screens/signup/signup_page.dart';
+import 'app/screens/settings/settings_page.dart';
 
 void main() {
   runApp(const SideQuestApp());
@@ -21,6 +22,12 @@ class SideQuestApp extends StatelessWidget {
         useMaterial3: true,
         fontFamily: 'Inter',
       ),
+
+      routes: {
+        SettingsScreen.routeName: (context) => const SettingsScreen(),
+        CreateAccountScreen.routeName: (context) => const CreateAccountScreen(),
+      },
+
       home: OnboardingPage(
         onFinished: (context) {
           Navigator.of(context).pushReplacement(

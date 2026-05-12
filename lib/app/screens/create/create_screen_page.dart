@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 
 import '../../shared/custom_bottom_nav.dart';
 import 'models/create_quest.dart';
-import 'widgets/create_header.dart';
 import 'widgets/quest_section_label.dart';
 import 'widgets/solo_quest_card.dart';
 import 'widgets/group_quest_card.dart';
 import 'widgets/create_action_button.dart';
+import '../../shared/top_bar.dart';
 
 class CreateScreenPage extends StatelessWidget {
   const CreateScreenPage({super.key});
@@ -35,8 +35,7 @@ class CreateScreenPage extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(22, 18, 22, 24),
           child: Column(
             children: [
-              const CreateHeader(),
-              const SizedBox(height: 10),
+              const AppTopBar(),
 
               Container(
                 width: double.infinity,

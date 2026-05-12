@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import '../signup/signup_page.dart';
 import '../login/login_page.dart';
 import '../settings/widgets/danger_zone_card.dart';
-import 'widgets/settings_header.dart';
 import 'widgets/settings_profile_card.dart';
 import 'widgets/settings_section.dart';
 import 'widgets/settings_switch_tile.dart';
 import 'widgets/settings_tile.dart';
+import '../../shared/top_bar.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -39,8 +39,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SettingsHeader(),
-              const SizedBox(height: 22),
+              const AppTopBar(
+                showSettings: false,
+                showBackButton: true,
+              ),
               const SettingsProfileCard(
                 userName: 'Alex Explorer',
                 userHandle: '@alexexplores',

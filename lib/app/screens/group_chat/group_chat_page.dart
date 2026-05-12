@@ -4,6 +4,7 @@ import 'models/chat_message.dart';
 import 'widgets/chat_bubble.dart';
 import 'widgets/message_input_bar.dart';
 import 'widgets/quest_header_card.dart';
+import '../../shared/top_bar.dart';
 
 class GroupChatPage extends StatelessWidget {
   const GroupChatPage({super.key});
@@ -41,7 +42,7 @@ class GroupChatPage extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            buildHeader(context),
+            const AppTopBar(),
             const QuestHeaderCard(),
             Expanded(
               child: ListView(

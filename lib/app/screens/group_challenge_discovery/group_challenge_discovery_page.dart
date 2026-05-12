@@ -6,6 +6,7 @@ import 'models/group_challenge.dart';
 import 'widgets/challenge_card.dart';
 import 'widgets/challenge_category_chip.dart';
 import 'widgets/challenge_detail_page.dart';
+import '../../shared/top_bar.dart';
 
 class GroupChallengeDiscoveryPage extends StatefulWidget {
   const GroupChallengeDiscoveryPage({super.key});
@@ -136,8 +137,7 @@ class _GroupChallengeDiscoveryPageState
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildTopBar(),
-              const SizedBox(height: 22),
+              const AppTopBar(),
               _buildSearchBar(),
               const SizedBox(height: 16),
               _buildCategoryList(),

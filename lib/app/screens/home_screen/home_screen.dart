@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 
 import '../../shared/custom_bottom_nav.dart';
 import 'models/sidequest_post.dart';
-import 'widgets/header_section.dart';
 import 'widgets/stories_section.dart';
 import 'widgets/today_sidequest_card.dart';
 import 'widgets/sidequest_post_card.dart';
+import '../../shared/top_bar.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -57,8 +57,7 @@ class HomeScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const HeaderSection(),
-              const SizedBox(height: 18),
+              const AppTopBar(),
 
               const StoriesSection(),
               const SizedBox(height: 18),
