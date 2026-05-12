@@ -7,11 +7,24 @@ import 'widgets/solo_quest_card.dart';
 import 'widgets/group_quest_card.dart';
 import 'widgets/create_action_button.dart';
 import '../../shared/top_bar.dart';
+import 'package:image_picker/image_picker.dart';
 
 class CreateScreenPage extends StatelessWidget {
   const CreateScreenPage({super.key});
 
   static const Color bgColor = Color(0xFF050608);
+
+  Future<void> openCamera() async {
+    final ImagePicker picker = ImagePicker();
+
+    final XFile? photo = await picker.pickImage(
+      source: ImageSource.camera,
+    );
+
+    if (photo == null) return;
+
+    print('Foto gespeichert unter: ${photo.path}');
+  }
 
   static const CreateQuest soloQuest = CreateQuest(
     title: 'Take a photo of\nsomething that made\nyou smile today',
@@ -93,12 +106,19 @@ class CreateScreenPage extends StatelessWidget {
 
                     const SizedBox(height: 20),
 
-                    const Row(
+                    Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        CreateActionButton(icon: Icons.graphic_eq_rounded),
-                        CreateActionButton(icon: Icons.camera_alt_rounded),
-                        CreateActionButton(icon: Icons.title_rounded),
+                        const CreateActionButton(icon: Icons.graphic_eq_rounded),
+
+                        GestureDetector(
+                          onTap: openCamera,
+                          child: const CreateActionButton(
+                            icon: Icons.camera_alt_rounded,
+                          ),
+                        ),
+
+                        const CreateActionButton(icon: Icons.title_rounded),
                       ],
                     ),
                   ],
