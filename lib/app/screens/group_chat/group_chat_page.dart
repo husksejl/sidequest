@@ -112,7 +112,9 @@ class _GroupChatPageState extends State<GroupChatPage> {
         child: Column(
           children: [
             buildHeader(context),
-            const QuestHeaderCard(),
+            QuestHeaderCard(
+              chatID: widget.chatID,
+            ),
             Expanded(
               child: StreamBuilder<List<firestore_message.ChatMessage>>(
                 stream: _messageService.watchMessages(widget.chatID),
