@@ -5,6 +5,7 @@ class AppChat {
   final String lastMessage;
   final List<String> memberIDs;
   final String type;
+  final DateTime createdAt;
   final DateTime updatedAt;
 
   const AppChat({
@@ -12,6 +13,7 @@ class AppChat {
     required this.lastMessage,
     required this.memberIDs,
     required this.type,
+    required this.createdAt,
     required this.updatedAt,
   });
 
@@ -23,6 +25,7 @@ class AppChat {
       lastMessage: data['lastMessage'] ?? '',
       memberIDs: List<String>.from(data['memberIDs'] ?? []),
       type: data['type'] ?? 'dm',
+      createdAt: _timestampToDateTime(data['createdAt']),
       updatedAt: _timestampToDateTime(data['updatedAt']),
     );
   }
@@ -32,6 +35,7 @@ class AppChat {
       'lastMessage': lastMessage,
       'memberIDs': memberIDs,
       'type': type,
+      'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': Timestamp.fromDate(updatedAt),
     };
   }

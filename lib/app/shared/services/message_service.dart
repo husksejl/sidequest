@@ -22,10 +22,12 @@ class MessageService {
       return;
     }
 
+    final now = DateTime.now();
+
     final message = ChatMessage(
       id: '',
       senderID: senderID,
-      sentAt: DateTime.now(),
+      sentAt: now,
       text: trimmedText,
     );
 

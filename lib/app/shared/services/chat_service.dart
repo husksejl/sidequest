@@ -22,6 +22,8 @@ class ChatService {
       return existingChat.id;
     }
 
+    final now = DateTime.now();
+
     final chat = AppChat(
       id: '',
       lastMessage: '',
@@ -30,7 +32,8 @@ class ChatService {
         otherUserID,
       ],
       type: 'dm',
-      updatedAt: DateTime.now(),
+      createdAt: now,
+      updatedAt: now,
     );
 
     final docRef = await _chatsCollection.add(chat.toMap());
@@ -61,12 +64,17 @@ class ChatService {
   Stream<List<AppChat>> watchChatsForUser(String userID) {
     return _chatsCollection
         .where('memberIDs', arrayContains: userID)
-        .orderBy('updatedAt', descending: true)
         .snapshots()
         .map((querySnapshot) {
-      return querySnapshot.docs.map((doc) {
+      final chats = querySnapshot.docs.map((doc) {
         return AppChat.fromFirestore(doc);
       }).toList();
+
+      chats.sort((a, b) {
+        return b.updatedAt.compareTo(a.updatedAt);
+      });
+
+      return chats;
     });
   }
 
