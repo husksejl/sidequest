@@ -7,6 +7,7 @@ import 'app/screens/onboarding/onboarding_page.dart';
 import 'app/screens/signup/signup_page.dart';
 import 'app/screens/login/login_page.dart';
 import 'app/screens/settings/settings_page.dart';
+import 'app/screens/splash_screen/splash_screen_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -35,7 +36,7 @@ class SideQuestApp extends StatelessWidget {
         CreateAccountScreen.routeName: (context) => const CreateAccountScreen(),
         LoginScreen.routeName: (context) => const LoginScreen(),
       },
-      home: const AuthGate(),
+      home: const SplashScreenPage(),
     );
   }
 }

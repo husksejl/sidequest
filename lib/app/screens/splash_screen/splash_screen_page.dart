@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 
-import '../home_screen/home_screen.dart';
-import '../onboarding/onboarding_page.dart';
+import '../../../main.dart';
 
 class SplashScreenPage extends StatefulWidget {
   const SplashScreenPage({super.key});
 
   @override
-  State<SplashScreenPage> createState() => _SplashScreenPageState();
+  State<SplashScreenPage> createState() {
+    return _SplashScreenPageState();
+  }
 }
 
 class _SplashScreenPageState extends State<SplashScreenPage>
@@ -59,49 +60,16 @@ class _SplashScreenPageState extends State<SplashScreenPage>
     controller.forward();
 
     Future.delayed(const Duration(milliseconds: 2600), () {
-      if (!mounted) return;
+      if (!mounted) {
+        return;
+      }
 
       Navigator.of(context).pushReplacement(
         PageRouteBuilder(
           transitionDuration: const Duration(milliseconds: 520),
           reverseTransitionDuration: const Duration(milliseconds: 360),
           pageBuilder: (context, animation, secondaryAnimation) {
-            return OnboardingPage(
-              onFinished: (context) {
-                Navigator.of(context).pushReplacement(
-                  PageRouteBuilder(
-                    transitionDuration: const Duration(milliseconds: 520),
-                    reverseTransitionDuration:
-                    const Duration(milliseconds: 360),
-                    pageBuilder: (context, animation, secondaryAnimation) {
-                      return const HomeScreen();
-                    },
-                    transitionsBuilder: (
-                        context,
-                        animation,
-                        secondaryAnimation,
-                        child,
-                        ) {
-                      final curvedAnimation = CurvedAnimation(
-                        parent: animation,
-                        curve: Curves.easeOutCubic,
-                      );
-
-                      return FadeTransition(
-                        opacity: curvedAnimation,
-                        child: SlideTransition(
-                          position: Tween<Offset>(
-                            begin: const Offset(0, 0.04),
-                            end: Offset.zero,
-                          ).animate(curvedAnimation),
-                          child: child,
-                        ),
-                      );
-                    },
-                  ),
-                );
-              },
-            );
+            return const AuthGate();
           },
           transitionsBuilder: (
               context,

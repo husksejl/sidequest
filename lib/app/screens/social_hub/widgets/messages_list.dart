@@ -3,7 +3,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../../shared/models/app_chat.dart';
+import '../../../shared/models/app_user.dart';
 import '../../../shared/services/chat_service.dart';
+import '../../../shared/services/user_service.dart';
 import '../models/message_thread.dart';
 import '../../group_chat/group_chat_page.dart';
 import '../widgets/messages_thread_card.dart';
@@ -19,6 +21,7 @@ class MessagesList extends StatefulWidget {
 
 class _MessagesListState extends State<MessagesList> {
   final ChatService _chatService = ChatService();
+  final UserService _userService = UserService();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final TextEditingController _searchController = TextEditingController();
 
@@ -99,6 +102,56 @@ class _MessagesListState extends State<MessagesList> {
     }
   }
 
+  Future<_ChatDisplayData> _getChatDisplayData({
+    required AppChat chat,
+    required String currentUserID,
+  }) async {
+    final bool isGroup = chat.type == 'group';
+
+    if (isGroup) {
+      return _ChatDisplayData(
+        chatName: 'Group Chat',
+        isGroup: true,
+      );
+    }
+
+    final otherUserID = _getOtherUserID(
+      chat: chat,
+      currentUserID: currentUserID,
+    );
+
+    if (otherUserID == null) {
+      return _ChatDisplayData(
+        chatName: 'Chat',
+        isGroup: false,
+      );
+    }
+
+    final AppUser? otherUser = await _userService.getUserByID(otherUserID);
+
+    return _ChatDisplayData(
+      chatName: otherUser?.username.isNotEmpty == true
+          ? otherUser!.username
+          : 'Unknown User',
+      isGroup: false,
+    );
+  }
+
+  String? _getOtherUserID({
+    required AppChat chat,
+    required String currentUserID,
+  }) {
+    final otherUserIDs = chat.memberIDs.where((id) {
+      return id != currentUserID;
+    }).toList();
+
+    if (otherUserIDs.isEmpty) {
+      return null;
+    }
+
+    return otherUserIDs.first;
+  }
+
   @override
   Widget build(BuildContext context) {
     final currentUser = FirebaseAuth.instance.currentUser;
@@ -122,7 +175,6 @@ class _MessagesListState extends State<MessagesList> {
       children: [
         buildSearchBar(),
         const SizedBox(height: 20),
-
         if (isSearching)
           FutureBuilder<List<_UserSearchResult>>(
             future: _searchUsers(currentUser.uid),
@@ -243,27 +295,11 @@ class _MessagesListState extends State<MessagesList> {
               return Column(
                 children: [
                   for (int i = 0; i < chats.length; i++)
-                    MessageThreadCard(
-                      thread: _chatToThread(
-                        chat: chats[i],
-                        currentUserID: currentUser.uid,
-                      ),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) {
-                              return GroupChatPage(
-                                chatID: chats[i].id,
-                                chatName: _getChatName(
-                                  chat: chats[i],
-                                  currentUserID: currentUser.uid,
-                                ),
-                              );
-                            },
-                          ),
-                        );
-                      },
+                    _RealChatThreadCard(
+                      chat: chats[i],
+                      currentUserID: currentUser.uid,
+                      getChatDisplayData: _getChatDisplayData,
+                      formatTime: _formatTime,
                     ),
                 ],
               );
@@ -271,42 +307,6 @@ class _MessagesListState extends State<MessagesList> {
           ),
       ],
     );
-  }
-
-  MessageThread _chatToThread({
-    required AppChat chat,
-    required String currentUserID,
-  }) {
-    final bool isGroup = chat.type == 'group';
-
-    return MessageThread(
-      name: _getChatName(
-        chat: chat,
-        currentUserID: currentUserID,
-      ),
-      preview: chat.lastMessage,
-      time: _formatTime(chat.updatedAt),
-      isGroup: isGroup,
-    );
-  }
-
-  String _getChatName({
-    required AppChat chat,
-    required String currentUserID,
-  }) {
-    if (chat.type == 'group') {
-      return 'Group Chat';
-    }
-
-    final otherUserIDs = chat.memberIDs.where((id) {
-      return id != currentUserID;
-    }).toList();
-
-    if (otherUserIDs.isEmpty) {
-      return 'Chat';
-    }
-
-    return 'Chat Partner';
   }
 
   String _formatTime(DateTime dateTime) {
@@ -389,6 +389,73 @@ class _MessagesListState extends State<MessagesList> {
       ),
     );
   }
+}
+
+class _RealChatThreadCard extends StatelessWidget {
+  final AppChat chat;
+  final String currentUserID;
+  final Future<_ChatDisplayData> Function({
+  required AppChat chat,
+  required String currentUserID,
+  }) getChatDisplayData;
+  final String Function(DateTime dateTime) formatTime;
+
+  const _RealChatThreadCard({
+    required this.chat,
+    required this.currentUserID,
+    required this.getChatDisplayData,
+    required this.formatTime,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<_ChatDisplayData>(
+      future: getChatDisplayData(
+        chat: chat,
+        currentUserID: currentUserID,
+      ),
+      builder: (context, snapshot) {
+        final displayData = snapshot.data;
+
+        final chatName = displayData?.chatName ?? 'Loading...';
+        final isGroup = displayData?.isGroup ?? chat.type == 'group';
+
+        final thread = MessageThread(
+          name: chatName,
+          preview: chat.lastMessage,
+          time: formatTime(chat.updatedAt),
+          isGroup: isGroup,
+        );
+
+        return MessageThreadCard(
+          thread: thread,
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) {
+                  return GroupChatPage(
+                    chatID: chat.id,
+                    chatName: chatName == 'Loading...' ? 'Chat' : chatName,
+                  );
+                },
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+class _ChatDisplayData {
+  final String chatName;
+  final bool isGroup;
+
+  const _ChatDisplayData({
+    required this.chatName,
+    required this.isGroup,
+  });
 }
 
 class _UserSearchResult {

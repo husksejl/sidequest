@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../home_screen/home_screen.dart';
 import '../signup/signup_page.dart';
 import '../login/models/login_form_card.dart';
-import '../login/models/login_header.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -30,11 +29,6 @@ class LoginScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              LoginHeader(
-                onCloseTap: () {
-                  _goToHome(context);
-                },
-              ),
               const SizedBox(height: 34),
               const Text(
                 'WELCOME BACK',

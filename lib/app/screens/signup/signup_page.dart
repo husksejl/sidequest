@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'widgets/create_account_form_card.dart';
-import 'widgets/create_account_header.dart';
+
 
 class CreateAccountScreen extends StatelessWidget {
   const CreateAccountScreen({super.key});
@@ -19,7 +19,6 @@ class CreateAccountScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: const [
-              CreateAccountHeader(),
               SizedBox(height: 34),
               Text(
                 'JOIN THE QUEST',
