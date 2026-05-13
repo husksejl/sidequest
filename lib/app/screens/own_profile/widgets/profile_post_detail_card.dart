@@ -3,6 +3,7 @@ import '../models/profile_post.dart';
 import 'dart:io';
 import '../../../data/profile_post_storage.dart';
 import '../own_profile_page.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 class ProfilePostDetailCard extends StatefulWidget {
   final ProfilePost post;
@@ -18,6 +19,39 @@ class ProfilePostDetailCard extends StatefulWidget {
 
 class _ProfilePostDetailCardState extends State<ProfilePostDetailCard> {
   bool isLiked = false;
+  final AudioPlayer audioPlayer = AudioPlayer();
+  bool isPlayingAudio = false;
+
+  Future<void> toggleAudio() async {
+    if (post.type != ProfilePostType.audio) return;
+
+    final file = File(post.assetPath);
+
+    print('PLAY AUDIO PATH: ${post.assetPath}');
+    print('PLAY AUDIO EXISTS: ${file.existsSync()}');
+    print('PLAY AUDIO SIZE: ${file.existsSync() ? file.lengthSync() : 0} bytes');
+
+    if (!file.existsSync()) return;
+
+    if (isPlayingAudio) {
+      await audioPlayer.stop();
+
+      setState(() {
+        isPlayingAudio = false;
+      });
+    } else {
+      await audioPlayer.stop();
+      await audioPlayer.setVolume(1.0);
+
+      await audioPlayer.play(
+        DeviceFileSource(post.assetPath),
+      );
+
+      setState(() {
+        isPlayingAudio = true;
+      });
+    }
+  }
 
   ProfilePost get post => widget.post;
 
@@ -48,6 +82,13 @@ class _ProfilePostDetailCardState extends State<ProfilePostDetailCard> {
         return 'Vote undecided';
     }
   }
+
+  @override
+  void dispose() {
+    audioPlayer.dispose();
+    super.dispose();
+  }
+
 
   int get xpValue {
     switch (post.voteStatus) {
@@ -257,10 +298,15 @@ class _ProfilePostDetailCardState extends State<ProfilePostDetailCard> {
                     ),
                     Center(
                       child: post.type == ProfilePostType.audio
-                          ? const Icon(
-                        Icons.graphic_eq_rounded,
-                        color: Colors.white,
-                        size: 92,
+                          ? GestureDetector(
+                        onTap: toggleAudio,
+                        child: Icon(
+                          isPlayingAudio
+                              ? Icons.pause_circle_filled_rounded
+                              : Icons.play_circle_fill_rounded,
+                          color: Colors.white,
+                          size: 92,
+                        ),
                       )
                           : const Text(
                         '"I complimented\nthree strangers today\nand honestly...\nit healed me a little."',

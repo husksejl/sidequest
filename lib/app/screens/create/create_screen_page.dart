@@ -9,6 +9,7 @@ import 'widgets/create_action_button.dart';
 import '../../shared/widgets/top_bar.dart';
 import 'package:image_picker/image_picker.dart';
 import 'photo_preview_page.dart';
+import 'audio_record_page.dart';
 
 class CreateScreenPage extends StatelessWidget {
   const CreateScreenPage({super.key});
@@ -120,7 +121,21 @@ class CreateScreenPage extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        const CreateActionButton(icon: Icons.graphic_eq_rounded),
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const AudioRecordPage(
+                                  quest: soloQuest,
+                                ),
+                              ),
+                            );
+                          },
+                          child: const CreateActionButton(
+                            icon: Icons.graphic_eq_rounded,
+                          ),
+                        ),
 
                         GestureDetector(
                           onTap: () => openCamera(context, soloQuest),
