@@ -1,285 +1,223 @@
 import 'dart:io';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'models/create_quest.dart';
+
 import '../../data/profile_post_storage.dart';
-import '../own_profile/models/profile_post.dart';
-import '../own_profile/own_profile_page.dart';
+import '../../screens/home_screen/home_screen.dart';
+import '../../screens/own_profile/models/profile_post.dart';
+import '../../shared/services/daily_sidequest_service.dart';
+import 'models/create_quest.dart';
 
 class PhotoPreviewPage extends StatefulWidget {
+  final String imagePath;
+  final CreateQuest quest;
+
   const PhotoPreviewPage({
     super.key,
     required this.imagePath,
     required this.quest,
   });
 
-  final String imagePath;
-  final CreateQuest quest;
-
   @override
-  State<PhotoPreviewPage> createState() =>
-      _PhotoPreviewPageState();
+  State<PhotoPreviewPage> createState() => _PhotoPreviewPageState();
 }
 
 class _PhotoPreviewPageState extends State<PhotoPreviewPage> {
-  final TextEditingController captionController =
-  TextEditingController();
+  final TextEditingController _captionController = TextEditingController();
+  final DailySideQuestService _dailySideQuestService = DailySideQuestService();
+
+  bool _isPosting = false;
+
+  @override
+  void dispose() {
+    _captionController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _postSolution() async {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('You need to be logged in to post.'),
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      _isPosting = true;
+    });
+
+    try {
+      await _dailySideQuestService.completeDailySideQuestFromUpload(
+        userID: user.uid,
+        sideQuestID: widget.quest.id,
+        date: widget.quest.date,
+        xp: widget.quest.xp,
+        mediaType: 'image',
+        mediaPath: widget.imagePath,
+        caption: _captionController.text.trim(),
+      );
+
+      ProfilePostStorage.posts.insert(
+        0,
+        ProfilePost(
+          userName: user.email ?? 'You',
+          timeAgo: 'now',
+          location: 'SideQuest',
+          caption: _captionController.text.trim(),
+          questTitle: widget.quest.title,
+          assetPath: widget.imagePath,
+          type: ProfilePostType.image,
+          voteStatus: VoteStatus.open,
+          votingOpen: true,
+          likes: 0,
+          comments: 0,
+        ),
+      );
+
+      if (!mounted) return;
+
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const HomeScreen(),
+        ),
+            (route) => false,
+      );
+    } catch (error) {
+      if (!mounted) return;
+
+      setState(() {
+        _isPosting = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Could not post solution: $error'),
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF050608),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF050608),
+        foregroundColor: Colors.white,
+        elevation: 0,
+        title: const Text(
+          'Preview',
+          style: TextStyle(
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+      ),
       body: SafeArea(
         child: Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(18, 12, 18, 12),
-              child: Row(
-                children: [
-                  IconButton(
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(
-                      Icons.close_rounded,
-                      color: Colors.white,
-                      size: 28,
-                    ),
+            Expanded(
+              child: Container(
+                width: double.infinity,
+                margin: const EdgeInsets.fromLTRB(16, 10, 16, 16),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(34),
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.08),
                   ),
-                  const Spacer(),
-                  const Text(
-                    'Preview',
-                    style: TextStyle(
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: Image.file(
+                  File(widget.imagePath),
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 22),
+              decoration: const BoxDecoration(
+                color: Color(0xFF0E1014),
+                borderRadius: BorderRadius.vertical(
+                  top: Radius.circular(34),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.quest.title,
+                    style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 18,
+                      fontSize: 19,
                       fontWeight: FontWeight.w800,
                     ),
                   ),
-                  const Spacer(),
-                  const SizedBox(width: 48),
-                ],
-              ),
-            ),
-
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 18),
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(28),
-                  border: Border.all(
-                    color: const Color(0xFFFF6B5E),
-                    width: 7,
-                  ),
-
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFFFF6B5E).withOpacity(0.28),
-                      blurRadius: 26,
-                      spreadRadius: 2,
+                  const SizedBox(height: 8),
+                  Text(
+                    '${widget.quest.difficulty.toUpperCase()}  •  ${widget.quest.xp} XP',
+                    style: const TextStyle(
+                      color: Color(0xFFEB5D4F),
+                      fontSize: 12,
+                      letterSpacing: 1,
+                      fontWeight: FontWeight.w800,
                     ),
-                  ],
-
-                  gradient: const LinearGradient(
-                    colors: [
-                      Color(0xFF2A0F0D),
-                      Color(0xFF0A0B0D),
-                      Color(0xFF3A1511),
-                    ],
-
-                    begin: Alignment.topRight,
-                    end: Alignment.bottomLeft,
                   ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'SELECTED SIDEQUEST',
-                                style: TextStyle(
-                                  color: Colors.white.withOpacity(0.45),
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: 1.2,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                widget.quest.title.replaceAll('\n', ' '),
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  height: 1.25,
-                                  fontWeight: FontWeight.w800,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        const SizedBox(width: 12),
-
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF101216),
-                            borderRadius: BorderRadius.circular(999),
-                          ),
-                          child: Text(
-                            widget.quest.isGroupQuest ? 'GROUP' : 'SOLO',
-                            style: TextStyle(
-                              color: const Color(0xFF00B2AA),
-                              fontSize: 10,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: 1,
-                            ),
-                          ),
-                        ),
-                      ],
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: _captionController,
+                    maxLines: 3,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
                     ),
-
-                    const SizedBox(height: 12),
-
-                    Align(
-                      alignment: Alignment.bottomRight,
-                      child: Text(
-                        'Expires in ${widget.quest.expiresIn}',
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.42),
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                        ),
+                    decoration: InputDecoration(
+                      hintText: 'Add a caption...',
+                      hintStyle: const TextStyle(
+                        color: Color(0xFF777982),
+                      ),
+                      filled: true,
+                      fillColor: const Color(0xFF171A20),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(22),
+                        borderSide: BorderSide.none,
                       ),
                     ),
-                  ],
-                ),
-              ),
-            ),
-
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(18),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(28),
-                  child: Image.file(
-                    File(widget.imagePath),
+                  ),
+                  const SizedBox(height: 18),
+                  SizedBox(
                     width: double.infinity,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
-            ),
-
-            Padding(
-              padding: const EdgeInsets.fromLTRB(18, 0, 18, 18),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF101216),
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(
-                    color: Colors.white.withOpacity(0.06),
-                  ),
-                ),
-                child: TextField(
-                  controller: captionController,
-                  style: TextStyle(
-                    color: Colors.white,
-                  ),
-                  maxLines: 3,
-                  minLines: 1,
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    hintText: 'Add a caption...',
-                    hintStyle: TextStyle(
-                      color: Colors.white38,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-
-            Padding(
-              padding: const EdgeInsets.fromLTRB(18, 8, 18, 24),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => Navigator.pop(context),
-                      style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: Colors.white38),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                      ),
-                      child: const Text(
-                        'RETAKE',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
+                    height: 54,
                     child: ElevatedButton(
-                      onPressed: () async {
-                        showDialog(
-                          context: context,
-                          barrierDismissible: false,
-                          builder: (context) {
-                            return const Center(
-                              child: CircularProgressIndicator(
-                                color: Color(0xFFFF7668),
-                              ),
-                            );
-                          },
-                        );
-
-                        await Future.delayed(const Duration(seconds: 1));
-
-                        ProfilePostStorage.posts.insert(
-                          0,
-                          ProfilePost(
-                            userName: 'Franz Hermann',
-                            timeAgo: 'now',
-                            location: 'Vienna',
-                            questTitle: widget.quest.title.replaceAll('\n', ' '),
-                            caption: captionController.text.isEmpty
-                                ? 'No caption'
-                                : captionController.text,
-                            assetPath: widget.imagePath,
-                            type: ProfilePostType.image,
-                            voteStatus: VoteStatus.open,
-                            votingOpen: true,
-                            likes: 0,
-                            comments: 0,
-                          ),
-                        );
-
-                        Navigator.pop(context);
-
-                        Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const OwnProfilePage(),
-                          ),
-                              (route) => false,
-                        );
-                      },
+                      onPressed: _isPosting ? null : _postSolution,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFFF7668),
-                        foregroundColor: Colors.black,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        backgroundColor: const Color(0xFFEB5D4F),
+                        disabledBackgroundColor: const Color(0xFF5A2B27),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(999),
+                        ),
                       ),
-                      child: const Text(
-                        'POST',
-                        style: TextStyle(fontWeight: FontWeight.w900),
+                      child: _isPosting
+                          ? const SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.5,
+                          color: Colors.white,
+                        ),
+                      )
+                          : const Text(
+                        'POST SOLUTION',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          letterSpacing: 1.2,
+                          fontWeight: FontWeight.w900,
+                        ),
                       ),
                     ),
                   ),

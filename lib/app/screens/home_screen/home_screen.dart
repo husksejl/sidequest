@@ -1,17 +1,35 @@
-import 'package:flutter/material.dart';
+import 'dart:async';
 
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+
+import '../../shared/models/daily_sidequest.dart';
+import '../../shared/services/daily_sidequest_service.dart';
 import '../../shared/widgets/custom_bottom_nav.dart';
+import '../../shared/widgets/top_bar.dart';
+import '../create/models/create_quest.dart';
+import '../create/photo_preview_page.dart';
 import 'models/sidequest_post.dart';
+import 'widgets/sidequest_post_card.dart';
 import 'widgets/stories_section.dart';
 import 'widgets/today_sidequest_card.dart';
-import 'widgets/sidequest_post_card.dart';
-import '../../shared/widgets/top_bar.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   static const String routeName = '/';
   static const Color bgColor = Color(0xFF050608);
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  final DailySideQuestService _dailySideQuestService = DailySideQuestService();
+
+  late Timer _dateTimer;
+  late String _todayDate;
 
   static const List<SideQuestPost> posts = [
     SideQuestPost(
@@ -22,8 +40,7 @@ class HomeScreen extends StatelessWidget {
       imageEmoji: '🌿',
       imageLabelTop: 'Y O U R S',
       imageLabelBottom: 'SAFE  •  SOFT  •  WILD',
-      caption:
-          'I put on a wig and suddenly have opinions #quirky',
+      caption: 'I put on a wig and suddenly have opinions #quirky',
       likes: 124,
       comments: 18,
       completedVotes: 21,
@@ -37,8 +54,7 @@ class HomeScreen extends StatelessWidget {
       imageEmoji: '📸',
       imageLabelTop: 'M O M E N T',
       imageLabelBottom: 'LIGHT  •  JOY  •  CITY',
-      caption:
-          'The mask told me to do it 🤪',
+      caption: 'The mask told me to do it 🤪',
       likes: 89,
       comments: 11,
       completedVotes: 17,
@@ -47,9 +63,151 @@ class HomeScreen extends StatelessWidget {
   ];
 
   @override
+  void initState() {
+    super.initState();
+
+    _todayDate = _formatDate(DateTime.now());
+
+    _ensureTodaySideQuestExists();
+
+    _dateTimer = Timer.periodic(const Duration(minutes: 1), (timer) {
+      final newDate = _formatDate(DateTime.now());
+
+      if (newDate != _todayDate) {
+        setState(() {
+          _todayDate = newDate;
+        });
+
+        _ensureTodaySideQuestExists();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _dateTimer.cancel();
+    super.dispose();
+  }
+
+  Future<void> _ensureTodaySideQuestExists() async {
+    await _dailySideQuestService.getOrCreateTodayDailySideQuest();
+
+    if (!mounted) return;
+
+    setState(() {});
+  }
+
+  String _formatDate(DateTime date) {
+    final year = date.year.toString();
+    final month = date.month.toString().padLeft(2, '0');
+    final day = date.day.toString().padLeft(2, '0');
+
+    return '$year-$month-$day';
+  }
+
+  String _formatTimeUntilMidnight() {
+    final now = DateTime.now();
+    final nextMidnight = DateTime(now.year, now.month, now.day + 1);
+    final remaining = nextMidnight.difference(now);
+
+    String twoDigits(int number) {
+      return number.toString().padLeft(2, '0');
+    }
+
+    final hours = twoDigits(remaining.inHours);
+    final minutes = twoDigits(remaining.inMinutes.remainder(60));
+    final seconds = twoDigits(remaining.inSeconds.remainder(60));
+
+    return '$hours  :  $minutes  :  $seconds';
+  }
+
+  CreateQuest _toCreateQuest(DailySideQuest sideQuest) {
+    return CreateQuest(
+      id: sideQuest.id,
+      title: sideQuest.title,
+      description: sideQuest.description,
+      expiresIn: _formatTimeUntilMidnight(),
+      difficulty: sideQuest.difficulty,
+      xp: sideQuest.xp,
+      isGroupQuest: false,
+      date: sideQuest.date,
+    );
+  }
+
+  Future<void> _openCameraForDailySideQuest(DailySideQuest sideQuest) async {
+    final ImagePicker picker = ImagePicker();
+
+    final XFile? photo = await picker.pickImage(
+      source: ImageSource.camera,
+    );
+
+    if (photo == null || !mounted) return;
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PhotoPreviewPage(
+          imagePath: photo.path,
+          quest: _toCreateQuest(sideQuest),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTodaySideQuest() {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      return const SizedBox.shrink();
+    }
+
+    return StreamBuilder<DailySideQuest?>(
+      stream: _dailySideQuestService.watchDailySideQuestByDate(_todayDate),
+      builder: (context, sideQuestSnapshot) {
+        if (sideQuestSnapshot.connectionState == ConnectionState.waiting) {
+          return const SizedBox.shrink();
+        }
+
+        final sideQuest = sideQuestSnapshot.data;
+
+        if (sideQuest == null) {
+          return const SizedBox.shrink();
+        }
+
+        return StreamBuilder<bool>(
+          stream: _dailySideQuestService.watchIsDailySideQuestCompleted(
+            userID: user.uid,
+            sideQuestID: sideQuest.id,
+            date: sideQuest.date,
+          ),
+          builder: (context, completedSnapshot) {
+            final isCompleted = completedSnapshot.data ?? false;
+
+            if (isCompleted) {
+              return const SizedBox.shrink();
+            }
+
+            return Column(
+              children: [
+                TodaySideQuestCard(
+                  sideQuest: sideQuest,
+                  onCameraTap: () {
+                    _openCameraForDailySideQuest(sideQuest);
+                  },
+                ),
+                const SizedBox(height: 24),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: bgColor,
+      backgroundColor: HomeScreen.bgColor,
       bottomNavigationBar: const CustomBottomNav(currentIndex: 0),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -62,8 +220,7 @@ class HomeScreen extends StatelessWidget {
               const StoriesSection(),
               const SizedBox(height: 18),
 
-              const TodaySideQuestCard(),
-              const SizedBox(height: 24),
+              _buildTodaySideQuest(),
 
               const SearchBarHome(),
               const SizedBox(height: 20),
@@ -128,7 +285,7 @@ class MissionTabs extends StatelessWidget {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(999),
               border: Border.all(color: Colors.white),
-              color: Color(0xFF1A1A1A),
+              color: const Color(0xFF1A1A1A),
             ),
             child: const Center(
               child: Text(

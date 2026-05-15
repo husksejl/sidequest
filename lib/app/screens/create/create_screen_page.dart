@@ -1,155 +1,300 @@
-import 'package:flutter/material.dart';
+import 'dart:async';
 
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+
+import '../../shared/models/daily_sidequest.dart';
+import '../../shared/services/daily_sidequest_service.dart';
 import '../../shared/widgets/custom_bottom_nav.dart';
+import '../../shared/widgets/top_bar.dart';
+import 'audio_record_page.dart';
 import 'models/create_quest.dart';
+import 'photo_preview_page.dart';
+import 'widgets/create_action_button.dart';
 import 'widgets/quest_section_label.dart';
 import 'widgets/solo_quest_card.dart';
-import 'widgets/group_quest_card.dart';
-import 'widgets/create_action_button.dart';
-import '../../shared/widgets/top_bar.dart';
-import 'package:image_picker/image_picker.dart';
-import 'photo_preview_page.dart';
-import 'audio_record_page.dart';
 
-class CreateScreenPage extends StatelessWidget {
+class CreateScreenPage extends StatefulWidget {
   const CreateScreenPage({super.key});
 
   static const Color bgColor = Color(0xFF050608);
 
-  Future<void> openCamera(BuildContext context, CreateQuest quest) async {
+  @override
+  State<CreateScreenPage> createState() => _CreateScreenPageState();
+}
+
+class _CreateScreenPageState extends State<CreateScreenPage> {
+  final DailySideQuestService _dailySideQuestService = DailySideQuestService();
+
+  late Future<DailySideQuest?> _dailySideQuestFuture;
+  late Timer _timer;
+
+  String _expiresIn = '';
+
+  @override
+  void initState() {
+    super.initState();
+
+    _dailySideQuestFuture =
+        _dailySideQuestService.getOrCreateTodayDailySideQuest();
+
+    _updateExpiresIn();
+
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      _updateExpiresIn();
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
+  void _updateExpiresIn() {
+    final now = DateTime.now();
+    final nextMidnight = DateTime(now.year, now.month, now.day + 1);
+    final remaining = nextMidnight.difference(now);
+
+    String twoDigits(int number) {
+      return number.toString().padLeft(2, '0');
+    }
+
+    final hours = twoDigits(remaining.inHours);
+    final minutes = twoDigits(remaining.inMinutes.remainder(60));
+    final seconds = twoDigits(remaining.inSeconds.remainder(60));
+
+    if (!mounted) return;
+
+    setState(() {
+      _expiresIn = '$hours  :  $minutes  :  $seconds';
+    });
+  }
+
+  CreateQuest _toCreateQuest(DailySideQuest sideQuest) {
+    return CreateQuest(
+      id: sideQuest.id,
+      title: sideQuest.title,
+      description: sideQuest.description,
+      expiresIn: _expiresIn,
+      difficulty: sideQuest.difficulty,
+      xp: sideQuest.xp,
+      isGroupQuest: false,
+      date: sideQuest.date,
+    );
+  }
+
+  Future<void> _openCamera(DailySideQuest sideQuest) async {
     final ImagePicker picker = ImagePicker();
 
     final XFile? photo = await picker.pickImage(
       source: ImageSource.camera,
     );
 
-    if (photo == null) return;
+    if (photo == null || !mounted) return;
 
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => PhotoPreviewPage(
           imagePath: photo.path,
-          quest: quest,
+          quest: _toCreateQuest(sideQuest),
         ),
       ),
     );
   }
 
-  static const CreateQuest soloQuest = CreateQuest(
-    title: 'Take a photo of\nsomething that made\nyou smile today',
-    expiresIn: '23  :  58  :  12',
-    isGroupQuest: false,
-  );
+  Future<void> _openGallery(DailySideQuest sideQuest) async {
+    final ImagePicker picker = ImagePicker();
 
-  static const CreateQuest groupQuest = CreateQuest(
-    title: 'Take a selfie with\nsomething yellow',
-    expiresIn: '23  :  58  :  12',
-    isGroupQuest: true,
-  );
+    final XFile? image = await picker.pickImage(
+      source: ImageSource.gallery,
+    );
+
+    if (image == null || !mounted) return;
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PhotoPreviewPage(
+          imagePath: image.path,
+          quest: _toCreateQuest(sideQuest),
+        ),
+      ),
+    );
+  }
+
+  void _openAudio(DailySideQuest sideQuest) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AudioRecordPage(
+          quest: _toCreateQuest(sideQuest),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCompletedCard() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: const Color(0xFF111317),
+        borderRadius: BorderRadius.circular(32),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.08),
+        ),
+      ),
+      child: const Column(
+        children: [
+          Icon(
+            Icons.check_circle_rounded,
+            color: Color(0xFF00B2AA),
+            size: 54,
+          ),
+          SizedBox(height: 14),
+          Text(
+            'Daily SideQuest completed',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 21,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          SizedBox(height: 8),
+          Text(
+            'Come back tomorrow for a new quest.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Color(0xFF9DA3AD),
+              fontSize: 13,
+              height: 1.4,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDailyQuestContent() {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      return const Text(
+        'Log in to solve today’s SideQuest.',
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 16,
+          fontWeight: FontWeight.w700,
+        ),
+      );
+    }
+
+    return FutureBuilder<DailySideQuest?>(
+      future: _dailySideQuestFuture,
+      builder: (context, sideQuestSnapshot) {
+        if (sideQuestSnapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: CircularProgressIndicator(
+              color: Color(0xFFEB5D4F),
+            ),
+          );
+        }
+
+        final sideQuest = sideQuestSnapshot.data;
+
+        if (sideQuest == null) {
+          return const Text(
+            'No Daily SideQuest found.',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+            ),
+          );
+        }
+
+        return StreamBuilder<bool>(
+          stream: _dailySideQuestService.watchIsDailySideQuestCompleted(
+            userID: user.uid,
+            sideQuestID: sideQuest.id,
+            date: sideQuest.date,
+          ),
+          builder: (context, completedSnapshot) {
+            final isCompleted = completedSnapshot.data ?? false;
+
+            if (isCompleted) {
+              return _buildCompletedCard();
+            }
+
+            final quest = _toCreateQuest(sideQuest);
+
+            return Column(
+              children: [
+                SoloQuestCard(quest: quest),
+                const SizedBox(height: 28),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    GestureDetector(
+                      onTap: () => _openCamera(sideQuest),
+                      child: const CreateActionButton(
+                        icon: Icons.camera_alt_rounded,
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () => _openGallery(sideQuest),
+                      child: const CreateActionButton(
+                        icon: Icons.image_rounded,
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () => _openAudio(sideQuest),
+                      child: const CreateActionButton(
+                        icon: Icons.mic_rounded,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  'Upload a photo or audio to complete the Daily SideQuest.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Color(0xFF777982),
+                    fontSize: 12,
+                    height: 1.4,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: bgColor,
-      bottomNavigationBar: const CustomBottomNav(
-        currentIndex: 2,
-      ),
+      backgroundColor: CreateScreenPage.bgColor,
+      bottomNavigationBar: const CustomBottomNav(currentIndex: 2),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(22, 18, 22, 24),
+          padding: const EdgeInsets.fromLTRB(16, 10, 16, 26),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const AppTopBar(),
-
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.fromLTRB(22, 20, 22, 20),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(38),
-                  gradient: const LinearGradient(
-                    colors: [
-                      Color(0xFF100C0C),
-                      Color(0xFF050608),
-                      Color(0xFF160B0A),
-                    ],
-                    begin: Alignment.topRight,
-                    end: Alignment.bottomLeft,
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        const QuestSectionLabel(label: 'SOLO'),
-                        const Spacer(),
-                        Container(
-                          width: 32,
-                          height: 32,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: Colors.white,
-                              width: 1.4,
-                            ),
-                          ),
-                          child: const Center(
-                            child: Text(
-                              '?',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 16),
-                    const SoloQuestCard(quest: soloQuest),
-
-                    const SizedBox(height: 20),
-                    const QuestSectionLabel(label: 'GROUPS'),
-
-                    const SizedBox(height: 16),
-                    const GroupQuestCard(quest: groupQuest),
-
-                    const SizedBox(height: 20),
-
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const AudioRecordPage(
-                                  quest: soloQuest,
-                                ),
-                              ),
-                            );
-                          },
-                          child: const CreateActionButton(
-                            icon: Icons.graphic_eq_rounded,
-                          ),
-                        ),
-
-                        GestureDetector(
-                          onTap: () => openCamera(context, soloQuest),
-                          child: const CreateActionButton(
-                            icon: Icons.camera_alt_rounded,
-                          ),
-                        ),
-
-                        const CreateActionButton(icon: Icons.title_rounded),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
+              const SizedBox(height: 28),
+              const QuestSectionLabel(label: 'DAILY SIDEQUEST'),
+              const SizedBox(height: 18),
+              _buildDailyQuestContent(),
             ],
           ),
         ),

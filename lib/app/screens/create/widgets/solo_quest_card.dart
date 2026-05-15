@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../models/create_quest.dart';
 
 class SoloQuestCard extends StatelessWidget {
@@ -49,7 +50,44 @@ class SoloQuestCard extends StatelessWidget {
               fontWeight: FontWeight.w700,
             ),
           ),
+
+          const SizedBox(height: 10),
+
+          Text(
+            quest.description,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: Color(0xFF9DA3AD),
+              fontSize: 13,
+              height: 1.35,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(999),
+              color: Colors.white.withOpacity(0.05),
+              border: Border.all(
+                color: Colors.white.withOpacity(0.08),
+              ),
+            ),
+            child: Text(
+              '${quest.difficulty.toUpperCase()}  •  ${quest.xp} XP',
+              style: const TextStyle(
+                color: Color(0xFFEB5D4F),
+                fontSize: 11,
+                letterSpacing: 1.1,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+
           const SizedBox(height: 22),
+
           const Text(
             'QUEST EXPIRES IN',
             style: TextStyle(
@@ -59,7 +97,9 @@ class SoloQuestCard extends StatelessWidget {
               fontWeight: FontWeight.w600,
             ),
           ),
+
           const SizedBox(height: 12),
+
           Text(
             quest.expiresIn,
             style: const TextStyle(
