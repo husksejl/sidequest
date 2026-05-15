@@ -26,12 +26,46 @@ class ChatService {
 
     final chat = AppChat(
       id: '',
+      name: '',
       lastMessage: '',
       memberIDs: [
         currentUserID,
         otherUserID,
       ],
       type: 'dm',
+      createdAt: now,
+      updatedAt: now,
+    );
+
+    final docRef = await _chatsCollection.add(chat.toMap());
+
+    return docRef.id;
+  }
+
+  Future<String> createGroupChat({
+    required String groupName,
+    required List<String> memberIDs,
+  }) async {
+    final cleanedGroupName = groupName.trim();
+
+    if (cleanedGroupName.isEmpty) {
+      throw Exception('Group name cannot be empty.');
+    }
+
+    final uniqueMemberIDs = memberIDs.toSet().toList();
+
+    if (uniqueMemberIDs.length < 2) {
+      throw Exception('A group chat needs at least two members.');
+    }
+
+    final now = DateTime.now();
+
+    final chat = AppChat(
+      id: '',
+      name: cleanedGroupName,
+      lastMessage: '',
+      memberIDs: uniqueMemberIDs,
+      type: 'group',
       createdAt: now,
       updatedAt: now,
     );
@@ -94,6 +128,26 @@ class ChatService {
   }) async {
     await _chatsCollection.doc(chatID).update({
       'lastMessage': lastMessage,
+      'updatedAt': Timestamp.now(),
+    });
+  }
+
+  Future<void> addMemberToGroup({
+    required String chatID,
+    required String userID,
+  }) async {
+    await _chatsCollection.doc(chatID).update({
+      'memberIDs': FieldValue.arrayUnion([userID]),
+      'updatedAt': Timestamp.now(),
+    });
+  }
+
+  Future<void> removeMemberFromGroup({
+    required String chatID,
+    required String userID,
+  }) async {
+    await _chatsCollection.doc(chatID).update({
+      'memberIDs': FieldValue.arrayRemove([userID]),
       'updatedAt': Timestamp.now(),
     });
   }

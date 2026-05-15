@@ -6,8 +6,9 @@ import '../../../shared/models/app_chat.dart';
 import '../../../shared/models/app_user.dart';
 import '../../../shared/services/chat_service.dart';
 import '../../../shared/services/user_service.dart';
-import '../models/message_thread.dart';
+import '../../create_group_chat/create_group_chat_page.dart';
 import '../../group_chat/group_chat_page.dart';
+import '../models/message_thread.dart';
 import '../widgets/messages_thread_card.dart';
 
 class MessagesList extends StatefulWidget {
@@ -84,6 +85,7 @@ class _MessagesListState extends State<MessagesList> {
             return GroupChatPage(
               chatID: chatID,
               chatName: username,
+              isGroup: false,
             );
           },
         ),
@@ -106,11 +108,9 @@ class _MessagesListState extends State<MessagesList> {
     required AppChat chat,
     required String currentUserID,
   }) async {
-    final bool isGroup = chat.type == 'group';
-
-    if (isGroup) {
+    if (chat.isGroup) {
       return _ChatDisplayData(
-        chatName: 'Group Chat',
+        chatName: chat.name.isEmpty ? 'Group Chat' : chat.name,
         isGroup: true,
       );
     }
@@ -121,7 +121,7 @@ class _MessagesListState extends State<MessagesList> {
     );
 
     if (otherUserID == null) {
-      return _ChatDisplayData(
+      return const _ChatDisplayData(
         chatName: 'Chat',
         isGroup: false,
       );
@@ -152,6 +152,17 @@ class _MessagesListState extends State<MessagesList> {
     return otherUserIDs.first;
   }
 
+  void _goToCreateGroupChat(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) {
+          return const CreateGroupChatPage();
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final currentUser = FirebaseAuth.instance.currentUser;
@@ -173,6 +184,8 @@ class _MessagesListState extends State<MessagesList> {
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
       children: [
+        buildActionRow(context),
+        const SizedBox(height: 14),
         buildSearchBar(),
         const SizedBox(height: 20),
         if (isSearching)
@@ -272,7 +285,7 @@ class _MessagesListState extends State<MessagesList> {
               }
 
               final chats = snapshot.data!.where((chat) {
-                return chat.lastMessage.trim().isNotEmpty;
+                return chat.lastMessage.trim().isNotEmpty || chat.isGroup;
               }).toList();
 
               if (chats.isEmpty) {
@@ -280,7 +293,7 @@ class _MessagesListState extends State<MessagesList> {
                   padding: EdgeInsets.only(top: 40),
                   child: Center(
                     child: Text(
-                      'No conversations yet.\nSearch for a user to start chatting.',
+                      'No conversations yet.\nSearch for a user or create a group chat.',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: Colors.grey,
@@ -305,6 +318,47 @@ class _MessagesListState extends State<MessagesList> {
               );
             },
           ),
+      ],
+    );
+  }
+
+  Widget buildActionRow(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: GestureDetector(
+            onTap: () {
+              _goToCreateGroupChat(context);
+            },
+            child: Container(
+              height: 44,
+              decoration: BoxDecoration(
+                color: const Color(0xFFFF7A66),
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.groups_rounded,
+                    color: Colors.black,
+                    size: 19,
+                  ),
+                  SizedBox(width: 8),
+                  Text(
+                    'NEW GROUP',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 0.8,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -418,11 +472,15 @@ class _RealChatThreadCard extends StatelessWidget {
         final displayData = snapshot.data;
 
         final chatName = displayData?.chatName ?? 'Loading...';
-        final isGroup = displayData?.isGroup ?? chat.type == 'group';
+        final isGroup = displayData?.isGroup ?? chat.isGroup;
 
         final thread = MessageThread(
           name: chatName,
-          preview: chat.lastMessage,
+          preview: chat.lastMessage.isEmpty
+              ? isGroup
+              ? 'Group created. Send the first message.'
+              : 'No messages yet.'
+              : chat.lastMessage,
           time: formatTime(chat.updatedAt),
           isGroup: isGroup,
         );
@@ -437,6 +495,7 @@ class _RealChatThreadCard extends StatelessWidget {
                   return GroupChatPage(
                     chatID: chat.id,
                     chatName: chatName == 'Loading...' ? 'Chat' : chatName,
+                    isGroup: isGroup,
                   );
                 },
               ),

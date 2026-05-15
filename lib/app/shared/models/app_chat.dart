@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AppChat {
   final String id;
+  final String name;
   final String lastMessage;
   final List<String> memberIDs;
   final String type;
@@ -10,6 +11,7 @@ class AppChat {
 
   const AppChat({
     required this.id,
+    required this.name,
     required this.lastMessage,
     required this.memberIDs,
     required this.type,
@@ -22,6 +24,7 @@ class AppChat {
 
     return AppChat(
       id: doc.id,
+      name: data['name'] ?? '',
       lastMessage: data['lastMessage'] ?? '',
       memberIDs: List<String>.from(data['memberIDs'] ?? []),
       type: data['type'] ?? 'dm',
@@ -32,12 +35,17 @@ class AppChat {
 
   Map<String, dynamic> toMap() {
     return {
+      'name': name,
       'lastMessage': lastMessage,
       'memberIDs': memberIDs,
       'type': type,
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': Timestamp.fromDate(updatedAt),
     };
+  }
+
+  bool get isGroup {
+    return type == 'group';
   }
 
   static DateTime _timestampToDateTime(dynamic value) {

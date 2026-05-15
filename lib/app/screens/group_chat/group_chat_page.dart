@@ -1,21 +1,24 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import '../../shared/models/app_user.dart';
 import '../../shared/models/chat_message.dart' as firestore_message;
 import '../../shared/services/message_service.dart';
+import '../../shared/services/user_service.dart';
 import 'models/chat_message.dart';
 import 'widgets/chat_bubble.dart';
 import 'widgets/message_input_bar.dart';
-import 'widgets/quest_header_card.dart';
 
 class GroupChatPage extends StatefulWidget {
   final String chatID;
   final String chatName;
+  final bool isGroup;
 
   const GroupChatPage({
     super.key,
     required this.chatID,
     required this.chatName,
+    this.isGroup = false,
   });
 
   @override
@@ -26,6 +29,9 @@ class GroupChatPage extends StatefulWidget {
 
 class _GroupChatPageState extends State<GroupChatPage> {
   final MessageService _messageService = MessageService();
+  final UserService _userService = UserService();
+
+  final Map<String, String> _usernameCache = {};
 
   bool _isSending = false;
 
@@ -72,14 +78,42 @@ class _GroupChatPageState extends State<GroupChatPage> {
     }
   }
 
-  ChatMessage _toBubbleMessage(
-      firestore_message.ChatMessage message,
-      String currentUserID,
-      ) {
+  Future<String> _getSenderName({
+    required String senderID,
+    required String currentUserID,
+  }) async {
+    if (senderID == currentUserID) {
+      return 'You';
+    }
+
+    if (!widget.isGroup) {
+      return widget.chatName;
+    }
+
+    if (_usernameCache.containsKey(senderID)) {
+      return _usernameCache[senderID]!;
+    }
+
+    final AppUser? user = await _userService.getUserByID(senderID);
+
+    final username = user?.username.isNotEmpty == true
+        ? user!.username
+        : 'Unknown User';
+
+    _usernameCache[senderID] = username;
+
+    return username;
+  }
+
+  ChatMessage _toBubbleMessage({
+    required firestore_message.ChatMessage message,
+    required String senderName,
+    required String currentUserID,
+  }) {
     final bool isOwnMessage = message.senderID == currentUserID;
 
     return ChatMessage(
-      senderName: isOwnMessage ? 'You' : widget.chatName,
+      senderName: senderName,
       text: message.text,
       isOwnMessage: isOwnMessage,
     );
@@ -112,9 +146,6 @@ class _GroupChatPageState extends State<GroupChatPage> {
         child: Column(
           children: [
             buildHeader(context),
-            QuestHeaderCard(
-              chatID: widget.chatID,
-            ),
             Expanded(
               child: StreamBuilder<List<firestore_message.ChatMessage>>(
                 stream: _messageService.watchMessages(widget.chatID),
@@ -163,11 +194,11 @@ class _GroupChatPageState extends State<GroupChatPage> {
                     padding: const EdgeInsets.fromLTRB(18, 8, 18, 12),
                     children: [
                       for (int i = 0; i < messages.length; i++)
-                        ChatBubble(
-                          message: _toBubbleMessage(
-                            messages[i],
-                            currentUser.uid,
-                          ),
+                        _ChatBubbleWithSenderName(
+                          message: messages[i],
+                          currentUserID: currentUser.uid,
+                          getSenderName: _getSenderName,
+                          toBubbleMessage: _toBubbleMessage,
                         ),
                     ],
                   );
@@ -213,9 +244,9 @@ class _GroupChatPageState extends State<GroupChatPage> {
                   ),
                 ),
                 const SizedBox(height: 3),
-                const Text(
-                  'DIRECT MESSAGE',
-                  style: TextStyle(
+                Text(
+                  widget.isGroup ? 'GROUP CHAT' : 'DIRECT MESSAGE',
+                  style: const TextStyle(
                     color: Colors.grey,
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
@@ -235,14 +266,58 @@ class _GroupChatPageState extends State<GroupChatPage> {
                 color: const Color(0xFF00E5FF).withOpacity(0.6),
               ),
             ),
-            child: const Icon(
-              Icons.person,
-              color: Color(0xFF00E5FF),
+            child: Icon(
+              widget.isGroup ? Icons.groups_rounded : Icons.person,
+              color: const Color(0xFF00E5FF),
               size: 22,
             ),
           ),
         ],
       ),
+    );
+  }
+}
+
+class _ChatBubbleWithSenderName extends StatelessWidget {
+  final firestore_message.ChatMessage message;
+  final String currentUserID;
+
+  final Future<String> Function({
+  required String senderID,
+  required String currentUserID,
+  }) getSenderName;
+
+  final ChatMessage Function({
+  required firestore_message.ChatMessage message,
+  required String senderName,
+  required String currentUserID,
+  }) toBubbleMessage;
+
+  const _ChatBubbleWithSenderName({
+    required this.message,
+    required this.currentUserID,
+    required this.getSenderName,
+    required this.toBubbleMessage,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<String>(
+      future: getSenderName(
+        senderID: message.senderID,
+        currentUserID: currentUserID,
+      ),
+      builder: (context, snapshot) {
+        final senderName = snapshot.data ?? 'Loading...';
+
+        return ChatBubble(
+          message: toBubbleMessage(
+            message: message,
+            senderName: senderName,
+            currentUserID: currentUserID,
+          ),
+        );
+      },
     );
   }
 }
