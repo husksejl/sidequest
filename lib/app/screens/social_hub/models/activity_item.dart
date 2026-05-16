@@ -6,6 +6,7 @@ class ActivityItem {
   final String text;
   final String time;
   final String? actionText;
+  final DateTime? createdAt;
 
   const ActivityItem({
     required this.icon,
@@ -13,5 +14,6 @@ class ActivityItem {
     required this.text,
     required this.time,
     this.actionText,
+    this.createdAt,
   });
 }
