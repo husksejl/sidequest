@@ -14,6 +14,7 @@ import 'models/sidequest_post.dart';
 import 'widgets/sidequest_post_card.dart';
 import 'widgets/stories_section.dart';
 import 'widgets/today_sidequest_card.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -204,6 +205,68 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Widget _buildFirestoreFeed() {
+    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+      stream: FirebaseFirestore.instance
+          .collection('posts')
+          .orderBy('createdAt', descending: true)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: Padding(
+              padding: EdgeInsets.all(24),
+              child: CircularProgressIndicator(
+                color: Color(0xFFEB5D4F),
+              ),
+            ),
+          );
+        }
+
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return const Text(
+            'No posts yet.',
+            style: TextStyle(color: Colors.white54),
+          );
+        }
+
+        final docs = snapshot.data!.docs;
+
+        return Column(
+          children: docs.map((doc) {
+            final data = doc.data();
+
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: SideQuestPostCard(
+                post: SideQuestPost(
+                  userName: data['username'] ?? 'Unknown',
+                  timeAgo: 'now',
+                  location: 'SideQuest',
+                  userId: data['userId'],
+                  title: data['questTitle'] ?? '',
+                  imageEmoji: '',
+                  imageLabelTop: '',
+                  imageLabelBottom: '',
+                  caption: data['caption'] ?? '',
+                  likes: data['likes'] ?? 0,
+                  comments: data['comments'] ?? 0,
+                  completedVotes: data['completedVotes'] ?? 0,
+                  notCompletedVotes: data['failedVotes'] ?? 0,
+                  imageUrl: data['imageUrl'],
+                  profileImageUrl: data['profileImageUrl'],
+                  firestoreId: doc.id,
+                  isOwnPost: data['userId'] == FirebaseAuth.instance.currentUser?.uid,
+                  isFirestorePost: true,
+                ),
+              ),
+            );
+          }).toList(),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -239,10 +302,7 @@ class _HomeScreenState extends State<HomeScreen> {
               const MissionTabs(),
               const SizedBox(height: 18),
 
-              for (final post in posts) ...[
-                SideQuestPostCard(post: post),
-                const SizedBox(height: 16),
-              ],
+              _buildFirestoreFeed(),
             ],
           ),
         ),

@@ -136,6 +136,12 @@ class ProfilePostTile extends StatelessWidget {
                     ],
                   ),
                 )
+                    : post.assetPath.startsWith('http')
+                    ? Image.network(
+                  post.assetPath,
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                )
                     : post.assetPath.startsWith('assets/')
                     ? Image.asset(
                   post.assetPath,

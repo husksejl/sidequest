@@ -8,6 +8,8 @@ import '../../screens/home_screen/home_screen.dart';
 import '../../screens/own_profile/models/profile_post.dart';
 import '../../shared/services/daily_sidequest_service.dart';
 import 'models/create_quest.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 class PhotoPreviewPage extends StatefulWidget {
   final String imagePath;
@@ -28,6 +30,28 @@ class _PhotoPreviewPageState extends State<PhotoPreviewPage> {
   final DailySideQuestService _dailySideQuestService = DailySideQuestService();
 
   bool _isPosting = false;
+
+  Future<String> _uploadImageToStorage({
+    required String userId,
+    required String imagePath,
+  }) async {
+    final file = File(imagePath);
+
+    final fileName = '${DateTime.now().millisecondsSinceEpoch}.jpg';
+
+    final ref = FirebaseStorage.instance
+        .ref()
+        .child('posts')
+        .child(userId)
+        .child(fileName);
+
+    await ref.putFile(
+      file,
+      SettableMetadata(contentType: 'image/jpeg'),
+    );
+
+    return ref.getDownloadURL();
+  }
 
   @override
   void dispose() {
@@ -52,6 +76,18 @@ class _PhotoPreviewPageState extends State<PhotoPreviewPage> {
     });
 
     try {
+      final imageUrl = await _uploadImageToStorage(
+        userId: user.uid,
+        imagePath: widget.imagePath,
+      );
+
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+
+      final username = userDoc.data()?['username'] ?? 'Unknown user';
+
       await _dailySideQuestService.completeDailySideQuestFromUpload(
         userID: user.uid,
         sideQuestID: widget.quest.id,
@@ -62,10 +98,24 @@ class _PhotoPreviewPageState extends State<PhotoPreviewPage> {
         caption: _captionController.text.trim(),
       );
 
+      await FirebaseFirestore.instance.collection('posts').add({
+        'userId': user.uid,
+        'username': username,
+        'profileImageUrl': userDoc.data()?['profileImageUrl'],
+        'caption': _captionController.text.trim(),
+        'questTitle': widget.quest.title,
+        'questId': widget.quest.id,
+        'imageUrl': imageUrl,
+        'mediaType': 'image',
+        'createdAt': FieldValue.serverTimestamp(),
+        'likes': 0,
+        'comments': 0,
+      });
+
       ProfilePostStorage.posts.insert(
         0,
         ProfilePost(
-          userName: user.email ?? 'You',
+          userName: username,
           timeAgo: 'now',
           location: 'SideQuest',
           caption: _captionController.text.trim(),

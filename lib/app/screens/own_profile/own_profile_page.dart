@@ -7,7 +7,8 @@ import 'widgets/profile_action_buttons.dart';
 import 'widgets/profile_post_grid.dart';
 import 'widgets/profile_level_bar.dart';
 import '../../shared/widgets/top_bar.dart';
-import '../../data/profile_post_storage.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class OwnProfilePage extends StatelessWidget {
   const OwnProfilePage({super.key});
@@ -136,11 +137,44 @@ class OwnProfilePage extends StatelessWidget {
               ),
 
               const SizedBox(height: 14),
-              ProfilePostGrid(
-                posts: [
-                  ...ProfilePostStorage.posts,
-                  ...posts,
-                ],
+              StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                stream: FirebaseFirestore.instance
+                    .collection('posts')
+                    .where('userId', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return const Center(
+                      child: CircularProgressIndicator(
+                        color: Color(0xFFEB5D4F),
+                      ),
+                    );
+                  }
+
+                  final docs = snapshot.data!.docs;
+
+                  final firebasePosts = docs.map((doc) {
+                    final data = doc.data();
+
+                    return ProfilePost(
+                      firestoreId: doc.id,
+                      userName: data['username'] ?? 'Unknown',
+                      timeAgo: 'now',
+                      location: 'SideQuest',
+                      questTitle: data['questTitle'] ?? '',
+                      caption: data['caption'] ?? '',
+                      assetPath: data['imageUrl'] ?? '',
+                      type: ProfilePostType.image,
+                      voteStatus: VoteStatus.open,
+                      votingOpen: true,
+                      likes: data['likes'] ?? 0,
+                      comments: data['comments'] ?? 0,
+                      profileImageUrl: data['profileImageUrl'],
+                    );
+                  }).toList();
+
+                  return ProfilePostGrid(posts: firebasePosts);
+                },
               ),
             ],
           ),

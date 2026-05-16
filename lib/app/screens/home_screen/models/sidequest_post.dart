@@ -12,6 +12,13 @@ class SideQuestPost {
   final int completedVotes;
   final int notCompletedVotes;
 
+  final String? imageUrl;
+  final String? profileImageUrl;
+  final String? firestoreId;
+  final bool isOwnPost;
+  final bool isFirestorePost;
+  final String? userId;
+
   const SideQuestPost({
     required this.userName,
     required this.timeAgo,
@@ -25,5 +32,12 @@ class SideQuestPost {
     required this.comments,
     required this.completedVotes,
     required this.notCompletedVotes,
+    this.userId,
+
+    this.imageUrl,
+    this.profileImageUrl,
+    this.firestoreId,
+    this.isOwnPost = false,
+    this.isFirestorePost = false,
   });
 }

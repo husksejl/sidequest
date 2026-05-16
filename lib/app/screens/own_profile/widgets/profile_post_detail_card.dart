@@ -4,6 +4,8 @@ import 'dart:io';
 import '../../../data/profile_post_storage.dart';
 import '../own_profile_page.dart';
 import 'package:audioplayers/audioplayers.dart';
+import '../../home_screen/widgets/comments_bottom_sheet.dart';
+
 
 class ProfilePostDetailCard extends StatefulWidget {
   final ProfilePost post;
@@ -127,9 +129,20 @@ class _ProfilePostDetailCardState extends State<ProfilePostDetailCard> {
           children: [
             Row(
               children: [
-                const CircleAvatar(
+                CircleAvatar(
                   radius: 22,
-                  backgroundImage: AssetImage('assets/images/Max.jpg'),
+                  backgroundColor: const Color(0xFF111317),
+                  backgroundImage: post.profileImageUrl != null &&
+                      post.profileImageUrl!.isNotEmpty
+                      ? NetworkImage(post.profileImageUrl!)
+                      : null,
+                  child: post.profileImageUrl == null ||
+                      post.profileImageUrl!.isEmpty
+                      ? const Icon(
+                    Icons.person_rounded,
+                    color: Colors.white54,
+                  )
+                      : null,
                 ),
                 const SizedBox(width: 10),
                 Expanded(
@@ -328,7 +341,13 @@ class _ProfilePostDetailCardState extends State<ProfilePostDetailCard> {
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    post.assetPath.startsWith('assets/')
+                    post.assetPath.startsWith('http')
+                        ? Image.network(
+                      post.assetPath,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                    )
+                        : post.assetPath.startsWith('assets/')
                         ? Image.asset(
                       post.assetPath,
                       width: double.infinity,
@@ -486,10 +505,24 @@ class _ProfilePostDetailCardState extends State<ProfilePostDetailCard> {
                   ),
                 ),
                 const SizedBox(width: 8),
-                _SmallStat(
-                  icon: Icons.chat_bubble_outline_rounded,
-                  value: '${post.comments}',
-                  color: const Color(0xFF00B2AA),
+                GestureDetector(
+                  onTap: () {
+                    if (post.firestoreId == null) return;
+
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      backgroundColor: Colors.transparent,
+                      builder: (_) => CommentsBottomSheet(
+                        postId: post.firestoreId!,
+                      ),
+                    );
+                  },
+                  child: _SmallStat(
+                    icon: Icons.chat_bubble_outline_rounded,
+                    value: '${post.comments}',
+                    color: const Color(0xFF00B2AA),
+                  ),
                 ),
                 const Spacer(),
                 Container(

@@ -6,6 +6,10 @@ import '../../home_screen/home_screen.dart';
 import '../../login/login_page.dart';
 import 'create_account_text_field.dart';
 import 'profile_photo_picker.dart';
+import 'dart:io';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 class CreateAccountFormCard extends StatefulWidget {
   const CreateAccountFormCard({super.key});
@@ -31,6 +35,8 @@ class _CreateAccountFormCardState extends State<CreateAccountFormCard> {
 
   String? _errorMessage;
 
+  String? _profileImagePath;
+
   @override
   void dispose() {
     _fullNameController.dispose();
@@ -39,6 +45,24 @@ class _CreateAccountFormCardState extends State<CreateAccountFormCard> {
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
+  }
+
+  Future<String?> _uploadProfileImage(String uid) async {
+    if (_profileImagePath == null) return null;
+
+    final file = File(_profileImagePath!);
+
+    final ref = FirebaseStorage.instance
+        .ref()
+        .child('profile_pictures')
+        .child('$uid.jpg');
+
+    await ref.putFile(
+      file,
+      SettableMetadata(contentType: 'image/jpeg'),
+    );
+
+    return ref.getDownloadURL();
   }
 
   Future<void> _createAccount() async {
@@ -77,6 +101,21 @@ class _CreateAccountFormCardState extends State<CreateAccountFormCard> {
         email: email,
         password: password,
       );
+
+      final uid = FirebaseAuth.instance.currentUser?.uid;
+
+      if (uid != null) {
+        final profileImageUrl = await _uploadProfileImage(uid);
+
+        if (profileImageUrl != null) {
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(uid)
+              .set({
+            'profileImageUrl': profileImageUrl,
+          }, SetOptions(merge: true));
+        }
+      }
 
       if (!mounted) return;
 
@@ -193,7 +232,11 @@ class _CreateAccountFormCardState extends State<CreateAccountFormCard> {
       ),
       child: Column(
         children: [
-          const ProfilePhotoPicker(),
+          ProfilePhotoPicker(
+            onImageSelected: (path) {
+              _profileImagePath = path;
+            },
+          ),
           const SizedBox(height: 26),
           CreateAccountTextField(
             controller: _fullNameController,
