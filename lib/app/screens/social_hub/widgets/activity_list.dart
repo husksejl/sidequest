@@ -45,17 +45,22 @@ class ActivityList extends StatelessWidget {
         continue;
       }
 
+      String username = 'Someone';
+
       final followerDoc = await FirebaseFirestore.instance
           .collection('users')
           .doc(followerID)
           .get();
 
-      if (!followerDoc.exists) {
-        continue;
-      }
+      if (followerDoc.exists) {
+        final followerData = followerDoc.data();
 
-      final followerData = followerDoc.data();
-      final username = followerData?['username'] ?? 'Someone';
+        final foundUsername = followerData?['username']?.toString();
+
+        if (foundUsername != null && foundUsername.trim().isNotEmpty) {
+          username = foundUsername;
+        }
+      }
 
       activities.add(
         ActivityItem(
@@ -108,7 +113,14 @@ class ActivityList extends StatelessWidget {
     required String postTitle,
     required String postCaption,
   }) async {
-    final likedBy = List<String>.from(postData['likedBy'] ?? []);
+    final rawLikedBy = postData['likedBy'];
+    final List<String> likedBy = [];
+
+    if (rawLikedBy is List) {
+      for (final likerID in rawLikedBy) {
+        likedBy.add(likerID.toString());
+      }
+    }
 
     for (final likerID in likedBy) {
       if (likerID == currentUserID) {
@@ -125,7 +137,11 @@ class ActivityList extends StatelessWidget {
       }
 
       final likerData = likerDoc.data();
-      final username = likerData?['username'] ?? 'Someone';
+      final username = likerData?['username']?.toString();
+
+      if (username == null || username.trim().isEmpty) {
+        continue;
+      }
 
       activities.add(
         ActivityItem(
@@ -161,8 +177,12 @@ class ActivityList extends StatelessWidget {
         continue;
       }
 
-      final username = commentData['username'] ?? 'Someone';
-      final text = commentData['text'] ?? '';
+      final username = commentData['username']?.toString();
+      final text = commentData['text']?.toString() ?? '';
+
+      if (username == null || username.trim().isEmpty) {
+        continue;
+      }
 
       activities.add(
         ActivityItem(
@@ -255,7 +275,15 @@ class ActivityList extends StatelessWidget {
         }
 
         final userData = userSnapshot.data!.data();
-        final followerIDs = List<String>.from(userData?['followers'] ?? []);
+
+        final rawFollowers = userData?['followers'];
+        final List<String> followerIDs = [];
+
+        if (rawFollowers is List) {
+          for (final follower in rawFollowers) {
+            followerIDs.add(follower.toString());
+          }
+        }
 
         return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
           stream: FirebaseFirestore.instance
