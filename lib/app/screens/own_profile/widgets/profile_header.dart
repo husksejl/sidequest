@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ProfileHeader extends StatefulWidget {
   const ProfileHeader({super.key});
@@ -234,27 +235,167 @@ class _ProfileHeaderState extends State<ProfileHeader> {
 
             final data = snapshot.data!.data() as Map<String, dynamic>;
 
-            return Text(
-              data['username'] ?? 'Unknown',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 22,
-                fontWeight: FontWeight.w800,
-              ),
+            return Column(
+              children: [
+                Text(
+                  data['username'] ?? 'Unknown',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+
+                const SizedBox(height: 4),
+
+                Text(
+                  (data['firstName'] ?? '')
+                      .toString()
+                      .toUpperCase(),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 1.2,
+                  ),
+                ),
+              ],
             );
           },
         ),
 
-        const SizedBox(height: 8),
+        StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+          stream: FirebaseFirestore.instance
+              .collection('users')
+              .doc(FirebaseAuth.instance.currentUser!.uid)
+              .snapshots(),
+          builder: (context, snapshot) {
+            final data = snapshot.data?.data();
+            final bio = data?['bio']?.toString().trim();
+            final location = data?['location']?.toString();
+            final locationLat = data?['locationLat']?.toString();
+            final locationLon = data?['locationLon']?.toString();
+            final website = data?['website']?.toString();
 
-        const Text(
-          'Side quests, chaos & tiny wins ✨\nPosting proof before I overthink it 📸\nCurrently collecting brave little moments 🚀',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            color: Color(0xFFC8CDD5),
-            fontSize: 13,
-            height: 1.45,
-          ),
+            if (bio == null || bio.isEmpty) {
+              return const SizedBox.shrink();
+            }
+
+            return Column(
+              children: [
+                const SizedBox(height: 8),
+
+                Text(
+                  bio,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Color(0xFFC8CDD5),
+                    fontSize: 13,
+                    height: 1.45,
+                  ),
+                ),
+
+                if (location != null && location.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+
+                  GestureDetector(
+                    onTap: () async {
+                      final uri = locationLat != null &&
+                          locationLon != null
+                          ? Uri.parse(
+                        'https://www.google.com/maps/search/?api=1&query=$locationLat,$locationLon',
+                      )
+                          : Uri.parse(
+                        'https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(location)}',
+                      );
+
+                      await launchUrl(
+                        uri,
+                        mode: LaunchMode.externalApplication,
+                      );
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.location_on_rounded,
+                          color: Color(0xFF00B2AA),
+                          size: 15,
+                        ),
+
+                        const SizedBox(width: 4),
+
+                        Flexible(
+                          child: Text(
+                            location,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+
+                if (website != null && website.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+
+                  GestureDetector(
+                    onTap: () async {
+                      String url = website.trim();
+
+                      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                        url = 'https://$url';
+                      }
+
+                      final uri = Uri.parse(url);
+
+                      final opened = await launchUrl(
+                        uri,
+                        mode: LaunchMode.externalApplication,
+                      );
+
+                      if (!opened && context.mounted) {
+                        await launchUrl(
+                          uri,
+                          mode: LaunchMode.platformDefault,
+                        );
+                      }
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.link_rounded,
+                          color: Color(0xFFEB5D4F),
+                          size: 15,
+                        ),
+
+                        const SizedBox(width: 4),
+
+                        Flexible(
+                          child: Text(
+                            website,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ],
+            );
+          },
         ),
       ],
     );

@@ -6,14 +6,25 @@ import 'widgets/social_hub_tabs.dart';
 import '../../shared/widgets/top_bar.dart';
 
 class SocialHubPage extends StatefulWidget {
-  const SocialHubPage({super.key});
+  const SocialHubPage({
+    super.key,
+    this.initialTabIndex = 0,
+  });
+
+  final int initialTabIndex;
 
   @override
   State<SocialHubPage> createState() => _SocialHubPageState();
 }
 
 class _SocialHubPageState extends State<SocialHubPage> {
-  int selectedTabIndex = 0;
+  late int selectedTabIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    selectedTabIndex = widget.initialTabIndex;
+  }
 
   void changeTab(int index) {
     setState(() {

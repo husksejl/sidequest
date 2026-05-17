@@ -18,6 +18,8 @@ class CommentsBottomSheet extends StatefulWidget {
 
 class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
   final TextEditingController commentController = TextEditingController();
+  String? replyingToCommentId;
+  String? replyingToUsername;
 
   Future<void> addComment() async {
     final user = FirebaseAuth.instance.currentUser;
@@ -44,6 +46,8 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
       'text': text,
       'likes': 0,
       'createdAt': FieldValue.serverTimestamp(),
+      'replyToCommentId': replyingToCommentId,
+      'replyToUsername': replyingToUsername,
     });
 
     await FirebaseFirestore.instance
@@ -54,6 +58,11 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
     });
 
     commentController.clear();
+
+    setState(() {
+      replyingToCommentId = null;
+      replyingToUsername = null;
+    });
   }
 
   @override
@@ -175,6 +184,27 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
+                                    if (data['replyToUsername'] != null) ...[
+                                      Row(
+                                        children: [
+                                          const Icon(
+                                            Icons.subdirectory_arrow_right_rounded,
+                                            color: Color(0xFF8A8F98),
+                                            size: 15,
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            'Reply to ${data['replyToUsername']}',
+                                            style: const TextStyle(
+                                              color: Color(0xFF8A8F98),
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 3),
+                                    ],
                                     Text(
                                       data['username'] ?? 'Unknown',
                                       style: const TextStyle(
@@ -217,12 +247,25 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
                                           ),
                                         ),
                                         const SizedBox(width: 14),
-                                        const Text(
-                                          'Reply',
-                                          style: TextStyle(
-                                            color: Color(0xFF8A8F98),
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.w700,
+                                        GestureDetector(
+                                          onTap: () {
+                                            setState(() {
+                                              replyingToCommentId = doc.id;
+                                              replyingToUsername = data['username'] ?? 'Unknown';
+                                            });
+
+                                            commentController.text = '@${replyingToUsername!} ';
+                                            commentController.selection = TextSelection.fromPosition(
+                                              TextPosition(offset: commentController.text.length),
+                                            );
+                                          },
+                                          child: const Text(
+                                            'Reply',
+                                            style: TextStyle(
+                                              color: Color(0xFF8A8F98),
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.w700,
+                                            ),
                                           ),
                                         ),
                                       ],
@@ -297,12 +340,46 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
                                       Icons.more_horiz_rounded,
                                       color: Colors.white54,
                                     ),
-                                    itemBuilder: (context) => const [
-                                      PopupMenuItem(
-                                        value: 'report',
-                                        child: Text('Report comment'),
-                                      ),
-                                    ],
+                                    onSelected: (value) async {
+                                      final currentUserId = FirebaseAuth.instance.currentUser?.uid;
+
+                                      if (value == 'delete' &&
+                                          currentUserId != null &&
+                                          data['userId'] == currentUserId) {
+                                        await FirebaseFirestore.instance
+                                            .collection('posts')
+                                            .doc(widget.postId)
+                                            .collection('comments')
+                                            .doc(doc.id)
+                                            .delete();
+
+                                        await FirebaseFirestore.instance
+                                            .collection('posts')
+                                            .doc(widget.postId)
+                                            .update({
+                                          'comments': FieldValue.increment(-1),
+                                        });
+                                      }
+                                    },
+                                    itemBuilder: (context) {
+                                      final currentUserId = FirebaseAuth.instance.currentUser?.uid;
+                                      final isOwnComment = data['userId'] == currentUserId;
+
+                                      return [
+                                        if (isOwnComment)
+                                          const PopupMenuItem(
+                                            value: 'delete',
+                                            child: Text(
+                                              'Delete comment',
+                                              style: TextStyle(color: Color(0xFFEB5D4F)),
+                                            ),
+                                          ),
+                                        const PopupMenuItem(
+                                          value: 'report',
+                                          child: Text('Report comment'),
+                                        ),
+                                      ];
+                                    },
                                   ),
                                 ],
                               ),
@@ -316,6 +393,37 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
               ),
 
               const SizedBox(height: 10),
+
+              if (replyingToUsername != null) ...[
+                Row(
+                  children: [
+                    Text(
+                      'Replying to @$replyingToUsername',
+                      style: const TextStyle(
+                        color: Color(0xFF00B2AA),
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const Spacer(),
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          replyingToCommentId = null;
+                          replyingToUsername = null;
+                          commentController.clear();
+                        });
+                      },
+                      child: const Icon(
+                        Icons.close_rounded,
+                        color: Colors.white54,
+                        size: 18,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+              ],
 
               Row(
                 children: [

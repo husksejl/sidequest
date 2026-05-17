@@ -3,7 +3,7 @@ import '../models/profile_post.dart';
 import 'dart:io';
 import '../../../data/profile_post_storage.dart';
 import '../own_profile_page.dart';
-import 'package:audioplayers/audioplayers.dart';
+import 'package:just_audio/just_audio.dart';
 import '../../home_screen/widgets/comments_bottom_sheet.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -28,32 +28,36 @@ class _ProfilePostDetailCardState extends State<ProfilePostDetailCard> {
 
   Future<void> toggleAudio() async {
     if (post.type != ProfilePostType.audio) return;
+    if (post.assetPath.isEmpty) return;
 
-    final file = File(post.assetPath);
+    try {
+      if (isPlayingAudio) {
+        await audioPlayer.stop();
 
-    print('PLAY AUDIO PATH: ${post.assetPath}');
-    print('PLAY AUDIO EXISTS: ${file.existsSync()}');
-    print('PLAY AUDIO SIZE: ${file.existsSync() ? file.lengthSync() : 0} bytes');
+        setState(() {
+          isPlayingAudio = false;
+        });
+      } else {
+        await audioPlayer.setUrl(post.assetPath);
 
-    if (!file.existsSync()) return;
+        await audioPlayer.play();
 
-    if (isPlayingAudio) {
-      await audioPlayer.stop();
+        setState(() {
+          isPlayingAudio = true;
+        });
 
-      setState(() {
-        isPlayingAudio = false;
-      });
-    } else {
-      await audioPlayer.stop();
-      await audioPlayer.setVolume(1.0);
-
-      await audioPlayer.play(
-        DeviceFileSource(post.assetPath),
-      );
-
-      setState(() {
-        isPlayingAudio = true;
-      });
+        audioPlayer.playerStateStream.listen((state) {
+          if (state.processingState == ProcessingState.completed) {
+            if (mounted) {
+              setState(() {
+                isPlayingAudio = false;
+              });
+            }
+          }
+        });
+      }
+    } catch (e) {
+      print('PROFILE AUDIO ERROR: $e');
     }
   }
 
@@ -593,31 +597,23 @@ class _ProfilePostDetailCardState extends State<ProfilePostDetailCard> {
 
             if (post.votingOpen) ...[
               const SizedBox(height: 14),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.04),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: _VotePreviewButton(
-                        label: 'Complete',
-                        color: const Color(0xFF00B2AA),
-                        icon: Icons.check_rounded,
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: _VotePreviewButton(
-                        label: 'Fail',
-                        color: const Color(0xFFEB5D4F),
-                        icon: Icons.close_rounded,
-                      ),
-                    ),
-                  ],
-                ),
+
+              Row(
+                children: [
+                  _SmallStat(
+                    icon: Icons.check_rounded,
+                    value: '${post.completedVotes}',
+                    color: const Color(0xFF00B2AA),
+                  ),
+
+                  const SizedBox(width: 8),
+
+                  _SmallStat(
+                    icon: Icons.close_rounded,
+                    value: '${post.notCompletedVotes}',
+                    color: const Color(0xFFEB5D4F),
+                  ),
+                ],
               ),
             ],
           ],

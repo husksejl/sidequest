@@ -26,6 +26,8 @@ class ProfilePost {
   final int comments;
   final String? profileImageUrl;
   final String? firestoreId;
+  final int completedVotes;
+  final int notCompletedVotes;
 
   const ProfilePost({
     required this.userName,
@@ -41,5 +43,7 @@ class ProfilePost {
     required this.comments,
     this.profileImageUrl,
     this.firestoreId,
+    this.completedVotes = 0,
+    this.notCompletedVotes = 0,
   });
 }

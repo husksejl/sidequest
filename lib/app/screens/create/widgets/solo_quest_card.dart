@@ -64,28 +64,6 @@ class SoloQuestCard extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(height: 16),
-
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(999),
-              color: Colors.white.withOpacity(0.05),
-              border: Border.all(
-                color: Colors.white.withOpacity(0.08),
-              ),
-            ),
-            child: Text(
-              '${quest.difficulty.toUpperCase()}  •  ${quest.xp} XP',
-              style: const TextStyle(
-                color: Color(0xFFEB5D4F),
-                fontSize: 11,
-                letterSpacing: 1.1,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-          ),
-
           const SizedBox(height: 22),
 
           const Text(

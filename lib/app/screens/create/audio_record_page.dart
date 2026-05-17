@@ -6,6 +6,12 @@ import '../../screens/home_screen/home_screen.dart';
 import '../../screens/own_profile/models/profile_post.dart';
 import '../../shared/services/daily_sidequest_service.dart';
 import 'models/create_quest.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:record/record.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
+
+import 'package:firebase_storage/firebase_storage.dart';
 
 class AudioRecordPage extends StatefulWidget {
   final CreateQuest quest;
@@ -27,21 +33,54 @@ class _AudioRecordPageState extends State<AudioRecordPage> {
   bool _hasRecording = false;
   bool _isPosting = false;
 
+  final AudioRecorder _recorder = AudioRecorder();
+
+  String? _recordedPath;
+
   @override
   void dispose() {
     _captionController.dispose();
     super.dispose();
   }
 
-  void _toggleRecording() {
-    setState(() {
-      if (_isRecording) {
+  Future<void> _toggleRecording() async {
+    if (_isRecording) {
+      final path = await _recorder.stop();
+
+      print('RECORDED PATH: $path');
+
+      if (path != null) {
+        final file = File(path);
+        print('AUDIO EXISTS: ${file.existsSync()}');
+        print('AUDIO SIZE: ${file.existsSync() ? file.lengthSync() : 0}');
+      }
+
+      setState(() {
         _isRecording = false;
         _hasRecording = true;
-      } else {
-        _isRecording = true;
+        _recordedPath = path;
+      });
+    } else {
+      if (await _recorder.hasPermission()) {
+        final dir = await getTemporaryDirectory();
+
+        final path =
+            '${dir.path}/${DateTime.now().millisecondsSinceEpoch}.m4a';
+
+        await _recorder.start(
+          const RecordConfig(
+            encoder: AudioEncoder.aacLc,
+            bitRate: 128000,
+            sampleRate: 44100,
+          ),
+          path: path,
+        );
+
+        setState(() {
+          _isRecording = true;
+        });
       }
-    });
+    }
   }
 
   Future<void> _postSolution() async {
@@ -79,6 +118,47 @@ class _AudioRecordPageState extends State<AudioRecordPage> {
         mediaPath: 'local_audio_placeholder',
         caption: _captionController.text.trim(),
       );
+
+      String? audioUrl;
+
+      if (_recordedPath != null) {
+        final ref = FirebaseStorage.instance
+            .ref()
+            .child('audio')
+            .child('${DateTime.now().millisecondsSinceEpoch}.m4a');
+
+        await ref.putFile(
+          File(_recordedPath!),
+          SettableMetadata(contentType: 'audio/mp4'),
+        );
+
+        audioUrl = await ref.getDownloadURL();
+
+        print('AUDIO DOWNLOAD URL: $audioUrl');
+      }
+
+      await FirebaseFirestore.instance.collection('posts').add({
+        'userId': user.uid,
+        'userEmail': user.email,
+        'username': user.displayName ?? user.email ?? 'Unknown',
+        'caption': _captionController.text.trim(),
+        'questTitle': widget.quest.title,
+        'questId': widget.quest.id,
+        'mediaType': 'audio',
+        'imageUrl': null,
+        'audioUrl': audioUrl,
+        'createdAt': FieldValue.serverTimestamp(),
+        'likes': 0,
+        'comments': 0,
+        'completedVotes': 0,
+        'failedVotes': 0,
+        'completedVotedBy': [],
+        'failedVotedBy': [],
+        'votingEndsAt': Timestamp.fromDate(
+          DateTime.now().add(const Duration(hours: 24)),
+        ),
+        'xpAwarded': false,
+      });
 
       ProfilePostStorage.posts.insert(
         0,

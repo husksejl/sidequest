@@ -5,6 +5,8 @@ import '../models/sidequest_post.dart';
 import '../../other_profile/other_profile_page.dart';
 import 'comments_bottom_sheet.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:just_audio/just_audio.dart';
+
 
 class SideQuestPostCard extends StatefulWidget {
   final SideQuestPost post;
@@ -20,6 +22,10 @@ class SideQuestPostCard extends StatefulWidget {
 
 class _SideQuestPostCardState extends State<SideQuestPostCard> {
   bool isLiked = false;
+
+  final AudioPlayer _audioPlayer = AudioPlayer();
+
+  bool _isPlayingAudio = false;
 
   SideQuestPost get post => widget.post;
 
@@ -39,6 +45,64 @@ class _SideQuestPostCardState extends State<SideQuestPostCard> {
         .doc(post.firestoreId)
         .delete();
   }
+
+
+  Future<void> awardXpIfVotingClosed({
+    required Map<String, dynamic> data,
+  }) async {
+    if (post.firestoreId == null) return;
+
+    final votingEndsAt = data['votingEndsAt'];
+    if (votingEndsAt == null) return;
+
+    final isClosed = DateTime.now().isAfter(votingEndsAt.toDate());
+    final alreadyAwarded = data['xpAwarded'] == true;
+
+    if (!isClosed || alreadyAwarded) return;
+
+    final completedVotes = data['completedVotes'] ?? 0;
+    final failedVotes = data['failedVotes'] ?? 0;
+    final ownerId = data['userId'];
+
+    if (ownerId == null) return;
+
+    int earnedXp = 0;
+
+    if (completedVotes > failedVotes) {
+      earnedXp = 100;
+    } else if (completedVotes == failedVotes && completedVotes > 0) {
+      earnedXp = 50;
+    } else {
+      earnedXp = 0;
+    }
+
+    final postRef = FirebaseFirestore.instance
+        .collection('posts')
+        .doc(post.firestoreId);
+
+    final userRef = FirebaseFirestore.instance
+        .collection('users')
+        .doc(ownerId);
+
+    await FirebaseFirestore.instance.runTransaction((transaction) async {
+      final freshPost = await transaction.get(postRef);
+
+      if (freshPost.data()?['xpAwarded'] == true) return;
+
+      transaction.update(postRef, {
+        'xpAwarded': true,
+        'earnedXp': earnedXp,
+      });
+
+      if (earnedXp > 0) {
+        transaction.update(userRef, {
+          'xp': FieldValue.increment(earnedXp),
+        });
+      }
+    });
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -200,7 +264,67 @@ class _SideQuestPostCardState extends State<SideQuestPostCard> {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  if (post.isFirestorePost && post.imageUrl != null)
+                  if (post.mediaType == 'audio')
+                    Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            const Color(0xFFEB5D4F).withOpacity(0.22),
+                            const Color(0xFF050608),
+                            const Color(0xFF00B2AA).withOpacity(0.18),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                      ),
+                      child: Center(
+                        child: GestureDetector(
+                          onTap: () async {
+                            if (post.audioUrl == null) return;
+
+                            try {
+                              if (_isPlayingAudio) {
+                                await _audioPlayer.stop();
+
+                                setState(() {
+                                  _isPlayingAudio = false;
+                                });
+                              } else {
+                                print(post.audioUrl);
+
+                                await _audioPlayer.setUrl(post.audioUrl!);
+
+                                await _audioPlayer.play();
+
+                                setState(() {
+                                  _isPlayingAudio = true;
+                                });
+
+                                _audioPlayer.playerStateStream.listen((state) {
+                                  if (state.processingState == ProcessingState.completed) {
+                                    if (mounted) {
+                                      setState(() {
+                                        _isPlayingAudio = false;
+                                      });
+                                    }
+                                  }
+                                });
+                              }
+                            } catch (e) {
+                              print('JUST AUDIO ERROR: $e');
+                            }
+                          },
+                          child: Icon(
+                            _isPlayingAudio
+                                ? Icons.pause_circle_filled_rounded
+                                : Icons.play_circle_fill_rounded,
+                            color: Colors.white,
+                            size: 92,
+                          ),
+                        ),
+                      ),
+                    )
+                  else if (post.isFirestorePost && post.imageUrl != null)
                     Image.network(
                       post.imageUrl!,
                       width: double.infinity,
@@ -213,148 +337,6 @@ class _SideQuestPostCardState extends State<SideQuestPostCard> {
                           : 'assets/images/Max.jpg',
                       width: double.infinity,
                       fit: BoxFit.cover,
-                    ),
-
-                  if (post.isOwnPost)
-                    Positioned(
-                      top: 12,
-                      right: 12,
-                      child: PopupMenuButton<String>(
-                        color: const Color(0xFF15181D),
-                        icon: Container(
-                          padding: const EdgeInsets.all(7),
-                          decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.45),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.more_horiz_rounded,
-                            color: Colors.white,
-                            size: 22,
-                          ),
-                        ),
-                        onSelected: (value) async {
-                          if (value == 'edit') {
-                            final TextEditingController captionController =
-                            TextEditingController(text: post.caption);
-
-                            showDialog(
-                              context: context,
-                              builder: (context) {
-                                return AlertDialog(
-                                  backgroundColor: const Color(0xFF101216),
-                                  title: const Text(
-                                    'Edit caption',
-                                    style: TextStyle(color: Colors.white),
-                                  ),
-                                  content: TextField(
-                                    controller: captionController,
-                                    maxLines: 3,
-                                    style: const TextStyle(color: Colors.white),
-                                    decoration: const InputDecoration(
-                                      hintText: 'Add a caption...',
-                                      hintStyle: TextStyle(color: Colors.white38),
-                                    ),
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () => Navigator.pop(context),
-                                      child: const Text('Cancel'),
-                                    ),
-                                    TextButton(
-                                      onPressed: () async {
-                                        if (post.firestoreId != null) {
-                                          await FirebaseFirestore.instance
-                                              .collection('posts')
-                                              .doc(post.firestoreId)
-                                              .update({
-                                            'caption': captionController.text.trim(),
-                                          });
-                                        }
-
-                                        Navigator.pop(context);
-                                      },
-                                      child: const Text(
-                                        'Save',
-                                        style: TextStyle(color: Color(0xFF00B2AA)),
-                                      ),
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
-                          }
-
-                          if (value == 'save') {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Save image coming soon')),
-                            );
-                          }
-
-                          if (value == 'share') {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Share post coming soon')),
-                            );
-                          }
-
-                          if (value == 'delete') {
-                            showDialog(
-                              context: context,
-                              builder: (context) {
-                                return AlertDialog(
-                                  backgroundColor: const Color(0xFF101216),
-                                  title: const Text(
-                                    'Delete post?',
-                                    style: TextStyle(color: Colors.white),
-                                  ),
-                                  content: const Text(
-                                    'This post will be removed from your profile and feed.',
-                                    style: TextStyle(color: Colors.white70),
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () => Navigator.pop(context),
-                                      child: const Text('Cancel'),
-                                    ),
-                                    TextButton(
-                                      onPressed: () async {
-                                        Navigator.pop(context);
-                                        await deletePost();
-                                      },
-                                      child: const Text(
-                                        'Delete',
-                                        style: TextStyle(color: Color(0xFFEB5D4F)),
-                                      ),
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
-                          }
-                        },
-                        itemBuilder: (context) => const [
-                          PopupMenuItem(
-                            value: 'edit',
-                            child: Text('Edit caption'),
-                          ),
-                          PopupMenuItem(
-                            value: 'save',
-                            child: Text('Save image'),
-                          ),
-                          PopupMenuItem(
-                            value: 'share',
-                            child: Text('Share post'),
-                          ),
-                          PopupMenuDivider(),
-                          PopupMenuItem(
-                            value: 'delete',
-                            child: Text(
-                              'Delete post',
-                              style: TextStyle(color: Color(0xFFEB5D4F)),
-                            ),
-                          ),
-                        ],
-                      ),
                     ),
                 ],
               ),
@@ -465,51 +447,212 @@ class _SideQuestPostCardState extends State<SideQuestPostCard> {
 
           const SizedBox(height: 14),
 
-          if (post.isOwnPost)
-            Row(
-              children: [
-                _SmallStat(
-                  icon: Icons.check_rounded,
-                  value: '${post.completedVotes}',
-                  color: const Color(0xFF00B2AA),
-                ),
-                const SizedBox(width: 8),
-                _SmallStat(
-                  icon: Icons.close_rounded,
-                  value: '${post.notCompletedVotes}',
-                  color: const Color(0xFFEB5D4F),
-                ),
-              ],
-            )
-          else
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.04),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: _VotePreviewButton(
-                      label: 'Complete',
-                      color: const Color(0xFF00B2AA),
+          StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+            stream: post.firestoreId == null
+                ? null
+                : FirebaseFirestore.instance
+                .collection('posts')
+                .doc(post.firestoreId)
+                .snapshots(),
+            builder: (context, snapshot) {
+              final data = snapshot.data?.data();
+
+              if (data != null) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  awardXpIfVotingClosed(data: data);
+                });
+              }
+
+              final currentUserId = FirebaseAuth.instance.currentUser?.uid ?? '';
+
+              final completedVotedBy =
+              List<String>.from(data?['completedVotedBy'] ?? []);
+              final failedVotedBy =
+              List<String>.from(data?['failedVotedBy'] ?? []);
+
+              final completedVotes = data?['completedVotes'] ?? 0;
+              final failedVotes = data?['failedVotes'] ?? 0;
+
+              final votingEndsAt = data?['votingEndsAt'];
+              final votingOpen = votingEndsAt == null
+                  ? true
+                  : DateTime.now().isBefore(votingEndsAt.toDate());
+
+              final votedComplete = completedVotedBy.contains(currentUserId);
+              final votedFail = failedVotedBy.contains(currentUserId);
+              final hasVoted = votedComplete || votedFail;
+
+              Future<void> vote(String type) async {
+                if (post.firestoreId == null || currentUserId.isEmpty || !votingOpen) {
+                  return;
+                }
+
+                final postRef = FirebaseFirestore.instance
+                    .collection('posts')
+                    .doc(post.firestoreId);
+
+                if (type == 'complete') {
+                  if (votedComplete) {
+                    await postRef.update({
+                      'completedVotedBy': FieldValue.arrayRemove([currentUserId]),
+                      'completedVotes': FieldValue.increment(-1),
+                    });
+                  } else {
+                    await postRef.update({
+                      'completedVotedBy': FieldValue.arrayUnion([currentUserId]),
+                      'completedVotes': FieldValue.increment(1),
+                      'failedVotedBy': FieldValue.arrayRemove([currentUserId]),
+                      if (votedFail) 'failedVotes': FieldValue.increment(-1),
+                    });
+                  }
+                }
+
+                if (type == 'fail') {
+                  if (votedFail) {
+                    await postRef.update({
+                      'failedVotedBy': FieldValue.arrayRemove([currentUserId]),
+                      'failedVotes': FieldValue.increment(-1),
+                    });
+                  } else {
+                    await postRef.update({
+                      'failedVotedBy': FieldValue.arrayUnion([currentUserId]),
+                      'failedVotes': FieldValue.increment(1),
+                      'completedVotedBy': FieldValue.arrayRemove([currentUserId]),
+                      if (votedComplete) 'completedVotes': FieldValue.increment(-1),
+                    });
+                  }
+                }
+              }
+
+              if (post.isOwnPost) {
+                return Row(
+                  children: [
+                    _SmallStat(
                       icon: Icons.check_rounded,
-                      count: post.completedVotes,
+                      value: '$completedVotes',
+                      color: const Color(0xFF00B2AA),
                     ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: _VotePreviewButton(
-                      label: 'Fail',
-                      color: const Color(0xFFEB5D4F),
+                    const SizedBox(width: 8),
+                    _SmallStat(
                       icon: Icons.close_rounded,
-                      count: post.notCompletedVotes,
+                      value: '$failedVotes',
+                      color: const Color(0xFFEB5D4F),
                     ),
-                  ),
-                ],
-              ),
-            ),
+                  ],
+                );
+              }
+
+              if (!votingOpen) {
+                if (!hasVoted) {
+                  return const Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'NOT VOTED',
+                      style: TextStyle(
+                        color: Color(0xFF8A8F98),
+                        fontSize: 11,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 1,
+                      ),
+                    ),
+                  );
+                }
+
+                return Row(
+                  children: [
+                    Expanded(
+                      child: _VotePreviewButton(
+                        label: votedComplete ? 'Complete' : 'Fail',
+                        color: votedComplete
+                            ? const Color(0xFF00B2AA)
+                            : const Color(0xFFEB5D4F),
+                        icon: votedComplete
+                            ? Icons.check_rounded
+                            : Icons.close_rounded,
+                        count: votedComplete ? completedVotes : failedVotes,
+                        filled: true,
+                      ),
+                    ),
+                  ],
+                );
+              }
+
+              if (votedComplete) {
+                return Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => vote('complete'),
+                        child: _VotePreviewButton(
+                          label: 'Complete',
+                          color: const Color(0xFF00B2AA),
+                          icon: Icons.check_rounded,
+                          count: completedVotes,
+                          filled: true,
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              }
+
+              if (votedFail) {
+                return Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => vote('fail'),
+                        child: _VotePreviewButton(
+                          label: 'Fail',
+                          color: const Color(0xFFEB5D4F),
+                          icon: Icons.close_rounded,
+                          count: failedVotes,
+                          filled: true,
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              }
+
+              return Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.04),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => vote('complete'),
+                        child: _VotePreviewButton(
+                          label: 'Complete',
+                          color: const Color(0xFF00B2AA),
+                          icon: Icons.check_rounded,
+                          count: completedVotes,
+                          filled: false,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => vote('fail'),
+                        child: _VotePreviewButton(
+                          label: 'Fail',
+                          color: const Color(0xFFEB5D4F),
+                          icon: Icons.close_rounded,
+                          count: failedVotes,
+                          filled: false,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
         ],
       ),
     );
@@ -558,12 +701,14 @@ class _VotePreviewButton extends StatelessWidget {
   final Color color;
   final IconData icon;
   final int count;
+  final bool filled;
 
   const _VotePreviewButton({
     required this.label,
     required this.color,
     required this.icon,
     required this.count,
+    this.filled = false,
   });
 
   @override
@@ -571,18 +716,23 @@ class _VotePreviewButton extends StatelessWidget {
     return Container(
       height: 34,
       decoration: BoxDecoration(
+        color: filled ? color : Colors.transparent,
         borderRadius: BorderRadius.circular(999),
         border: Border.all(color: color),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, color: color, size: 18),
+          Icon(
+            icon,
+            color: filled ? Colors.black : color,
+            size: 18,
+          ),
           const SizedBox(width: 6),
           Text(
-            '${label.toUpperCase()} • $count',
+            label.toUpperCase(),
             style: TextStyle(
-              color: color,
+              color: filled ? Colors.black : color,
               fontSize: 10,
               fontWeight: FontWeight.w800,
               letterSpacing: 0.7,

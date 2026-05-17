@@ -4,6 +4,12 @@ import 'package:flutter/material.dart';
 import '../../shared/widgets/custom_bottom_nav.dart';
 import 'widgets/other_profile_post_grid.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../social_hub/social_hub_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+import '../../shared/services/chat_service.dart';
+import '../group_chat/group_chat_page.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class OtherProfilePage extends StatelessWidget {
   final String userId;
@@ -59,6 +65,11 @@ class OtherProfilePage extends StatelessWidget {
 
             final isFollowing =
                 currentUserId != null && followers.contains(currentUserId);
+
+            final location = userData['location']?.toString();
+            final locationLat = userData['locationLat']?.toString();
+            final locationLon = userData['locationLon']?.toString();
+            final website = userData['website']?.toString();
 
             return SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
@@ -181,19 +192,113 @@ class OtherProfilePage extends StatelessWidget {
 
                   const SizedBox(height: 8),
 
-                  Text(
-                    bio.toString().isEmpty
-                        ? 'No bio yet.'
-                        : bio.toString(),
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      color: Color(0xFFC8CDD5),
-                      fontSize: 13,
-                      height: 1.45,
-                    ),
-                  ),
+                  if (bio.toString().trim().isNotEmpty) ...[
+                    const SizedBox(height: 8),
 
-                  const SizedBox(height: 28),
+                    Text(
+                      bio.toString(),
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        color: Color(0xFFC8CDD5),
+                        fontSize: 13,
+                        height: 1.45,
+                      ),
+                    ),
+                  ],
+
+                  if (location != null && location.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+
+                    GestureDetector(
+                      onTap: () async {
+                        final uri = locationLat != null &&
+                            locationLon != null
+                            ? Uri.parse(
+                          'https://www.google.com/maps/search/?api=1&query=$locationLat,$locationLon',
+                        )
+                            : Uri.parse(
+                          'https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(location)}',
+                        );
+
+                        await launchUrl(
+                          uri,
+                          mode: LaunchMode.externalApplication,
+                        );
+                      },
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(
+                            Icons.location_on_rounded,
+                            color: Color(0xFF00B2AA),
+                            size: 15,
+                          ),
+
+                          const SizedBox(width: 4),
+
+                          Flexible(
+                            child: Text(
+                              location,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+
+                  if (website != null && website.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+
+                    GestureDetector(
+                      onTap: () async {
+                        String url = website.trim();
+
+                        if (!url.startsWith('http://') &&
+                            !url.startsWith('https://')) {
+                          url = 'https://$url';
+                        }
+
+                        final uri = Uri.parse(url);
+
+                        await launchUrl(
+                          uri,
+                          mode: LaunchMode.externalApplication,
+                        );
+                      },
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(
+                            Icons.link_rounded,
+                            color: Color(0xFFEB5D4F),
+                            size: 15,
+                          ),
+
+                          const SizedBox(width: 4),
+
+                          Flexible(
+                            child: Text(
+                              website,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                decoration: TextDecoration.underline,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+
 
                   const SizedBox(height: 22),
 
@@ -264,10 +369,38 @@ class OtherProfilePage extends StatelessWidget {
                       const SizedBox(width: 12),
                       Expanded(
                         child: OutlinedButton(
-                          onPressed: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Message coming soon')),
-                            );
+                          onPressed: () async {
+                            final currentUser = FirebaseAuth.instance.currentUser;
+
+                            if (currentUser == null) return;
+
+                            try {
+                              final chatService = ChatService();
+
+                              final chatID = await chatService.createDirectChat(
+                                currentUserID: currentUser.uid,
+                                otherUserID: userId,
+                              );
+
+                              if (!context.mounted) return;
+
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => GroupChatPage(
+                                    chatID: chatID,
+                                    chatName: username,
+                                    isGroup: false,
+                                  ),
+                                ),
+                              );
+                            } catch (e) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Could not open chat: $e'),
+                                ),
+                              );
+                            }
                           },
                           style: OutlinedButton.styleFrom(
                             side: const BorderSide(color: Color(0xFF00B2AA)),
@@ -304,11 +437,6 @@ class OtherProfilePage extends StatelessWidget {
                         ),
                       ),
                       Spacer(),
-                      Icon(
-                        Icons.grid_on_rounded,
-                        color: Color(0xFF00B2AA),
-                        size: 18,
-                      ),
                     ],
                   ),
 

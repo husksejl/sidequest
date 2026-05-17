@@ -4,6 +4,30 @@ import 'package:flutter/material.dart';
 
 import '../../home_screen/models/sidequest_post.dart';
 import '../../home_screen/widgets/sidequest_post_card.dart';
+import '../../own_profile/models/profile_post.dart';
+import '../../own_profile/widgets/profile_post_tile.dart';
+
+
+String getVoteStatus(Map<String, dynamic> data) {
+  final votingEndsAt = data['votingEndsAt'];
+
+  if (votingEndsAt == null) return 'open';
+
+  final endTime = votingEndsAt.toDate();
+
+  if (DateTime.now().isBefore(endTime)) {
+    return 'open';
+  }
+
+  final completedVotes = data['completedVotes'] ?? 0;
+  final failedVotes = data['failedVotes'] ?? 0;
+
+  if (completedVotes > failedVotes) return 'completed';
+  if (failedVotes > completedVotes) return 'failed';
+
+  return 'undecided';
+}
+
 
 class OtherProfilePostGrid extends StatelessWidget {
   final List<QueryDocumentSnapshot<Map<String, dynamic>>> docs;
@@ -27,7 +51,30 @@ class OtherProfilePostGrid extends StatelessWidget {
       itemBuilder: (context, index) {
         final data = docs[index].data();
 
-        return GestureDetector(
+        return ProfilePostTile(
+          post: ProfilePost(
+            userName: data['username'] ?? 'Unknown',
+            timeAgo: 'now',
+            location: 'SideQuest',
+            caption: data['caption'] ?? '',
+            questTitle: data['questTitle'] ?? '',
+            assetPath: data['mediaType'] == 'audio'
+                ? (data['audioUrl'] ?? '')
+                : (data['imageUrl'] ?? ''),
+            type: data['mediaType'] == 'audio'
+                ? ProfilePostType.audio
+                : ProfilePostType.image,
+            voteStatus: switch (getVoteStatus(data)) {
+              'completed' => VoteStatus.completed,
+              'failed' => VoteStatus.failed,
+              'undecided' => VoteStatus.undecided,
+              _ => VoteStatus.open,
+            },
+
+            votingOpen: getVoteStatus(data) == 'open',
+            likes: data['likes'] ?? 0,
+            comments: data['comments'] ?? 0,
+          ),
           onTap: () {
             Navigator.push(
               context,
@@ -39,13 +86,6 @@ class OtherProfilePostGrid extends StatelessWidget {
               ),
             );
           },
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(18),
-            child: Image.network(
-              data['imageUrl'] ?? '',
-              fit: BoxFit.cover,
-            ),
-          ),
         );
       },
     );
@@ -83,6 +123,45 @@ class _FirestorePostDetailPageState extends State<FirestorePostDetailPage> {
     });
   }
 
+  String _formatPostTime(dynamic timestamp) {
+    if (timestamp == null) return 'now';
+
+    final DateTime createdAt = timestamp.toDate();
+    final difference = DateTime.now().difference(createdAt);
+
+    if (difference.inMinutes < 1) return 'now';
+    if (difference.inMinutes < 60) return '${difference.inMinutes}m ago';
+    if (difference.inHours < 24) return '${difference.inHours}h ago';
+    if (difference.inDays == 1) return 'yesterday';
+
+    return '${difference.inDays}d ago';
+  }
+
+  String _getVoteStatus(Map<String, dynamic> data) {
+    final votingEndsAt = data['votingEndsAt'];
+
+    if (votingEndsAt == null) return 'open';
+
+    final endTime = votingEndsAt.toDate();
+
+    if (DateTime.now().isBefore(endTime)) {
+      return 'open';
+    }
+
+    final completedVotes = data['completedVotes'] ?? 0;
+    final failedVotes = data['failedVotes'] ?? 0;
+
+    if (completedVotes > failedVotes) {
+      return 'completed';
+    }
+
+    if (failedVotes > completedVotes) {
+      return 'failed';
+    }
+
+    return 'undecided';
+  }
+
   @override
   void dispose() {
     _scrollController.dispose();
@@ -95,7 +174,7 @@ class _FirestorePostDetailPageState extends State<FirestorePostDetailPage> {
     return SideQuestPost(
       userId: data['userId'],
       userName: data['username'] ?? 'Unknown',
-      timeAgo: 'now',
+      timeAgo: _formatPostTime(data['createdAt']),
       location: 'SideQuest',
       title: data['questTitle'] ?? '',
       imageEmoji: '',

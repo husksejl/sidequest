@@ -94,6 +94,45 @@ class OwnProfilePage extends StatelessWidget {
     ),
   ];
 
+  static String _formatPostTime(dynamic timestamp) {
+    if (timestamp == null) return 'now';
+
+    final DateTime createdAt = timestamp.toDate();
+    final difference = DateTime.now().difference(createdAt);
+
+    if (difference.inMinutes < 1) return 'now';
+    if (difference.inMinutes < 60) return '${difference.inMinutes}m ago';
+    if (difference.inHours < 24) return '${difference.inHours}h ago';
+    if (difference.inDays == 1) return 'yesterday';
+
+    return '${difference.inDays}d ago';
+  }
+
+  String _getVoteStatus(Map<String, dynamic> data) {
+    final votingEndsAt = data['votingEndsAt'];
+
+    if (votingEndsAt == null) return 'open';
+
+    final endTime = votingEndsAt.toDate();
+
+    if (DateTime.now().isBefore(endTime)) {
+      return 'open';
+    }
+
+    final completedVotes = data['completedVotes'] ?? 0;
+    final failedVotes = data['failedVotes'] ?? 0;
+
+    if (completedVotes > failedVotes) {
+      return 'completed';
+    }
+
+    if (failedVotes > completedVotes) {
+      return 'failed';
+    }
+
+    return 'undecided';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -128,11 +167,6 @@ class OwnProfilePage extends StatelessWidget {
                     ),
                   ),
                   Spacer(),
-                  Icon(
-                    Icons.grid_on_rounded,
-                    color: Color(0xFF00B2AA),
-                    size: 18,
-                  ),
                 ],
               ),
 
@@ -159,16 +193,28 @@ class OwnProfilePage extends StatelessWidget {
                     return ProfilePost(
                       firestoreId: doc.id,
                       userName: data['username'] ?? 'Unknown',
-                      timeAgo: 'now',
+                      timeAgo: _formatPostTime(data['createdAt']),
                       location: 'SideQuest',
                       questTitle: data['questTitle'] ?? '',
                       caption: data['caption'] ?? '',
-                      assetPath: data['imageUrl'] ?? '',
-                      type: ProfilePostType.image,
-                      voteStatus: VoteStatus.open,
-                      votingOpen: true,
+                      assetPath: data['mediaType'] == 'audio'
+                          ? (data['audioUrl'] ?? '')
+                          : (data['imageUrl'] ?? ''),
+                      type: data['mediaType'] == 'audio'
+                          ? ProfilePostType.audio
+                          : ProfilePostType.image,
+                      voteStatus: switch (_getVoteStatus(data)) {
+                        'completed' => VoteStatus.completed,
+                        'failed' => VoteStatus.failed,
+                        'undecided' => VoteStatus.undecided,
+                        _ => VoteStatus.open,
+                      },
+
+                      votingOpen: _getVoteStatus(data) == 'open',
                       likes: data['likes'] ?? 0,
                       comments: data['comments'] ?? 0,
+                      completedVotes: data['completedVotes'] ?? 0,
+                      notCompletedVotes: data['failedVotes'] ?? 0,
                       profileImageUrl: data['profileImageUrl'],
                     );
                   }).toList();

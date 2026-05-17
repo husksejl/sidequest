@@ -110,6 +110,14 @@ class _PhotoPreviewPageState extends State<PhotoPreviewPage> {
         'createdAt': FieldValue.serverTimestamp(),
         'likes': 0,
         'comments': 0,
+        'votingEndsAt': Timestamp.fromDate(
+          DateTime.now().add(const Duration(hours: 24)),
+        ),
+        'completedVotes': 0,
+        'failedVotes': 0,
+        'completedVotedBy': [],
+        'failedVotedBy': [],
+        'xpAwarded': false,
       });
 
       ProfilePostStorage.posts.insert(
@@ -204,16 +212,6 @@ class _PhotoPreviewPageState extends State<PhotoPreviewPage> {
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 19,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    '${widget.quest.difficulty.toUpperCase()}  •  ${widget.quest.xp} XP',
-                    style: const TextStyle(
-                      color: Color(0xFFEB5D4F),
-                      fontSize: 12,
-                      letterSpacing: 1,
                       fontWeight: FontWeight.w800,
                     ),
                   ),

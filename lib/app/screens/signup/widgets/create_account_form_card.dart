@@ -107,14 +107,15 @@ class _CreateAccountFormCardState extends State<CreateAccountFormCard> {
       if (uid != null) {
         final profileImageUrl = await _uploadProfileImage(uid);
 
-        if (profileImageUrl != null) {
-          await FirebaseFirestore.instance
-              .collection('users')
-              .doc(uid)
-              .set({
-            'profileImageUrl': profileImageUrl,
-          }, SetOptions(merge: true));
-        }
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(uid)
+            .set({
+          'profileImageUrl': profileImageUrl,
+          'fullName': fullName,
+          'firstName': fullName.split(' ').first,
+          'xp': 0,
+        }, SetOptions(merge: true));
       }
 
       if (!mounted) return;

@@ -15,6 +15,7 @@ import 'widgets/sidequest_post_card.dart';
 import 'widgets/stories_section.dart';
 import 'widgets/today_sidequest_card.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'widgets/search_bar.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -37,6 +38,7 @@ class _HomeScreenState extends State<HomeScreen>
 
   late Timer _dateTimer;
   late String _todayDate;
+  int selectedFeedTab = 0;
 
   static const List<SideQuestPost> posts = [
     SideQuestPost(
@@ -128,6 +130,45 @@ class _HomeScreenState extends State<HomeScreen>
     return '$hours  :  $minutes  :  $seconds';
   }
 
+  String _formatPostTime(dynamic timestamp) {
+    if (timestamp == null) return 'now';
+
+    final DateTime createdAt = timestamp.toDate();
+    final difference = DateTime.now().difference(createdAt);
+
+    if (difference.inMinutes < 1) return 'now';
+    if (difference.inMinutes < 60) return '${difference.inMinutes}m ago';
+    if (difference.inHours < 24) return '${difference.inHours}h ago';
+    if (difference.inDays == 1) return 'yesterday';
+
+    return '${difference.inDays}d ago';
+  }
+
+  String _getVoteStatus(Map<String, dynamic> data) {
+    final votingEndsAt = data['votingEndsAt'];
+
+    if (votingEndsAt == null) return 'open';
+
+    final endTime = votingEndsAt.toDate();
+
+    if (DateTime.now().isBefore(endTime)) {
+      return 'open';
+    }
+
+    final completedVotes = data['completedVotes'] ?? 0;
+    final failedVotes = data['failedVotes'] ?? 0;
+
+    if (completedVotes > failedVotes) {
+      return 'completed';
+    }
+
+    if (failedVotes > completedVotes) {
+      return 'failed';
+    }
+
+    return 'undecided';
+  }
+
   CreateQuest _toCreateQuest(DailySideQuest sideQuest) {
     return CreateQuest(
       id: sideQuest.id,
@@ -212,62 +253,112 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   Widget _buildFirestoreFeed() {
-    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+    final currentUserId = FirebaseAuth.instance.currentUser?.uid;
+
+    if (currentUserId == null) {
+      return const Text(
+        'Please log in.',
+        style: TextStyle(color: Colors.white54),
+      );
+    }
+
+    return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
       stream: FirebaseFirestore.instance
-          .collection('posts')
-          .orderBy('createdAt', descending: true)
+          .collection('users')
+          .doc(currentUserId)
           .snapshots(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(
-            child: Padding(
-              padding: EdgeInsets.all(24),
-              child: CircularProgressIndicator(
-                color: Color(0xFFEB5D4F),
-              ),
-            ),
-          );
-        }
+      builder: (context, userSnapshot) {
+        final userData = userSnapshot.data?.data();
+        final following = List<String>.from(userData?['following'] ?? []);
 
-        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return const Text(
-            'No posts yet.',
-            style: TextStyle(color: Colors.white54),
-          );
-        }
-
-        final docs = snapshot.data!.docs;
-
-        return Column(
-          children: docs.map((doc) {
-            final data = doc.data();
-
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: SideQuestPostCard(
-                post: SideQuestPost(
-                  userName: data['username'] ?? 'Unknown',
-                  timeAgo: 'now',
-                  location: 'SideQuest',
-                  userId: data['userId'],
-                  title: data['questTitle'] ?? '',
-                  imageEmoji: '',
-                  imageLabelTop: '',
-                  imageLabelBottom: '',
-                  caption: data['caption'] ?? '',
-                  likes: data['likes'] ?? 0,
-                  comments: data['comments'] ?? 0,
-                  completedVotes: data['completedVotes'] ?? 0,
-                  notCompletedVotes: data['failedVotes'] ?? 0,
-                  imageUrl: data['imageUrl'],
-                  profileImageUrl: data['profileImageUrl'],
-                  firestoreId: doc.id,
-                  isOwnPost: data['userId'] == FirebaseAuth.instance.currentUser?.uid,
-                  isFirestorePost: true,
+        return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+          stream: FirebaseFirestore.instance
+              .collection('posts')
+              .orderBy('createdAt', descending: true)
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(24),
+                  child: CircularProgressIndicator(
+                    color: Color(0xFFEB5D4F),
+                  ),
                 ),
-              ),
+              );
+            }
+
+            if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+              return const Text(
+                'No posts yet.',
+                style: TextStyle(color: Colors.white54),
+              );
+            }
+
+            final docs = snapshot.data!.docs;
+
+            final filteredDocs = docs.where((doc) {
+              final data = doc.data();
+              final postUserId = data['userId'];
+
+              if (selectedFeedTab == 0) {
+                return postUserId == currentUserId ||
+                    following.contains(postUserId);
+              }
+
+              return postUserId != currentUserId &&
+                  !following.contains(postUserId);
+            }).toList();
+
+            if (selectedFeedTab == 1) {
+              filteredDocs.shuffle();
+            }
+
+            if (filteredDocs.isEmpty) {
+              return Text(
+                selectedFeedTab == 0
+                    ? 'No posts from people you follow yet.'
+                    : 'No For You posts yet.',
+                style: const TextStyle(color: Colors.white54),
+              );
+            }
+
+            return Column(
+              children: filteredDocs.map((doc) {
+                final data = doc.data();
+
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: SideQuestPostCard(
+                    post: SideQuestPost(
+                      userName: data['username'] ?? 'Unknown',
+                      timeAgo: _formatPostTime(data['createdAt']),
+                      location: 'SideQuest',
+                      userId: data['userId'],
+                      title: data['questTitle'] ?? '',
+                      imageEmoji: '',
+                      imageLabelTop: '',
+                      imageLabelBottom: '',
+                      caption: data['caption'] ?? '',
+                      likes: data['likes'] ?? 0,
+                      comments: data['comments'] ?? 0,
+                      completedVotes: data['completedVotes'] ?? 0,
+                      notCompletedVotes: data['failedVotes'] ?? 0,
+                      imageUrl: data['imageUrl'],
+                      profileImageUrl: data['profileImageUrl'],
+                      firestoreId: doc.id,
+                      voteStatus: _getVoteStatus(data),
+                      votingOpen: _getVoteStatus(data) == 'open',
+                      isOwnPost: data['userId'] == currentUserId,
+                      isFirestorePost: true,
+                      audioUrl: data['audioUrl'],
+                      mediaType: data['mediaType'] ?? 'image',
+                    ),
+                  ),
+                );
+              }).toList(),
             );
-          }).toList(),
+          },
         );
       },
     );
@@ -295,7 +386,7 @@ class _HomeScreenState extends State<HomeScreen>
 
               _buildTodaySideQuest(),
 
-              const SearchBarHome(),
+              const HomeSearchBar(),
               const SizedBox(height: 20),
 
               const Text(
@@ -309,7 +400,14 @@ class _HomeScreenState extends State<HomeScreen>
 
               const SizedBox(height: 16),
 
-              const MissionTabs(),
+              MissionTabs(
+                selectedIndex: selectedFeedTab,
+                onChanged: (index) {
+                  setState(() {
+                    selectedFeedTab = index;
+                  });
+                },
+              ),
               const SizedBox(height: 18),
 
               _buildFirestoreFeed(),
@@ -321,77 +419,74 @@ class _HomeScreenState extends State<HomeScreen>
   }
 }
 
-class SearchBarHome extends StatelessWidget {
-  const SearchBarHome({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 50,
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: Colors.white70),
-      ),
-      child: const Row(
-        children: [
-          Icon(Icons.search, color: Colors.white70, size: 30),
-        ],
-      ),
-    );
-  }
-}
-
 class MissionTabs extends StatelessWidget {
-  const MissionTabs({super.key});
+  final int selectedIndex;
+  final ValueChanged<int> onChanged;
+
+  const MissionTabs({
+    super.key,
+    required this.selectedIndex,
+    required this.onChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Expanded(
-          child: Container(
-            height: 40,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(999),
-              border: Border.all(color: Colors.white),
-              color: const Color(0xFF1A1A1A),
-            ),
-            child: const Center(
-              child: Text(
-                'FOLLOWING',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 1,
-                ),
-              ),
-            ),
-          ),
+        _TabButton(
+          label: 'FOLLOWING',
+          isActive: selectedIndex == 0,
+          onTap: () => onChanged(0),
         ),
         const SizedBox(width: 26),
-        Expanded(
-          child: Container(
-            height: 40,
-            decoration: BoxDecoration(
-              border: Border.all(color: Color(0xFF1A1A1A)),
-              borderRadius: BorderRadius.circular(999),
+        _TabButton(
+          label: 'FOR YOU',
+          isActive: selectedIndex == 1,
+          onTap: () => onChanged(1),
+        ),
+      ],
+    );
+  }
+}
+
+class _TabButton extends StatelessWidget {
+  final String label;
+  final bool isActive;
+  final VoidCallback onTap;
+
+  const _TabButton({
+    required this.label,
+    required this.isActive,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          height: 40,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(999),
+            border: Border.all(
+              color: isActive ? Colors.white : const Color(0xFF1A1A1A),
             ),
-            child: const Center(
-              child: Text(
-                'FOR YOU',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 1,
-                ),
+            color: isActive ? const Color(0xFF1A1A1A) : Colors.transparent,
+          ),
+          child: Center(
+            child: Text(
+              label,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 1,
               ),
             ),
           ),
         ),
-      ],
+      ),
     );
   }
 }
