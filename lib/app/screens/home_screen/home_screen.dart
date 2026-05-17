@@ -26,8 +26,14 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen>
+    with AutomaticKeepAliveClientMixin {
+
+  @override
+  bool get wantKeepAlive => true;
+
   final DailySideQuestService _dailySideQuestService = DailySideQuestService();
+  final ScrollController _scrollController = ScrollController();
 
   late Timer _dateTimer;
   late String _todayDate;
@@ -268,12 +274,16 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   @override
+  @override
   Widget build(BuildContext context) {
+    super.build(context);
+
     return Scaffold(
       backgroundColor: HomeScreen.bgColor,
       bottomNavigationBar: const CustomBottomNav(currentIndex: 0),
       body: SafeArea(
         child: SingleChildScrollView(
+          controller: _scrollController,
           padding: const EdgeInsets.fromLTRB(12, 10, 12, 20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

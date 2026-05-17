@@ -5,6 +5,8 @@ import '../../../data/profile_post_storage.dart';
 import '../own_profile_page.dart';
 import 'package:audioplayers/audioplayers.dart';
 import '../../home_screen/widgets/comments_bottom_sheet.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 
 class ProfilePostDetailCard extends StatefulWidget {
@@ -492,17 +494,48 @@ class _ProfilePostDetailCardState extends State<ProfilePostDetailCard> {
 
             Row(
               children: [
-                GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      isLiked = !isLiked;
-                    });
+                StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+                  stream: post.firestoreId == null
+                      ? null
+                      : FirebaseFirestore.instance
+                      .collection('posts')
+                      .doc(post.firestoreId)
+                      .snapshots(),
+                  builder: (context, snapshot) {
+                    final data = snapshot.data?.data();
+
+                    final likedBy = List<String>.from(data?['likedBy'] ?? []);
+                    final currentUserId = FirebaseAuth.instance.currentUser?.uid ?? '';
+                    final isLiked = likedBy.contains(currentUserId);
+                    final likes = data?['likes'] ?? post.likes;
+
+                    return GestureDetector(
+                      onTap: () async {
+                        if (post.firestoreId == null || currentUserId.isEmpty) return;
+
+                        final postRef = FirebaseFirestore.instance
+                            .collection('posts')
+                            .doc(post.firestoreId);
+
+                        if (isLiked) {
+                          await postRef.update({
+                            'likedBy': FieldValue.arrayRemove([currentUserId]),
+                            'likes': FieldValue.increment(-1),
+                          });
+                        } else {
+                          await postRef.update({
+                            'likedBy': FieldValue.arrayUnion([currentUserId]),
+                            'likes': FieldValue.increment(1),
+                          });
+                        }
+                      },
+                      child: _SmallStat(
+                        icon: isLiked ? Icons.favorite : Icons.favorite_border_rounded,
+                        value: '$likes',
+                        color: const Color(0xFFEB5D4F),
+                      ),
+                    );
                   },
-                  child: _SmallStat(
-                    icon: isLiked ? Icons.favorite : Icons.favorite_border_rounded,
-                    value: '${widget.post.likes + (isLiked ? 1 : 0)}',
-                    color: const Color(0xFFEB5D4F),
-                  ),
                 ),
                 const SizedBox(width: 8),
                 GestureDetector(

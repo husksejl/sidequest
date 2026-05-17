@@ -17,7 +17,12 @@ class CustomBottomNav extends StatelessWidget {
   });
 
   void _navigateToPage(BuildContext context, int index) {
-    if (index == currentIndex) return;
+    if (index == currentIndex) {
+      if (index == 0 && Navigator.canPop(context)) {
+        Navigator.popUntil(context, (route) => route.isFirst);
+      }
+      return;
+    }
 
     Widget page;
 

@@ -236,11 +236,12 @@ class OtherProfilePage extends StatelessWidget {
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: isFollowing
-                                ? const Color(0xFFEB5D4F)
-                                : Colors.transparent,
-                            foregroundColor: isFollowing
-                                ? Colors.black
+                                ? Colors.transparent
                                 : const Color(0xFFEB5D4F),
+
+                            foregroundColor: isFollowing
+                                ? const Color(0xFFEB5D4F)
+                                : Colors.black,
                             elevation: 0,
                             padding: const EdgeInsets.symmetric(vertical: 15),
                             side: const BorderSide(
