@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:sidequest/l10n/app_localizations.dart';
 
 import '../models/activity_item.dart';
 import 'activity_card.dart';
@@ -9,18 +10,21 @@ class ActivityList extends StatelessWidget {
   const ActivityList({super.key});
 
   Future<List<ActivityItem>> _loadActivities({
+    required BuildContext context,
     required String currentUserID,
     required List<String> followerIDs,
   }) async {
     final List<ActivityItem> activities = [];
 
     await _addFollowerActivities(
+      context: context,
       activities: activities,
       currentUserID: currentUserID,
       followerIDs: followerIDs,
     );
 
     await _addPostActivities(
+      context: context,
       activities: activities,
       currentUserID: currentUserID,
     );
@@ -36,16 +40,19 @@ class ActivityList extends StatelessWidget {
   }
 
   Future<void> _addFollowerActivities({
+    required BuildContext context,
     required List<ActivityItem> activities,
     required String currentUserID,
     required List<String> followerIDs,
   }) async {
+    final l10n = AppLocalizations.of(context)!;
+
     for (final followerID in followerIDs) {
       if (followerID == currentUserID) {
         continue;
       }
 
-      String username = 'Someone';
+      String username = l10n.unknownUser;
 
       final followerDoc = await FirebaseFirestore.instance
           .collection('users')
@@ -54,7 +61,6 @@ class ActivityList extends StatelessWidget {
 
       if (followerDoc.exists) {
         final followerData = followerDoc.data();
-
         final foundUsername = followerData?['username']?.toString();
 
         if (foundUsername != null && foundUsername.trim().isNotEmpty) {
@@ -65,31 +71,35 @@ class ActivityList extends StatelessWidget {
       activities.add(
         ActivityItem(
           icon: Icons.person_add_alt_1_rounded,
-          title: '$username started following you.',
-          text: 'You have a new follower.',
-          time: 'Follower',
+          title: l10n.userStartedFollowingYou(username),
+          text: l10n.youHaveANewFollower,
+          time: l10n.follower,
         ),
       );
     }
   }
 
   Future<void> _addPostActivities({
+    required BuildContext context,
     required List<ActivityItem> activities,
     required String currentUserID,
   }) async {
-    final postsSnapshot = await FirebaseFirestore.instance
+    final l10n = AppLocalizations.of(context)!;
+
+    final postSnapshot = await FirebaseFirestore.instance
         .collection('posts')
         .where('userId', isEqualTo: currentUserID)
         .get();
 
-    for (final postDoc in postsSnapshot.docs) {
+    for (final postDoc in postSnapshot.docs) {
       final postData = postDoc.data();
 
       final postCaption = postData['caption']?.toString() ?? '';
       final questTitle = postData['questTitle']?.toString() ?? '';
-      final postTitle = questTitle.isNotEmpty ? questTitle : 'your post';
+      final postTitle = questTitle.isNotEmpty ? questTitle : l10n.yourPost;
 
       await _addLikeActivities(
+        context: context,
         activities: activities,
         currentUserID: currentUserID,
         postData: postData,
@@ -98,6 +108,7 @@ class ActivityList extends StatelessWidget {
       );
 
       await _addCommentActivities(
+        context: context,
         activities: activities,
         currentUserID: currentUserID,
         postID: postDoc.id,
@@ -107,12 +118,15 @@ class ActivityList extends StatelessWidget {
   }
 
   Future<void> _addLikeActivities({
+    required BuildContext context,
     required List<ActivityItem> activities,
     required String currentUserID,
     required Map<String, dynamic> postData,
     required String postTitle,
     required String postCaption,
   }) async {
+    final l10n = AppLocalizations.of(context)!;
+
     final rawLikedBy = postData['likedBy'];
     final List<String> likedBy = [];
 
@@ -146,9 +160,9 @@ class ActivityList extends StatelessWidget {
       activities.add(
         ActivityItem(
           icon: Icons.favorite_border_rounded,
-          title: '$username liked your post.',
+          title: l10n.userLikedYourPost(username),
           text: postCaption.isEmpty ? postTitle : '"$postCaption"',
-          time: 'Like',
+          time: l10n.like,
           createdAt: _timestampToDateTime(postData['createdAt']),
         ),
       );
@@ -156,11 +170,14 @@ class ActivityList extends StatelessWidget {
   }
 
   Future<void> _addCommentActivities({
+    required BuildContext context,
     required List<ActivityItem> activities,
     required String currentUserID,
     required String postID,
     required String postTitle,
   }) async {
+    final l10n = AppLocalizations.of(context)!;
+
     final commentsSnapshot = await FirebaseFirestore.instance
         .collection('posts')
         .doc(postID)
@@ -187,9 +204,9 @@ class ActivityList extends StatelessWidget {
       activities.add(
         ActivityItem(
           icon: Icons.chat_bubble_outline_rounded,
-          title: '$username commented on $postTitle.',
+          title: l10n.userCommentedOnPost(username, postTitle),
           text: '"$text"',
-          time: _formatTime(commentData['createdAt']),
+          time: _formatTime(context, commentData['createdAt']),
           createdAt: _timestampToDateTime(commentData['createdAt']),
         ),
       );
@@ -204,43 +221,45 @@ class ActivityList extends StatelessWidget {
     return null;
   }
 
-  String _formatTime(dynamic value) {
+  String _formatTime(BuildContext context, dynamic value) {
+    final l10n = AppLocalizations.of(context)!;
     final date = _timestampToDateTime(value);
 
     if (date == null) {
-      return 'now';
+      return l10n.now;
     }
 
     final difference = DateTime.now().difference(date);
 
     if (difference.inMinutes < 1) {
-      return 'Just now';
+      return l10n.justNow;
     }
 
     if (difference.inMinutes < 60) {
-      return '${difference.inMinutes}m ago';
+      return l10n.minutesAgo(difference.inMinutes);
     }
 
     if (difference.inHours < 24) {
-      return '${difference.inHours}h ago';
+      return l10n.hoursAgo(difference.inHours);
     }
 
     if (difference.inDays == 1) {
-      return 'Yesterday';
+      return l10n.yesterday;
     }
 
-    return '${difference.inDays}d ago';
+    return l10n.daysAgo(difference.inDays);
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final currentUser = FirebaseAuth.instance.currentUser;
 
     if (currentUser == null) {
-      return const Center(
+      return Center(
         child: Text(
-          'You need to be logged in to see your activity.',
-          style: TextStyle(
+          l10n.youNeedToBeLoggedInToSeeActivity,
+          style: const TextStyle(
             color: Colors.white,
             fontSize: 14,
           ),
@@ -263,10 +282,10 @@ class ActivityList extends StatelessWidget {
         }
 
         if (!userSnapshot.hasData || !userSnapshot.data!.exists) {
-          return const Center(
+          return Center(
             child: Text(
-              'Your activity could not be loaded.',
-              style: TextStyle(
+              l10n.yourActivityCouldNotBeLoaded,
+              style: const TextStyle(
                 color: Colors.grey,
                 fontSize: 14,
               ),
@@ -301,6 +320,7 @@ class ActivityList extends StatelessWidget {
 
             return FutureBuilder<List<ActivityItem>>(
               future: _loadActivities(
+                context: context,
                 currentUserID: currentUser.uid,
                 followerIDs: followerIDs,
               ),
@@ -315,10 +335,10 @@ class ActivityList extends StatelessWidget {
                 }
 
                 if (activitySnapshot.hasError) {
-                  return const Center(
+                  return Center(
                     child: Text(
-                      'Activity could not be loaded.',
-                      style: TextStyle(
+                      l10n.activityCouldNotBeLoaded,
+                      style: const TextStyle(
                         color: Colors.grey,
                         fontSize: 14,
                       ),
@@ -331,30 +351,30 @@ class ActivityList extends StatelessWidget {
                 if (activities.isEmpty) {
                   return ListView(
                     padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
-                    children: const [
-                      SizedBox(height: 80),
-                      Icon(
+                    children: [
+                      const SizedBox(height: 80),
+                      const Icon(
                         Icons.notifications_none_rounded,
                         color: Color(0xFF18D7FF),
                         size: 42,
                       ),
-                      SizedBox(height: 18),
+                      const SizedBox(height: 18),
                       Center(
                         child: Text(
-                          'No activity yet.',
-                          style: TextStyle(
+                          l10n.noActivitiesYet,
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 17,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
-                      SizedBox(height: 8),
+                      const SizedBox(height: 8),
                       Center(
                         child: Text(
-                          'Likes, comments and follows will appear here.',
+                          l10n.activity,
                           textAlign: TextAlign.center,
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: Colors.grey,
                             fontSize: 13,
                           ),

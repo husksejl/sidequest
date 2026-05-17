@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sidequest/l10n/app_localizations.dart';
 
 import '../../../shared/models/challenge_invite.dart';
 import '../../../shared/services/challenge_invite_service.dart';
@@ -39,7 +40,7 @@ class _QuestHeaderCardState extends State<QuestHeaderCard> {
         return;
       }
 
-      _showError('Invite could not be accepted.');
+      _showError(AppLocalizations.of(context)!.inviteCouldNotBeAccepted);
     }
 
     if (mounted) {
@@ -65,7 +66,7 @@ class _QuestHeaderCardState extends State<QuestHeaderCard> {
         return;
       }
 
-      _showError('Invite could not be declined.');
+      _showError(AppLocalizations.of(context)!.inviteCouldNotBeDeclined);
     }
 
     if (mounted) {
@@ -97,7 +98,7 @@ class _QuestHeaderCardState extends State<QuestHeaderCard> {
         return;
       }
 
-      _showError('Invite could not be completed.');
+      _showError(AppLocalizations.of(context)!.inviteCouldNotBeCompleted);
     }
 
     if (mounted) {
@@ -172,7 +173,7 @@ class _PendingInviteCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final title = invite.challengeTitle.isEmpty
-        ? 'New SideQuest invitation'
+        ? AppLocalizations.of(context)!.newSideQuestInvitation
         : invite.challengeTitle;
 
     return Container(
@@ -195,9 +196,9 @@ class _PendingInviteCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'SIDEQUEST INVITE',
-                  style: TextStyle(
+                Text(
+                  AppLocalizations.of(context)!.sideQuestInvite,
+                  style: const TextStyle(
                     color: Color(0xFF00E5FF),
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
@@ -218,14 +219,14 @@ class _PendingInviteCard extends StatelessWidget {
                 Row(
                   children: [
                     _SmallActionButton(
-                      label: 'ACCEPT',
+                      label: AppLocalizations.of(context)!.accept,
                       isFilled: true,
                       isLoading: isLoading,
                       onTap: onAccept,
                     ),
                     const SizedBox(width: 8),
                     _SmallActionButton(
-                      label: 'DECLINE',
+                      label: AppLocalizations.of(context)!.decline,
                       isFilled: false,
                       isLoading: isLoading,
                       onTap: onDecline,

@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:sidequest/l10n/app_localizations.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import '../../../shared/services/location_search_service.dart';
 
@@ -66,6 +67,7 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final uid = FirebaseAuth.instance.currentUser?.uid;
 
     return DraggableScrollableSheet(
@@ -83,10 +85,10 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
             ),
           ),
           child: uid == null
-              ? const Center(
+              ? Center(
             child: Text(
-              'You need to be logged in.',
-              style: TextStyle(color: Colors.white),
+              l10n.pleaseLogIn,
+              style: const TextStyle(color: Colors.white),
             ),
           )
               : FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
@@ -134,10 +136,10 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
 
                   const SizedBox(height: 18),
 
-                  const Text(
-                    'EDIT PROFILE',
+                  Text(
+                    l10n.editProfileCaps,
                     textAlign: TextAlign.center,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 17,
                       fontWeight: FontWeight.w900,
@@ -149,7 +151,7 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
 
                   _EditField(
                     controller: usernameController,
-                    label: 'USERNAME',
+                    label: l10n.username,
                     hint: 'yourusername',
                     icon: Icons.alternate_email_rounded,
                   ),
@@ -158,7 +160,7 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
 
                   _EditField(
                     controller: fullNameController,
-                    label: 'FULL NAME',
+                    label: l10n.fullName,
                     hint: 'Emma Explorer',
                     icon: Icons.person_outline_rounded,
                   ),
@@ -167,8 +169,8 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
 
                   _EditField(
                     controller: bioController,
-                    label: 'BIO',
-                    hint: 'Tell people about your side quests...',
+                    label: l10n.bio,
+                    hint: l10n.bioHint,
                     icon: Icons.notes_rounded,
                     maxLines: 3,
                   ),
@@ -178,9 +180,9 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'LOCATION',
-                        style: TextStyle(
+                      Text(
+                        l10n.location,
+                        style: const TextStyle(
                           color: Color(0xFF00B2AA),
                           fontSize: 11,
                           fontWeight: FontWeight.w900,
@@ -214,7 +216,7 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
                             focusNode: focusNode,
                             style: const TextStyle(color: Colors.white),
                             decoration: InputDecoration(
-                              hintText: 'Search your location...',
+                              hintText: l10n.searchYourLocation,
                               hintStyle: const TextStyle(color: Colors.white38),
                               prefixIcon: const Icon(
                                 Icons.location_on_outlined,
@@ -243,7 +245,7 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
 
                   _EditField(
                     controller: websiteController,
-                    label: 'WEBSITE',
+                    label: l10n.website,
                     hint: 'https://your-site.com',
                     icon: Icons.link_rounded,
                   ),
@@ -271,9 +273,9 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
                           strokeWidth: 2.5,
                         ),
                       )
-                          : const Text(
-                        'SAVE CHANGES',
-                        style: TextStyle(
+                          : Text(
+                        l10n.saveChanges,
+                        style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.w900,
                           letterSpacing: 1,

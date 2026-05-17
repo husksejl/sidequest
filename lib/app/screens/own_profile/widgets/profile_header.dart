@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sidequest/l10n/app_localizations.dart';
 import 'dart:io';
 
 import 'package:image_picker/image_picker.dart';
@@ -86,6 +87,8 @@ class _ProfileHeaderState extends State<ProfileHeader> {
   }
 
   void showImageOptions() {
+    final l10n = AppLocalizations.of(context)!;
+
     showModalBottomSheet(
       context: context,
       backgroundColor: const Color(0xFF101216),
@@ -102,7 +105,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
             children: [
               _ProfileImageOption(
                 icon: Icons.camera_alt_rounded,
-                label: 'CAMERA',
+                label: l10n.camera,
                 onTap: () {
                   Navigator.pop(context);
                   pickAndUploadImage(ImageSource.camera);
@@ -111,7 +114,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
 
               _ProfileImageOption(
                 icon: Icons.photo_library_rounded,
-                label: 'GALLERY',
+                label: l10n.gallery,
                 onTap: () {
                   Navigator.pop(context);
                   pickAndUploadImage(ImageSource.gallery);
@@ -120,7 +123,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
 
               _ProfileImageOption(
                 icon: Icons.delete_outline_rounded,
-                label: 'REMOVE',
+                label: l10n.remove,
                 onTap: () async {
                   Navigator.pop(context);
 
@@ -176,6 +179,8 @@ class _ProfileHeaderState extends State<ProfileHeader> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Column(
       children: [
         StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
@@ -198,13 +203,13 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                 GestureDetector(
                   onTap: () {
                     showFollowList(
-                      title: 'Following',
+                      title: l10n.followingProfile,
                       userIds: following,
                     );
                   },
                   child: _ProfileStat(
                     number: '$followingCount',
-                    label: 'Following',
+                    label: l10n.followingProfile,
                   ),
                 ),
                 const SizedBox(width: 28),
@@ -244,13 +249,13 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                 GestureDetector(
                   onTap: () {
                     showFollowList(
-                      title: 'Followers',
+                      title: l10n.followers,
                       userIds: followers,
                     );
                   },
                   child: _ProfileStat(
                     number: '$followersCount',
-                    label: 'Followers',
+                    label: l10n.followers,
                   ),
                 ),
               ],
@@ -275,7 +280,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
             return Column(
               children: [
                 Text(
-                  data['username'] ?? 'Unknown',
+                  data['username'] ?? l10n.unknownUser,
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 22,
@@ -450,6 +455,8 @@ class _ProfileStat extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Column(
       children: [
         Text(

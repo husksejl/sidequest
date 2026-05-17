@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+
+import 'l10n/app_localizations.dart';
 
 import 'app/screens/home_screen/home_screen.dart';
 import 'app/screens/onboarding/onboarding_page.dart';
@@ -24,18 +27,34 @@ class SideQuestApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+
       title: 'SideQuest',
+
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ],
+
+      supportedLocales: const [
+        Locale('en'),
+        Locale('de'),
+      ],
+
       theme: ThemeData(
         brightness: Brightness.dark,
         scaffoldBackgroundColor: const Color(0xFF050608),
         useMaterial3: true,
         fontFamily: 'Inter',
       ),
+
       routes: {
         SettingsScreen.routeName: (context) => const SettingsScreen(),
         CreateAccountScreen.routeName: (context) => const CreateAccountScreen(),
         LoginScreen.routeName: (context) => const LoginScreen(),
       },
+
       home: const SplashScreenPage(),
     );
   }

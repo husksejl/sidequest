@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:sidequest/l10n/app_localizations.dart';
 
 import '../models/sidequest_post.dart';
 import '../../other_profile/other_profile_page.dart';
@@ -77,8 +78,9 @@ class _SideQuestPostCardState extends State<SideQuestPostCard> {
     }
   }
 
-  String get statusText {
-    return post.votingOpen ? 'Voting open' : 'Voting closed';
+  String statusText(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return post.votingOpen ? l10n.votingOpen : l10n.votingClosed;
   }
 
   bool get hasVotes =>
@@ -162,6 +164,8 @@ class _SideQuestPostCardState extends State<SideQuestPostCard> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -511,7 +515,7 @@ class _SideQuestPostCardState extends State<SideQuestPostCard> {
                   border: Border.all(color: statusColor),
                 ),
                 child: Text(
-                  statusText.toUpperCase(),
+                  statusText(context).toUpperCase(),
                   style: TextStyle(
                     color: statusColor,
                     fontSize: 10,
@@ -636,11 +640,11 @@ class _SideQuestPostCardState extends State<SideQuestPostCard> {
 
               if (!votingOpen) {
                 if (!hasVoted) {
-                  return const Align(
+                  return Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      'NOT VOTED',
-                      style: TextStyle(
+                      l10n.notVoted,
+                      style: const TextStyle(
                         color: Color(0xFF8A8F98),
                         fontSize: 11,
                         fontWeight: FontWeight.w900,
@@ -654,7 +658,7 @@ class _SideQuestPostCardState extends State<SideQuestPostCard> {
                   children: [
                     Expanded(
                       child: _VotePreviewButton(
-                        label: votedComplete ? 'Complete' : 'Fail',
+                        label: votedComplete ? l10n.complete : l10n.fail,
                         color: votedComplete
                             ? const Color(0xFF00B2AA)
                             : const Color(0xFFEB5D4F),
@@ -676,7 +680,7 @@ class _SideQuestPostCardState extends State<SideQuestPostCard> {
                       child: GestureDetector(
                         onTap: () => vote('complete'),
                         child: _VotePreviewButton(
-                          label: 'Complete',
+                          label: l10n.complete,
                           color: const Color(0xFF00B2AA),
                           icon: Icons.check_rounded,
                           count: completedVotes,
@@ -695,7 +699,7 @@ class _SideQuestPostCardState extends State<SideQuestPostCard> {
                       child: GestureDetector(
                         onTap: () => vote('fail'),
                         child: _VotePreviewButton(
-                          label: 'Fail',
+                          label: l10n.fail,
                           color: const Color(0xFFEB5D4F),
                           icon: Icons.close_rounded,
                           count: failedVotes,
@@ -719,7 +723,7 @@ class _SideQuestPostCardState extends State<SideQuestPostCard> {
                       child: GestureDetector(
                         onTap: () => vote('complete'),
                         child: _VotePreviewButton(
-                          label: 'Complete',
+                          label: l10n.complete,
                           color: const Color(0xFF00B2AA),
                           icon: Icons.check_rounded,
                           count: completedVotes,
@@ -732,7 +736,7 @@ class _SideQuestPostCardState extends State<SideQuestPostCard> {
                       child: GestureDetector(
                         onTap: () => vote('fail'),
                         child: _VotePreviewButton(
-                          label: 'Fail',
+                          label: l10n.fail,
                           color: const Color(0xFFEB5D4F),
                           icon: Icons.close_rounded,
                           count: failedVotes,

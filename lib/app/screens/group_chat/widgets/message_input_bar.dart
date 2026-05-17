@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sidequest/l10n/app_localizations.dart';
 
 class MessageInputBar extends StatefulWidget {
   final bool isSending;
@@ -41,6 +42,8 @@ class _MessageInputBarState extends State<MessageInputBar> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Container(
       padding: const EdgeInsets.fromLTRB(18, 8, 18, 18),
       color: const Color(0xFF050608),
@@ -67,9 +70,9 @@ class _MessageInputBarState extends State<MessageInputBar> {
                   color: Colors.white,
                   fontSize: 13,
                 ),
-                decoration: const InputDecoration(
-                  hintText: 'Type a message...',
-                  hintStyle: TextStyle(
+                decoration: InputDecoration(
+                  hintText: l10n.typeMessage,
+                  hintStyle: const TextStyle(
                     color: Colors.grey,
                     fontSize: 13,
                   ),

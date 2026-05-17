@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:sidequest/l10n/app_localizations.dart';
 
 import '../../data/profile_post_storage.dart';
 import '../../screens/home_screen/home_screen.dart';
@@ -84,12 +85,13 @@ class _AudioRecordPageState extends State<AudioRecordPage> {
   }
 
   Future<void> _postSolution() async {
+    final l10n = AppLocalizations.of(context)!;
     final user = FirebaseAuth.instance.currentUser;
 
     if (user == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('You need to be logged in to post.'),
+        SnackBar(
+          content: Text(l10n.youNeedToBeLoggedInToPost),
         ),
       );
       return;
@@ -97,8 +99,8 @@ class _AudioRecordPageState extends State<AudioRecordPage> {
 
     if (!_hasRecording) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Record something first.'),
+        SnackBar(
+          content: Text(l10n.recordSomethingFirst),
         ),
       );
       return;
@@ -195,7 +197,7 @@ class _AudioRecordPageState extends State<AudioRecordPage> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Could not post audio solution: $error'),
+          content: Text(l10n.couldNotPostAudioSolution(error.toString())),
         ),
       );
     }
@@ -203,6 +205,7 @@ class _AudioRecordPageState extends State<AudioRecordPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final buttonColor =
     _isRecording ? const Color(0xFFEB5D4F) : const Color(0xFF00B2AA);
 
@@ -212,8 +215,8 @@ class _AudioRecordPageState extends State<AudioRecordPage> {
         backgroundColor: const Color(0xFF050608),
         foregroundColor: Colors.white,
         elevation: 0,
-        title: const Text(
-          'Audio Solution',
+        title: Text(
+          l10n.audioSolution,
           style: TextStyle(
             fontWeight: FontWeight.w800,
           ),
@@ -298,10 +301,10 @@ class _AudioRecordPageState extends State<AudioRecordPage> {
                     const SizedBox(height: 18),
                     Text(
                       _isRecording
-                          ? 'Recording... tap to stop'
+                          ? l10n.recordingTapToStop
                           : _hasRecording
-                          ? 'Recording ready'
-                          : 'Tap to record',
+                          ? l10n.recordingReady
+                          : l10n.tapToRecord,
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 14,
@@ -319,7 +322,7 @@ class _AudioRecordPageState extends State<AudioRecordPage> {
                   color: Colors.white,
                 ),
                 decoration: InputDecoration(
-                  hintText: 'Add a caption...',
+                  hintText: l10n.addCaption,
                   hintStyle: const TextStyle(
                     color: Color(0xFF777982),
                   ),
@@ -353,8 +356,8 @@ class _AudioRecordPageState extends State<AudioRecordPage> {
                       color: Colors.white,
                     ),
                   )
-                      : const Text(
-                    'POST AUDIO SOLUTION',
+                      : Text(
+                    l10n.postAudioSolution,
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 14,

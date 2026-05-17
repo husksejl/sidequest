@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:sidequest/l10n/app_localizations.dart';
 
 import '../../shared/models/app_user.dart';
 import '../../shared/models/chat_message.dart' as firestore_message;
@@ -36,13 +37,14 @@ class _GroupChatPageState extends State<GroupChatPage> {
   bool _isSending = false;
 
   Future<void> _sendMessage(String text) async {
+    final l10n = AppLocalizations.of(context)!;
     final currentUser = FirebaseAuth.instance.currentUser;
 
     if (currentUser == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('You need to be logged in to send messages.'),
-          backgroundColor: Color(0xFF8B1E2D),
+        SnackBar(
+          content: Text(l10n.youNeedToBeLoggedInToSendMessages),
+          backgroundColor: const Color(0xFF8B1E2D),
         ),
       );
       return;
@@ -65,7 +67,7 @@ class _GroupChatPageState extends State<GroupChatPage> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Message could not be sent: $error'),
+          content: Text(l10n.messageCouldNotBeSent(error.toString())),
           backgroundColor: const Color(0xFF8B1E2D),
         ),
       );
@@ -83,7 +85,7 @@ class _GroupChatPageState extends State<GroupChatPage> {
     required String currentUserID,
   }) async {
     if (senderID == currentUserID) {
-      return 'You';
+      return AppLocalizations.of(context)!.you;
     }
 
     if (!widget.isGroup) {
@@ -98,7 +100,7 @@ class _GroupChatPageState extends State<GroupChatPage> {
 
     final username = user?.username.isNotEmpty == true
         ? user!.username
-        : 'Unknown User';
+        : AppLocalizations.of(context)!.unknownUser;
 
     _usernameCache[senderID] = username;
 
@@ -121,15 +123,16 @@ class _GroupChatPageState extends State<GroupChatPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final currentUser = FirebaseAuth.instance.currentUser;
 
     if (currentUser == null) {
-      return const Scaffold(
-        backgroundColor: Color(0xFF050608),
+      return Scaffold(
+        backgroundColor: const Color(0xFF050608),
         body: SafeArea(
           child: Center(
             child: Text(
-              'You need to be logged in to view this chat.',
+              l10n.youNeedToBeLoggedInToViewChat,
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 14,
@@ -155,7 +158,7 @@ class _GroupChatPageState extends State<GroupChatPage> {
                       child: Padding(
                         padding: const EdgeInsets.all(20),
                         child: Text(
-                          'Messages could not be loaded.\n${snapshot.error}',
+                          l10n.messagesCouldNotBeLoaded(snapshot.error.toString()),
                           textAlign: TextAlign.center,
                           style: const TextStyle(
                             color: Colors.white,
@@ -177,9 +180,9 @@ class _GroupChatPageState extends State<GroupChatPage> {
                   final messages = snapshot.data!;
 
                   if (messages.isEmpty) {
-                    return const Center(
+                    return Center(
                       child: Text(
-                        'No messages yet.\nSend the first message.',
+                        l10n.noMessagesYetSendFirst,
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: Colors.grey,
@@ -216,6 +219,8 @@ class _GroupChatPageState extends State<GroupChatPage> {
   }
 
   Widget buildHeader(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(18, 16, 18, 12),
       child: Row(
@@ -245,7 +250,7 @@ class _GroupChatPageState extends State<GroupChatPage> {
                 ),
                 const SizedBox(height: 3),
                 Text(
-                  widget.isGroup ? 'GROUP CHAT' : 'DIRECT MESSAGE',
+                  widget.isGroup ? l10n.groupChat : l10n.directMessage,
                   style: const TextStyle(
                     color: Colors.grey,
                     fontSize: 10,
@@ -308,7 +313,7 @@ class _ChatBubbleWithSenderName extends StatelessWidget {
         currentUserID: currentUserID,
       ),
       builder: (context, snapshot) {
-        final senderName = snapshot.data ?? 'Loading...';
+        final senderName = snapshot.data ?? AppLocalizations.of(context)!.loading;
 
         return ChatBubble(
           message: toBubbleMessage(

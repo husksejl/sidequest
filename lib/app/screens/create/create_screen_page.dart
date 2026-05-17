@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:sidequest/l10n/app_localizations.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../shared/models/daily_sidequest.dart';
@@ -137,6 +138,8 @@ class _CreateScreenPageState extends State<CreateScreenPage> {
   }
 
   Widget _buildCompletedCard() {
+    final l10n = AppLocalizations.of(context)!;
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(24),
@@ -147,16 +150,16 @@ class _CreateScreenPageState extends State<CreateScreenPage> {
           color: Colors.white.withOpacity(0.08),
         ),
       ),
-      child: const Column(
+      child: Column(
         children: [
-          Icon(
+          const Icon(
             Icons.check_circle_rounded,
             color: Color(0xFF00B2AA),
             size: 54,
           ),
-          SizedBox(height: 14),
+          const SizedBox(height: 14),
           Text(
-            'Daily SideQuest completed',
+            l10n.dailySideQuestCompleted,
             textAlign: TextAlign.center,
             style: TextStyle(
               color: Colors.white,
@@ -164,9 +167,9 @@ class _CreateScreenPageState extends State<CreateScreenPage> {
               fontWeight: FontWeight.w800,
             ),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
-            'Come back tomorrow for a new quest.',
+            l10n.comeBackTomorrow,
             textAlign: TextAlign.center,
             style: TextStyle(
               color: Color(0xFF9DA3AD),
@@ -181,11 +184,12 @@ class _CreateScreenPageState extends State<CreateScreenPage> {
   }
 
   Widget _buildDailyQuestContent() {
+    final l10n = AppLocalizations.of(context)!;
     final user = FirebaseAuth.instance.currentUser;
 
     if (user == null) {
-      return const Text(
-        'Log in to solve today’s SideQuest.',
+      return Text(
+        l10n.loginToSolveToday,
         style: TextStyle(
           color: Colors.white,
           fontSize: 16,
@@ -208,8 +212,8 @@ class _CreateScreenPageState extends State<CreateScreenPage> {
         final sideQuest = sideQuestSnapshot.data;
 
         if (sideQuest == null) {
-          return const Text(
-            'No Daily SideQuest found.',
+          return Text(
+            l10n.noDailySideQuestFound,
             style: TextStyle(
               color: Colors.white,
               fontSize: 16,
@@ -261,8 +265,8 @@ class _CreateScreenPageState extends State<CreateScreenPage> {
                   ],
                 ),
                 const SizedBox(height: 12),
-                const Text(
-                  'Upload a photo or audio to complete the Daily SideQuest.',
+                Text(
+                  l10n.uploadPhotoOrAudio,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: Color(0xFF777982),
@@ -292,7 +296,7 @@ class _CreateScreenPageState extends State<CreateScreenPage> {
             children: [
               const AppTopBar(),
               const SizedBox(height: 28),
-              const QuestSectionLabel(label: 'DAILY SIDEQUEST'),
+              QuestSectionLabel(label: AppLocalizations.of(context)!.dailySideQuest),
               const SizedBox(height: 18),
               _buildDailyQuestContent(),
             ],

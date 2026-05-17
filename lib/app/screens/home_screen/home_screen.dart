@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:sidequest/l10n/app_localizations.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../shared/models/daily_sidequest.dart';
@@ -132,17 +133,19 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   String _formatPostTime(dynamic timestamp) {
-    if (timestamp == null) return 'now';
+    final l10n = AppLocalizations.of(context)!;
+
+    if (timestamp == null) return l10n.now;
 
     final DateTime createdAt = timestamp.toDate();
     final difference = DateTime.now().difference(createdAt);
 
-    if (difference.inMinutes < 1) return 'now';
-    if (difference.inMinutes < 60) return '${difference.inMinutes}m ago';
-    if (difference.inHours < 24) return '${difference.inHours}h ago';
-    if (difference.inDays == 1) return 'yesterday';
+    if (difference.inMinutes < 1) return l10n.now;
+    if (difference.inMinutes < 60) return l10n.minutesAgo(difference.inMinutes);
+    if (difference.inHours < 24) return l10n.hoursAgo(difference.inHours);
+    if (difference.inDays == 1) return l10n.yesterday;
 
-    return '${difference.inDays}d ago';
+    return l10n.daysAgo(difference.inDays);
   }
 
   String _getVoteStatus(Map<String, dynamic> data) {
@@ -254,12 +257,13 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   Widget _buildFirestoreFeed() {
+    final l10n = AppLocalizations.of(context)!;
     final currentUserId = FirebaseAuth.instance.currentUser?.uid;
 
     if (currentUserId == null) {
-      return const Text(
-        'Please log in.',
-        style: TextStyle(color: Colors.white54),
+      return Text(
+        l10n.pleaseLogIn,
+        style: const TextStyle(color: Colors.white54),
       );
     }
 
@@ -290,9 +294,9 @@ class _HomeScreenState extends State<HomeScreen>
             }
 
             if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-              return const Text(
-                'No posts yet.',
-                style: TextStyle(color: Colors.white54),
+              return Text(
+                l10n.noPostsYet,
+                style: const TextStyle(color: Colors.white54),
               );
             }
 
@@ -328,8 +332,8 @@ class _HomeScreenState extends State<HomeScreen>
             if (filteredDocs.isEmpty) {
               return Text(
                 selectedFeedTab == 0
-                    ? 'No posts from people you follow yet.'
-                    : 'No For You posts yet.',
+                    ? l10n.noFollowingPostsYet
+                    : l10n.noForYouPostsYet,
                 style: const TextStyle(color: Colors.white54),
               );
             }
@@ -342,7 +346,7 @@ class _HomeScreenState extends State<HomeScreen>
                   padding: const EdgeInsets.only(bottom: 16),
                   child: SideQuestPostCard(
                     post: SideQuestPost(
-                      userName: data['username'] ?? 'Unknown',
+                      userName: data['username'] ?? l10n.unknownUser,
                       timeAgo: _formatPostTime(data['createdAt']),
                       location: '',
                       userId: data['userId'],
@@ -379,6 +383,7 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: HomeScreen.bgColor,
@@ -398,9 +403,9 @@ class _HomeScreenState extends State<HomeScreen>
               const HomeSearchBar(),
               const SizedBox(height: 20),
 
-              const Text(
-                "Today's Missions",
-                style: TextStyle(
+              Text(
+                l10n.todaysMissions,
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
@@ -444,16 +449,18 @@ class MissionTabs extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Row(
       children: [
         _TabButton(
-          label: 'FOLLOWING',
+          label: l10n.following,
           isActive: selectedIndex == 0,
           onTap: () => onChanged(0),
         ),
         const SizedBox(width: 26),
         _TabButton(
-          label: 'FOR YOU',
+          label: l10n.forYou,
           isActive: selectedIndex == 1,
           onTap: () => onChanged(1),
         ),

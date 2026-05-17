@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sidequest/l10n/app_localizations.dart';
 import '../models/profile_post.dart';
 import 'profile_post_tile.dart';
 import 'profile_post_detail_card.dart';
@@ -82,15 +83,17 @@ class _ProfilePostDetailPageState extends State<ProfilePostDetailPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       backgroundColor: const Color(0xFF050608),
       appBar: AppBar(
         backgroundColor: const Color(0xFF050608),
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
-        title: const Text(
-          'SideQuest Posts',
-          style: TextStyle(
+        title: Text(
+          l10n.sideQuestPosts,
+          style: const TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.w800,
           ),

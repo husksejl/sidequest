@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:sidequest/l10n/app_localizations.dart';
 
 import '../../../shared/services/auth_service.dart';
 import '../../home_screen/home_screen.dart';
@@ -66,6 +67,8 @@ class _CreateAccountFormCardState extends State<CreateAccountFormCard> {
   }
 
   Future<void> _createAccount() async {
+    final l10n = AppLocalizations.of(context)!;
+
     FocusScope.of(context).unfocus();
 
     final String fullName = _fullNameController.text.trim();
@@ -75,6 +78,7 @@ class _CreateAccountFormCardState extends State<CreateAccountFormCard> {
     final String confirmPassword = _confirmPasswordController.text.trim();
 
     final String? validationError = _validateInput(
+      l10n: l10n,
       fullName: fullName,
       username: username,
       email: email,
@@ -132,7 +136,7 @@ class _CreateAccountFormCardState extends State<CreateAccountFormCard> {
       });
     } catch (error) {
       setState(() {
-        _errorMessage = 'Something went wrong. Please try again.';
+        _errorMessage = l10n.somethingWentWrong;
       });
     } finally {
       if (mounted) {
@@ -144,6 +148,7 @@ class _CreateAccountFormCardState extends State<CreateAccountFormCard> {
   }
 
   String? _validateInput({
+    required AppLocalizations l10n,
     required String fullName,
     required String username,
     required String email,
@@ -151,39 +156,39 @@ class _CreateAccountFormCardState extends State<CreateAccountFormCard> {
     required String confirmPassword,
   }) {
     if (fullName.isEmpty) {
-      return 'Please enter your full name.';
+      return l10n.enterFullName;
     }
 
     if (username.isEmpty) {
-      return 'Please choose a username.';
+      return l10n.chooseUsername;
     }
 
     if (username.length < 3) {
-      return 'Your username must be at least 3 characters long.';
+      return l10n.usernameTooShort;
     }
 
     if (email.isEmpty) {
-      return 'Please enter your email address.';
+      return l10n.enterEmail;
     }
 
     if (!email.contains('@') || !email.contains('.')) {
-      return 'Please enter a valid email address.';
+      return AppLocalizations.of(context)!.enterValidEmail;
     }
 
     if (password.isEmpty) {
-      return 'Please enter a password.';
+      return l10n.enterPassword;
     }
 
     if (password.length < 6) {
-      return 'Your password must be at least 6 characters long.';
+      return l10n.passwordTooShort;
     }
 
     if (password != confirmPassword) {
-      return 'The passwords do not match.';
+      return l10n.passwordsDoNotMatch;
     }
 
     if (!_acceptedTerms) {
-      return 'Please accept the Terms & Privacy Policy.';
+      return l10n.acceptTerms;
     }
 
     return null;
@@ -192,22 +197,24 @@ class _CreateAccountFormCardState extends State<CreateAccountFormCard> {
   String _getReadableFirebaseError(String code) {
     switch (code) {
       case 'email-already-in-use':
-        return 'This email is already in use.';
+        return AppLocalizations.of(context)!.emailAlreadyInUse;
       case 'invalid-email':
-        return 'Please enter a valid email address.';
+        return AppLocalizations.of(context)!.enterValidEmail;
       case 'weak-password':
-        return 'Your password is too weak.';
+        return AppLocalizations.of(context)!.weakPassword;
       case 'operation-not-allowed':
-        return 'Email signup is not enabled in Firebase.';
+        return AppLocalizations.of(context)!.emailSignupDisabled;
       case 'network-request-failed':
-        return 'Please check your internet connection.';
+        return AppLocalizations.of(context)!.networkError;
       default:
-        return 'Signup failed. Please check your details.';
+        return AppLocalizations.of(context)!.signupFailed;
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(20, 26, 20, 24),
@@ -241,7 +248,7 @@ class _CreateAccountFormCardState extends State<CreateAccountFormCard> {
           const SizedBox(height: 26),
           CreateAccountTextField(
             controller: _fullNameController,
-            label: 'FULL NAME',
+            label: l10n.fullName,
             hintText: 'Alex Explorer',
             trailingIcon: Icons.person_outline_rounded,
             keyboardType: TextInputType.name,
@@ -249,14 +256,14 @@ class _CreateAccountFormCardState extends State<CreateAccountFormCard> {
           const SizedBox(height: 16),
           CreateAccountTextField(
             controller: _usernameController,
-            label: 'USERNAME',
+            label: l10n.username,
             hintText: 'alexexplores',
             trailingIcon: Icons.alternate_email_rounded,
           ),
           const SizedBox(height: 16),
           CreateAccountTextField(
             controller: _emailController,
-            label: 'EMAIL',
+            label: l10n.email,
             hintText: 'alex@example.com',
             trailingIcon: Icons.mail_outline_rounded,
             keyboardType: TextInputType.emailAddress,
@@ -264,7 +271,7 @@ class _CreateAccountFormCardState extends State<CreateAccountFormCard> {
           const SizedBox(height: 16),
           CreateAccountTextField(
             controller: _passwordController,
-            label: 'PASSWORD',
+            label: l10n.password,
             hintText: '••••••••••••',
             trailingIcon: Icons.lock_outline_rounded,
             obscureText: !_showPassword,
@@ -286,7 +293,7 @@ class _CreateAccountFormCardState extends State<CreateAccountFormCard> {
           const SizedBox(height: 16),
           CreateAccountTextField(
             controller: _confirmPasswordController,
-            label: 'CONFIRM PASSWORD',
+            label: l10n.confirmPassword,
             hintText: '••••••••••••',
             trailingIcon: Icons.lock_outline_rounded,
             obscureText: !_showConfirmPassword,
@@ -354,18 +361,18 @@ class _CreateAccountFormCardState extends State<CreateAccountFormCard> {
                         : null,
                   ),
                   const SizedBox(width: 12),
-                  const Expanded(
+                  Expanded(
                     child: Text.rich(
                       TextSpan(
-                        text: 'I agree to the ',
+                        text: l10n.agreeToThe,
                         children: [
                           TextSpan(
-                            text: 'Terms & Privacy Policy',
-                            style: TextStyle(color: Colors.white),
+                            text: l10n.termsPrivacyPolicy,
+                            style: const TextStyle(color: Colors.white),
                           ),
                         ],
                       ),
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Color(0xFFC1C6CF),
                         fontSize: 14,
                         height: 1.3,
@@ -426,9 +433,9 @@ class _CreateAccountFormCardState extends State<CreateAccountFormCard> {
                     color: Colors.black,
                   ),
                 )
-                    : const Text(
-                  'CREATE ACCOUNT',
-                  style: TextStyle(
+                    : Text(
+                  l10n.createAccountButton,
+                  style: const TextStyle(
                     color: Colors.black,
                     fontWeight: FontWeight.w900,
                     fontSize: 17,
@@ -449,13 +456,13 @@ class _CreateAccountFormCardState extends State<CreateAccountFormCard> {
                 ),
               );
             },
-            child: const Text.rich(
+            child: Text.rich(
               TextSpan(
-                text: 'Already have an account? ',
+                text: l10n.alreadyHaveAccount,
                 children: [
                   TextSpan(
-                    text: 'LOG IN',
-                    style: TextStyle(
+                    text: l10n.logInCaps,
+                    style: const TextStyle(
                       color: Color(0xFF18D7FF),
                       fontWeight: FontWeight.w900,
                     ),
@@ -463,7 +470,7 @@ class _CreateAccountFormCardState extends State<CreateAccountFormCard> {
                 ],
               ),
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: const TextStyle(
                 color: Color(0xFF9AA0AA),
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
@@ -485,6 +492,8 @@ class _SignupErrorBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),

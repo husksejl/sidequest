@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sidequest/l10n/app_localizations.dart';
 
 import 'nav_item.dart';
 
@@ -56,6 +57,8 @@ class CustomBottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       padding: const EdgeInsets.symmetric(vertical: 12),
@@ -71,7 +74,7 @@ class CustomBottomNav extends StatelessWidget {
           Expanded(
             child: NavItem(
               icon: Icons.home_rounded,
-              label: 'HOME',
+              label: l10n.home,
               isActive: currentIndex == 0,
               onTap: () => _navigateToPage(context, 0),
             ),
@@ -79,7 +82,7 @@ class CustomBottomNav extends StatelessWidget {
           Expanded(
             child: NavItem(
               icon: Icons.forum_rounded,
-              label: 'SOCIAL',
+              label: l10n.social,
               isActive: currentIndex == 1,
               onTap: () => _navigateToPage(context, 1),
             ),
@@ -87,7 +90,7 @@ class CustomBottomNav extends StatelessWidget {
           Expanded(
             child: NavItem(
               icon: Icons.add_circle,
-              label: 'CREATE',
+              label: l10n.create,
               isCenter: true,
               isActive: currentIndex == 2,
               onTap: () => _navigateToPage(context, 2),
@@ -96,7 +99,7 @@ class CustomBottomNav extends StatelessWidget {
           Expanded(
             child: NavItem(
               icon: Icons.groups_rounded,
-              label: 'GROUPS',
+              label: l10n.groups,
               isActive: currentIndex == 3,
               onTap: () => _navigateToPage(context, 3),
             ),
@@ -104,7 +107,7 @@ class CustomBottomNav extends StatelessWidget {
           Expanded(
             child: NavItem(
               icon: Icons.person_rounded,
-              label: 'PROFILE',
+              label: l10n.profile,
               isActive: currentIndex == 4,
               onTap: () => _navigateToPage(context, 4),
             ),

@@ -1,0 +1,400 @@
+{
+  "@@locale": "de",
+  "appTitle": "SideQuest",
+
+  "home": "START",
+  "social": "SOZIAL",
+  "create": "ERSTELLEN",
+  "groups": "GRUPPEN",
+  "profile": "PROFIL",
+
+  "homeNav": "START",
+  "socialNav": "SOZIAL",
+  "createNav": "ERSTELLEN",
+  "groupsNav": "GRUPPEN",
+  "profileNav": "PROFIL",
+
+  "login": "LOGIN",
+  "signUp": "SIGN UP",
+  "settings": "Einstellungen",
+
+  "loading": "Lädt...",
+  "loadingDots": "Lädt...",
+  "tryAgain": "Erneut versuchen",
+  "cancel": "Abbrechen",
+  "save": "Speichern",
+  "delete": "Löschen",
+  "edit": "Bearbeiten",
+  "search": "Suchen",
+  "send": "Senden",
+  "accept": "ANNEHMEN",
+  "decline": "ABLEHNEN",
+  "complete": "Geschafft",
+  "fail": "Nicht geschafft",
+
+  "notifications": "Benachrichtigungen",
+  "messages": "Nachrichten",
+  "activity": "Aktivität",
+  "noActivitiesYet": "Noch keine Aktivitäten",
+  "noMessagesYet": "Noch keine Nachrichten",
+  "noMessagesYetSendFirst": "Noch keine Nachrichten.\nSchreib die erste Nachricht.",
+
+  "you": "Du",
+  "unknownUser": "Unbekannter User",
+  "groupChat": "GRUPPENCHAT",
+  "directMessage": "DIREKTNACHRICHT",
+  "chat": "Chat",
+
+  "pleaseLogIn": "Bitte logge dich ein.",
+  "youNeedToBeLoggedInToPost": "Du musst eingeloggt sein, um etwas zu posten.",
+  "youNeedToBeLoggedInToSendMessages": "Du musst eingeloggt sein, um Nachrichten zu senden.",
+  "youNeedToBeLoggedInToViewChat": "Du musst eingeloggt sein, um diesen Chat zu sehen.",
+  "youNeedToBeLoggedInToSeeActivity": "Du musst eingeloggt sein, um deine Aktivitäten zu sehen.",
+  "youNeedToBeLoggedInToSeeChats": "Du musst eingeloggt sein, um deine Chats zu sehen.",
+
+  "recordSomethingFirst": "Nimm zuerst etwas auf.",
+  "addCaption": "Beschreibung hinzufügen...",
+  "addComment": "Kommentar hinzufügen...",
+  "typeMessage": "Nachricht schreiben...",
+  "searchUsersOrUsernames": "User oder Usernamen suchen...",
+  "searchUsersOrConversations": "User oder Chats suchen...",
+
+  "messageCouldNotBeSent": "Nachricht konnte nicht gesendet werden: {error}",
+  "@messageCouldNotBeSent": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+
+  "messagesCouldNotBeLoaded": "Nachrichten konnten nicht geladen werden.\n{error}",
+  "@messagesCouldNotBeLoaded": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+
+  "chatsCouldNotBeLoaded": "Chats konnten nicht geladen werden.\n{error}",
+  "@chatsCouldNotBeLoaded": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+
+  "chatCouldNotBeOpened": "Chat konnte nicht geöffnet werden: {error}",
+  "@chatCouldNotBeOpened": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+
+  "couldNotPostSolution": "Lösung konnte nicht gepostet werden: {error}",
+  "@couldNotPostSolution": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+
+  "couldNotPostAudioSolution": "Audio-Lösung konnte nicht gepostet werden: {error}",
+  "@couldNotPostAudioSolution": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+
+  "welcomeBack": "WILLKOMMEN ZURÜCK",
+  "loginToSideQuest": "BEI SIDEQUEST\nEINLOGGEN",
+  "loginSubtitle": "Setze deine Streak fort, checke deine Quests und starte das nächste Abenteuer.",
+  "loginFooter": "✦   Deine nächste SideQuest wartet.   ✦",
+  "loginWithYourProfile": "MIT DEINEM PROFIL EINLOGGEN",
+  "usernameOrEmail": "USERNAME ODER E-MAIL",
+  "usernameOrEmailHint": "username oder email@example.com",
+  "password": "PASSWORT",
+  "passwordHint": "Passwort",
+  "rememberMe": "Eingeloggt bleiben",
+  "forgotPassword": "Passwort vergessen?",
+  "createProfile": "PROFIL ERSTELLEN",
+
+  "enterUsernameEmailPassword": "Bitte gib Username/E-Mail und Passwort ein.",
+  "enterUsernameOrEmailFirst": "Bitte gib zuerst deinen Username oder deine E-Mail-Adresse ein.",
+  "noAccountFound": "Kein Account gefunden. Bitte erstelle zuerst ein Profil.",
+  "wrongPasswordTryAgain": "Falsches Passwort. Bitte versuche es erneut.",
+  "invalidEmailAddress": "Diese E-Mail-Adresse ist ungültig.",
+  "invalidLoginCredentials": "Username/E-Mail oder Passwort ist falsch. Bitte versuche es erneut.",
+  "accountDisabled": "Dieser Account wurde deaktiviert.",
+  "tooManyAttempts": "Zu viele Versuche. Bitte später erneut versuchen.",
+  "networkError": "Netzwerkfehler. Bitte prüfe deine Internetverbindung.",
+  "loginFailed": "Login fehlgeschlagen. Bitte versuche es erneut.",
+  "somethingWentWrong": "Etwas ist schiefgelaufen. Bitte versuche es erneut.",
+  "passwordResetSent": "E-Mail zum Zurücksetzen des Passworts wurde gesendet.",
+  "passwordResetCouldNotSend": "E-Mail zum Zurücksetzen konnte nicht gesendet werden.",
+
+  "joinTheQuest": "JOIN THE QUEST",
+  "createAccountTitle": "ACCOUNT\nERSTELLEN",
+  "createAccountSubtitle": "Starte dein Abenteuer und teile deine täglichen SideQuests.",
+  "signupFooter": "✦   Deine nächste SideQuest startet hier.   ✦",
+  "fullName": "VOLLSTÄNDIGER NAME",
+  "username": "USERNAME",
+  "email": "E-MAIL",
+  "confirmPassword": "PASSWORT BESTÄTIGEN",
+  "agreeToThe": "Ich akzeptiere die ",
+  "termsPrivacyPolicy": "AGB & Datenschutzrichtlinie",
+  "createAccountButton": "ACCOUNT ERSTELLEN",
+  "alreadyHaveAccount": "Du hast schon einen Account? ",
+  "logInCaps": "EINLOGGEN",
+
+  "enterFullName": "Bitte gib deinen vollständigen Namen ein.",
+  "chooseUsername": "Bitte wähle einen Username.",
+  "usernameTooShort": "Dein Username muss mindestens 3 Zeichen lang sein.",
+  "enterEmail": "Bitte gib deine E-Mail-Adresse ein.",
+  "enterValidEmail": "Bitte gib eine gültige E-Mail-Adresse ein.",
+  "enterPassword": "Bitte gib ein Passwort ein.",
+  "passwordTooShort": "Dein Passwort muss mindestens 6 Zeichen lang sein.",
+  "passwordsDoNotMatch": "Die Passwörter stimmen nicht überein.",
+  "acceptTerms": "Bitte akzeptiere die AGB & Datenschutzrichtlinie.",
+  "emailAlreadyInUse": "Diese E-Mail wird bereits verwendet.",
+  "weakPassword": "Dein Passwort ist zu schwach.",
+  "emailSignupDisabled": "E-Mail-Registrierung ist in Firebase nicht aktiviert.",
+  "signupFailed": "Registrierung fehlgeschlagen. Bitte prüfe deine Angaben.",
+
+  "todaysMissions": "Heutige Missionen",
+  "following": "FOLGE ICH",
+  "forYou": "FÜR DICH",
+  "noPostsYet": "Noch keine Beiträge.",
+  "noFollowingPostsYet": "Noch keine Beiträge von Personen, denen du folgst.",
+  "noForYouPostsYet": "Noch keine Für-dich-Beiträge.",
+  "newSideQuest": "NEUE SIDEQUEST",
+  "questExpiresIn": "QUEST LÄUFT AB IN",
+
+  "dailySideQuest": "TÄGLICHE SIDEQUEST",
+  "dailySideQuestCompleted": "Tägliche SideQuest abgeschlossen",
+  "comeBackTomorrow": "Komm morgen für eine neue Quest zurück.",
+  "loginToSolveToday": "Logge dich ein, um die heutige SideQuest zu lösen.",
+  "noDailySideQuestFound": "Keine tägliche SideQuest gefunden.",
+  "uploadPhotoOrAudio": "Lade ein Foto oder Audio hoch, um die tägliche SideQuest abzuschließen.",
+  "audioSolution": "Audio-Lösung",
+  "tapToRecord": "Zum Aufnehmen tippen",
+  "recordingReady": "Aufnahme bereit",
+  "recordingTapToStop": "Aufnahme läuft... zum Stoppen tippen",
+  "postAudioSolution": "AUDIO-LÖSUNG POSTEN",
+  "postSolution": "LÖSUNG POSTEN",
+
+  "votingOpen": "Voting offen",
+  "votingClosed": "Voting geschlossen",
+  "notVoted": "NICHT ABGESTIMMT",
+
+  "now": "jetzt",
+  "justNow": "Gerade eben",
+  "yesterday": "Gestern",
+
+  "minutesAgo": "vor {minutes} Min.",
+  "@minutesAgo": {
+    "placeholders": {
+      "minutes": {}
+    }
+  },
+
+  "hoursAgo": "vor {hours} Std.",
+  "@hoursAgo": {
+    "placeholders": {
+      "hours": {}
+    }
+  },
+
+  "daysAgo": "vor {days} Tg.",
+  "@daysAgo": {
+    "placeholders": {
+      "days": {}
+    }
+  },
+
+  "yourActivityCouldNotBeLoaded": "Deine Aktivitäten konnten nicht geladen werden.",
+  "activityCouldNotBeLoaded": "Aktivitäten konnten nicht geladen werden.",
+  "youHaveANewFollower": "Du hast einen neuen Follower.",
+  "follower": "Follower",
+  "like": "Like",
+  "yourPost": "dein Beitrag",
+
+  "userStartedFollowingYou": "{username} folgt dir jetzt.",
+  "@userStartedFollowingYou": {
+    "placeholders": {
+      "username": {}
+    }
+  },
+
+  "userLikedYourPost": "{username} gefällt dein Beitrag.",
+  "@userLikedYourPost": {
+    "placeholders": {
+      "username": {}
+    }
+  },
+
+  "userCommentedOnPost": "{username} hat {postTitle} kommentiert.",
+  "@userCommentedOnPost": {
+    "placeholders": {
+      "username": {},
+      "postTitle": {}
+    }
+  },
+
+  "usersCouldNotBeLoaded": "User konnten nicht geladen werden.",
+  "noUsersFound": "Keine User gefunden.",
+  "noConversationsYet": "Noch keine Unterhaltungen.\nSuche nach einem User oder erstelle einen Gruppenchat.",
+  "newGroup": "NEUE GRUPPE",
+  "groupCreatedSendFirst": "Gruppe erstellt. Schreib die erste Nachricht.",
+  "startNewChat": "Neuen Chat starten",
+
+  "createGroup": "GRUPPE ERSTELLEN",
+  "startNewGroupChat": "NEUEN GRUPPENCHAT STARTEN",
+  "groupName": "GRUPPENNAME",
+  "groupNameHint": "z. B. Weekend Warriors",
+  "noUsersSelectedYet": "Noch keine User ausgewählt.",
+  "searchUsers": "User suchen...",
+  "searchForUsersToAddThem": "Suche nach Usern, um sie hinzuzufügen.",
+  "addToGroup": "Zur Gruppe hinzufügen",
+  "createGroupChat": "GRUPPENCHAT ERSTELLEN",
+  "groupChatCouldNotBeCreated": "Gruppenchat konnte nicht erstellt werden.",
+  "pleaseEnterGroupName": "Bitte gib einen Gruppennamen ein.",
+  "pleaseSelectAtLeastOneUser": "Bitte wähle mindestens einen User aus.",
+
+  "inviteCouldNotBeAccepted": "Einladung konnte nicht angenommen werden.",
+  "inviteCouldNotBeDeclined": "Einladung konnte nicht abgelehnt werden.",
+  "inviteCouldNotBeCompleted": "Einladung konnte nicht abgeschlossen werden.",
+  "newSideQuestInvitation": "Neue SideQuest-Einladung",
+  "sideQuestInvite": "SIDEQUEST-EINLADUNG",
+  "completeNow": "Jetzt abschließen",
+  "saveForLater": "FÜR SPÄTER SPEICHERN",
+  "readyToStart": "Bereit zum Start?",
+  "readyToStartText": "Diese Quest startet in Gruppen. Erledige die Aufgabe und lade deinen Beweis hoch, sobald die Reise beginnt.",
+  "startGroupChallenge": "Gruppen-Challenge starten",
+  "theBrief": "Die Aufgabe",
+  "questIdeas": "Quest-Ideen",
+  "reward": "Belohnung",
+  "time": "Zeit",
+  "level": "Level",
+
+  "account": "ACCOUNT",
+  "privacyAndSafety": "PRIVATSPHÄRE & SICHERHEIT",
+  "appExperience": "APP-ERLEBNIS",
+  "support": "SUPPORT",
+
+  "editProfile": "Profil bearbeiten",
+  "editProfileSubtitle": "Name, Username, Foto und Bio",
+  "emailAndLogin": "E-Mail & Login",
+  "emailAndLoginSubtitle": "E-Mail, Passwort und Anmeldeoptionen verwalten",
+  "createNewProfile": "Neues Profil erstellen",
+  "createNewProfileSubtitle": "Starte eine neue SideQuest-Streak",
+  "questPreferences": "Quest-Einstellungen",
+  "questPreferencesSubtitle": "Themen, Schwierigkeit und täglicher Quest-Stil",
+
+  "pushNotifications": "Push-Benachrichtigungen",
+  "pushNotificationsSubtitle": "Erhalte Updates von SideQuest",
+  "dailySideQuestReminder": "Tägliche SideQuest-Erinnerung",
+  "dailySideQuestReminderSubtitle": "Lass dich erinnern, wenn eine neue Quest startet",
+  "streakWarning": "Streak-Warnung",
+  "streakWarningSubtitle": "Warne mich, bevor meine Streak abläuft",
+
+  "privateProfile": "Privates Profil",
+  "privateProfileSubtitle": "Nur akzeptierte Freunde können deine Quests sehen",
+  "allowFriendRequests": "Freundschaftsanfragen erlauben",
+  "allowFriendRequestsSubtitle": "Andere Abenteurer können dir Anfragen senden",
+  "locationHints": "Standort-Hinweise",
+  "locationHintsSubtitle": "Ungefähren Standort für Quest-Ideen in der Nähe nutzen",
+  "blockedAccounts": "Blockierte Accounts",
+  "blockedAccountsSubtitle": "Überprüfe Personen, die du blockiert hast",
+
+  "hapticFeedback": "Haptisches Feedback",
+  "hapticFeedbackSubtitle": "Kleine Vibrationen bei Taps und Quest-Aktionen",
+  "saveUploadedPhotos": "Hochgeladene Fotos speichern",
+  "saveUploadedPhotosSubtitle": "Nach dem Posten einer Quest lokale Kopie behalten",
+  "appearance": "Darstellung",
+  "appearanceSubtitle": "Dark Mode, Akzentfarbe und App-Icon",
+  "dark": "Dunkel",
+  "language": "Sprache",
+  "languageSubtitle": "Wähle deine bevorzugte App-Sprache",
+  "english": "Englisch",
+
+  "helpCenter": "Hilfe-Center",
+  "helpCenterSubtitle": "Support erhalten und häufige Antworten lesen",
+  "reportProblem": "Problem melden",
+  "reportProblemSubtitle": "Sag uns, wenn etwas nicht funktioniert",
+  "aboutSideQuest": "Über SideQuest",
+  "aboutSideQuestSubtitle": "Version, Credits und rechtliche Informationen",
+  "keepExploring": "SideQuest • Weiter entdecken",
+
+  "rookieAdventurer": "Rookie Adventurer",
+  "dayStreak": "{streak} TAGE STREAK",
+  "@dayStreak": {
+    "placeholders": {
+      "streak": {}
+    }
+  },
+
+  "dangerZone": "Gefahrenzone",
+  "dangerZoneSubtitle": "Melde dich ab oder lösche deinen Account dauerhaft.",
+  "deletingAccount": "Account wird gelöscht...",
+  "logoutFailed": "Logout fehlgeschlagen.",
+  "logOut": "ABMELDEN",
+  "loggingOut": "WIRD ABGEMELDET",
+  "deleteAccountButton": "LÖSCHEN",
+  "deleting": "WIRD GELÖSCHT",
+  "deleteAccountTitle": "Account löschen?",
+  "deleteAccountText": "Dadurch werden dein Account und deine Nutzerdaten dauerhaft gelöscht. Bitte gib dein Passwort zur Bestätigung ein.",
+  "noUserLoggedIn": "Es ist kein User eingeloggt.",
+  "accountCannotBeDeletedWithPassword": "Dieser Account kann nicht mit Passwortbestätigung gelöscht werden.",
+  "accountCouldNotBeDeleted": "Account konnte nicht gelöscht werden.",
+
+  "wrongPassword": "Das Passwort ist falsch. ({code})",
+  "@wrongPassword": {
+    "placeholders": {
+      "code": {}
+    }
+  },
+
+  "invalidCredential": "Das Passwort oder die Login-Methode konnte nicht bestätigt werden. ({code})",
+  "@invalidCredential": {
+    "placeholders": {
+      "code": {}
+    }
+  },
+
+  "requiresRecentLogin": "Bitte logge dich erneut ein, bevor du deinen Account löschst.",
+  "userMismatch": "Dieses Passwort gehört nicht zum aktuellen Account.",
+  "userNotFound": "Dieser Account existiert nicht mehr.",
+
+  "accountCouldNotBeDeletedWithCode": "Account konnte nicht gelöscht werden. ({code})",
+  "@accountCouldNotBeDeletedWithCode": {
+    "placeholders": {
+      "code": {}
+    }
+  },
+
+  "camera": "KAMERA",
+  "gallery": "GALERIE",
+  "remove": "ENTFERNEN",
+  "followers": "Follower",
+  "followingProfile": "Folgt",
+  "editProfileCaps": "PROFIL BEARBEITEN",
+  "checkOutMyProfile": "Schau dir mein SideQuest-Profil an!",
+  "levelNumber": "LEVEL {level}",
+  "@levelNumber": {
+    "placeholders": {
+      "level": {}
+    }
+  },
+
+  "xpUntilLevel": "{xp} XP bis Level {level}",
+  "@xpUntilLevel": {
+    "placeholders": {
+      "xp": {},
+      "level": {}
+    }
+  },
+
+  "sideQuestPosts": "SideQuest-Beiträge",
+  "saveChanges": "ÄNDERUNGEN SPEICHERN",
+  "bio": "BIO",
+  "bioHint": "Erzähl anderen etwas über deine SideQuests...",
+  "location": "STANDORT",
+  "searchYourLocation": "Standort suchen...",
+  "website": "WEBSITE"
+}

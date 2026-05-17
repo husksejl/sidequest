@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:sidequest/l10n/app_localizations.dart';
 
 import '../../../shared/models/daily_sidequest.dart';
 
@@ -65,6 +66,8 @@ class _TodaySideQuestCardState extends State<TodaySideQuestCard> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(18, 20, 18, 22),
@@ -101,9 +104,9 @@ class _TodaySideQuestCardState extends State<TodaySideQuestCard> {
                 color: Colors.white.withOpacity(0.05),
               ),
             ),
-            child: const Text(
-              'NEW SIDEQUEST',
-              style: TextStyle(
+            child: Text(
+              l10n.newSideQuest,
+              style: const TextStyle(
                 color: Color(0xFF00B2AA),
                 fontSize: 12,
                 letterSpacing: 1.3,
@@ -161,9 +164,9 @@ class _TodaySideQuestCardState extends State<TodaySideQuestCard> {
             ),
           ),
           const SizedBox(height: 22),
-          const Text(
-            'QUEST EXPIRES IN',
-            style: TextStyle(
+          Text(
+            l10n.questExpiresIn,
+            style: const TextStyle(
               color: Color(0xFF777982),
               fontSize: 12,
               letterSpacing: 1.2,

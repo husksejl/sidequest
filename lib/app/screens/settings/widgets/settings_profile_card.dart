@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sidequest/l10n/app_localizations.dart';
 
 class SettingsProfileCard extends StatelessWidget {
   final String userName;
@@ -16,6 +17,8 @@ class SettingsProfileCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
@@ -89,7 +92,7 @@ class SettingsProfileCard extends StatelessWidget {
                   children: [
                     _StatusPill(
                       icon: Icons.local_fire_department_rounded,
-                      label: '$streak DAY STREAK',
+                      label: l10n.dayStreak(streak),
                       color: const Color(0xFFFF8D84),
                     ),
                     _StatusPill(
@@ -126,6 +129,8 @@ class _StatusPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
       decoration: BoxDecoration(

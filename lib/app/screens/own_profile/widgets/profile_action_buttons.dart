@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sidequest/l10n/app_localizations.dart';
 import 'edit_profile.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -9,6 +10,8 @@ class ProfileActionButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Row(
       children: [
         Expanded(
@@ -28,10 +31,10 @@ class ProfileActionButtons extends StatelessWidget {
                 borderRadius: BorderRadius.circular(999),
                 border: Border.all(color: Colors.white.withOpacity(0.06)),
               ),
-              child: const Center(
+              child: Center(
                 child: Text(
-                  'EDIT PROFILE',
-                  style: TextStyle(
+                  l10n.editProfileCaps,
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 11,
                     fontWeight: FontWeight.w800,
@@ -56,14 +59,14 @@ class ProfileActionButtons extends StatelessWidget {
             final data = doc.data();
             if (data == null) return;
 
-            final username = data['username'] ?? 'Unknown';
+            final username = data['username'] ?? l10n.unknownUser;
             final firstName = data['firstName'] ?? '';
             final bio = data['bio'] ?? '';
             final location = data['location'] ?? '';
             final website = data['website'] ?? '';
 
             final text = '''
-Check out my SideQuest profile!
+${l10n.checkOutMyProfile}
 
 @$username
 ${firstName.toString().isNotEmpty ? firstName.toString().toUpperCase() : ''}

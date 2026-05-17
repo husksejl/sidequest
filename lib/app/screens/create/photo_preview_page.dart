@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:sidequest/l10n/app_localizations.dart';
 
 import '../../data/profile_post_storage.dart';
 import '../../screens/home_screen/home_screen.dart';
@@ -60,12 +61,13 @@ class _PhotoPreviewPageState extends State<PhotoPreviewPage> {
   }
 
   Future<void> _postSolution() async {
+    final l10n = AppLocalizations.of(context)!;
     final user = FirebaseAuth.instance.currentUser;
 
     if (user == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('You need to be logged in to post.'),
+        SnackBar(
+          content: Text(l10n.youNeedToBeLoggedInToPost),
         ),
       );
       return;
@@ -155,7 +157,7 @@ class _PhotoPreviewPageState extends State<PhotoPreviewPage> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Could not post solution: $error'),
+          content: Text(l10n.couldNotPostSolution(error.toString())),
         ),
       );
     }
@@ -163,14 +165,16 @@ class _PhotoPreviewPageState extends State<PhotoPreviewPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       backgroundColor: const Color(0xFF050608),
       appBar: AppBar(
         backgroundColor: const Color(0xFF050608),
         foregroundColor: Colors.white,
         elevation: 0,
-        title: const Text(
-          'Preview',
+        title: Text(
+          l10n.create,
           style: TextStyle(
             fontWeight: FontWeight.w800,
           ),
@@ -224,7 +228,7 @@ class _PhotoPreviewPageState extends State<PhotoPreviewPage> {
                       fontSize: 14,
                     ),
                     decoration: InputDecoration(
-                      hintText: 'Add a caption...',
+                      hintText: l10n.addCaption,
                       hintStyle: const TextStyle(
                         color: Color(0xFF777982),
                       ),
@@ -258,8 +262,8 @@ class _PhotoPreviewPageState extends State<PhotoPreviewPage> {
                           color: Colors.white,
                         ),
                       )
-                          : const Text(
-                        'POST SOLUTION',
+                          : Text(
+                        l10n.postSolution,
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 14,

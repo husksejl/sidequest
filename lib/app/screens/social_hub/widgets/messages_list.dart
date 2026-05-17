@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:sidequest/l10n/app_localizations.dart';
 
 import '../../../shared/models/app_chat.dart';
 import '../../../shared/models/app_user.dart';
@@ -35,6 +36,7 @@ class _MessagesListState extends State<MessagesList> {
   }
 
   Future<List<_UserSearchResult>> _searchUsers(String currentUserID) async {
+    final l10n = AppLocalizations.of(context)!;
     final query = _searchText.trim().toLowerCase();
 
     if (query.isEmpty) {
@@ -48,7 +50,7 @@ class _MessagesListState extends State<MessagesList> {
 
       return _UserSearchResult(
         id: doc.id,
-        username: data['username'] ?? 'Unknown User',
+        username: data['username'] ?? l10n.unknownUser,
         email: data['email'] ?? '',
       );
     }).where((user) {
@@ -68,6 +70,8 @@ class _MessagesListState extends State<MessagesList> {
     required String otherUserID,
     required String username,
   }) async {
+    final l10n = AppLocalizations.of(context)!;
+
     try {
       final chatID = await _chatService.createDirectChat(
         currentUserID: currentUserID,
@@ -97,7 +101,7 @@ class _MessagesListState extends State<MessagesList> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Chat could not be opened: $error'),
+          content: Text(l10n.chatCouldNotBeOpened(error.toString())),
           backgroundColor: const Color(0xFF8B1E2D),
         ),
       );
@@ -108,9 +112,11 @@ class _MessagesListState extends State<MessagesList> {
     required AppChat chat,
     required String currentUserID,
   }) async {
+    final l10n = AppLocalizations.of(context)!;
+
     if (chat.isGroup) {
       return _ChatDisplayData(
-        chatName: chat.name.isEmpty ? 'Group Chat' : chat.name,
+        chatName: chat.name.isEmpty ? l10n.groupChat : chat.name,
         isGroup: true,
       );
     }
@@ -121,8 +127,8 @@ class _MessagesListState extends State<MessagesList> {
     );
 
     if (otherUserID == null) {
-      return const _ChatDisplayData(
-        chatName: 'Chat',
+      return _ChatDisplayData(
+        chatName: l10n.chat,
         isGroup: false,
       );
     }
@@ -132,7 +138,7 @@ class _MessagesListState extends State<MessagesList> {
     return _ChatDisplayData(
       chatName: otherUser?.username.isNotEmpty == true
           ? otherUser!.username
-          : 'Unknown User',
+          : l10n.unknownUser,
       isGroup: false,
     );
   }
@@ -165,13 +171,14 @@ class _MessagesListState extends State<MessagesList> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final currentUser = FirebaseAuth.instance.currentUser;
 
     if (currentUser == null) {
-      return const Center(
+      return Center(
         child: Text(
-          'You need to be logged in to see your chats.',
-          style: TextStyle(
+          l10n.youNeedToBeLoggedInToSeeChats,
+          style: const TextStyle(
             color: Colors.white,
             fontSize: 14,
           ),
@@ -186,19 +193,19 @@ class _MessagesListState extends State<MessagesList> {
       children: [
         buildActionRow(context),
         const SizedBox(height: 14),
-        buildSearchBar(),
+        buildSearchBar(context),
         const SizedBox(height: 20),
         if (isSearching)
           FutureBuilder<List<_UserSearchResult>>(
             future: _searchUsers(currentUser.uid),
             builder: (context, snapshot) {
               if (snapshot.hasError) {
-                return const Padding(
-                  padding: EdgeInsets.only(top: 30),
+                return Padding(
+                  padding: const EdgeInsets.only(top: 30),
                   child: Center(
                     child: Text(
-                      'Users could not be loaded.',
-                      style: TextStyle(
+                      l10n.usersCouldNotBeLoaded,
+                      style: const TextStyle(
                         color: Colors.grey,
                         fontSize: 14,
                       ),
@@ -221,12 +228,12 @@ class _MessagesListState extends State<MessagesList> {
               final users = snapshot.data!;
 
               if (users.isEmpty) {
-                return const Padding(
-                  padding: EdgeInsets.only(top: 40),
+                return Padding(
+                  padding: const EdgeInsets.only(top: 40),
                   child: Center(
                     child: Text(
-                      'No users found.',
-                      style: TextStyle(
+                      l10n.noUsersFound,
+                      style: const TextStyle(
                         color: Colors.grey,
                         fontSize: 14,
                       ),
@@ -262,7 +269,7 @@ class _MessagesListState extends State<MessagesList> {
                   padding: const EdgeInsets.only(top: 30),
                   child: Center(
                     child: Text(
-                      'Chats could not be loaded.\n${snapshot.error}',
+                      l10n.chatsCouldNotBeLoaded(snapshot.error.toString()),
                       textAlign: TextAlign.center,
                       style: const TextStyle(
                         color: Colors.white,
@@ -289,13 +296,13 @@ class _MessagesListState extends State<MessagesList> {
               }).toList();
 
               if (chats.isEmpty) {
-                return const Padding(
-                  padding: EdgeInsets.only(top: 40),
+                return Padding(
+                  padding: const EdgeInsets.only(top: 40),
                   child: Center(
                     child: Text(
-                      'No conversations yet.\nSearch for a user or create a group chat.',
+                      l10n.noConversationsYet,
                       textAlign: TextAlign.center,
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Colors.grey,
                         fontSize: 14,
                         height: 1.5,
@@ -323,6 +330,8 @@ class _MessagesListState extends State<MessagesList> {
   }
 
   Widget buildActionRow(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Row(
       children: [
         Expanded(
@@ -336,18 +345,18 @@ class _MessagesListState extends State<MessagesList> {
                 color: const Color(0xFFFF7A66),
                 borderRadius: BorderRadius.circular(999),
               ),
-              child: const Row(
+              child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.groups_rounded,
                     color: Colors.black,
                     size: 19,
                   ),
-                  SizedBox(width: 8),
+                  const SizedBox(width: 8),
                   Text(
-                    'NEW GROUP',
-                    style: TextStyle(
+                    l10n.newGroup,
+                    style: const TextStyle(
                       color: Colors.black,
                       fontSize: 12,
                       fontWeight: FontWeight.w900,
@@ -363,30 +372,33 @@ class _MessagesListState extends State<MessagesList> {
     );
   }
 
-  String _formatTime(DateTime dateTime) {
+  String _formatTime(BuildContext context, DateTime dateTime) {
+    final l10n = AppLocalizations.of(context)!;
     final now = DateTime.now();
     final difference = now.difference(dateTime);
 
     if (difference.inMinutes < 1) {
-      return 'now';
+      return l10n.now;
     }
 
     if (difference.inMinutes < 60) {
-      return '${difference.inMinutes}m ago';
+      return l10n.minutesAgo(difference.inMinutes);
     }
 
     if (difference.inHours < 24) {
-      return '${difference.inHours}h ago';
+      return l10n.hoursAgo(difference.inHours);
     }
 
     if (difference.inDays == 1) {
-      return 'Yesterday';
+      return l10n.yesterday;
     }
 
-    return '${difference.inDays}d ago';
+    return l10n.daysAgo(difference.inDays);
   }
 
-  Widget buildSearchBar() {
+  Widget buildSearchBar(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Container(
       height: 48,
       padding: const EdgeInsets.symmetric(horizontal: 14),
@@ -414,9 +426,9 @@ class _MessagesListState extends State<MessagesList> {
                 color: Colors.white,
                 fontSize: 13,
               ),
-              decoration: const InputDecoration(
-                hintText: 'Search users or conversations...',
-                hintStyle: TextStyle(
+              decoration: InputDecoration(
+                hintText: l10n.searchUsersOrConversations,
+                hintStyle: const TextStyle(
                   color: Colors.grey,
                   fontSize: 13,
                 ),
@@ -452,7 +464,7 @@ class _RealChatThreadCard extends StatelessWidget {
   required AppChat chat,
   required String currentUserID,
   }) getChatDisplayData;
-  final String Function(DateTime dateTime) formatTime;
+  final String Function(BuildContext context, DateTime dateTime) formatTime;
 
   const _RealChatThreadCard({
     required this.chat,
@@ -463,6 +475,8 @@ class _RealChatThreadCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return FutureBuilder<_ChatDisplayData>(
       future: getChatDisplayData(
         chat: chat,
@@ -471,17 +485,17 @@ class _RealChatThreadCard extends StatelessWidget {
       builder: (context, snapshot) {
         final displayData = snapshot.data;
 
-        final chatName = displayData?.chatName ?? 'Loading...';
+        final chatName = displayData?.chatName ?? l10n.loadingDots;
         final isGroup = displayData?.isGroup ?? chat.isGroup;
 
         final thread = MessageThread(
           name: chatName,
           preview: chat.lastMessage.isEmpty
               ? isGroup
-              ? 'Group created. Send the first message.'
-              : 'No messages yet.'
+              ? l10n.groupCreatedSendFirst
+              : l10n.noMessagesYet
               : chat.lastMessage,
-          time: formatTime(chat.updatedAt),
+          time: formatTime(context, chat.updatedAt),
           isGroup: isGroup,
         );
 
@@ -494,7 +508,7 @@ class _RealChatThreadCard extends StatelessWidget {
                 builder: (context) {
                   return GroupChatPage(
                     chatID: chat.id,
-                    chatName: chatName == 'Loading...' ? 'Chat' : chatName,
+                    chatName: chatName == l10n.loadingDots ? l10n.chat : chatName,
                     isGroup: isGroup,
                   );
                 },
@@ -540,7 +554,8 @@ class _UserSearchCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final subtitle = user.email.isEmpty ? 'Start a new chat' : user.email;
+    final l10n = AppLocalizations.of(context)!;
+    final subtitle = user.email.isEmpty ? l10n.startNewChat : user.email;
 
     return GestureDetector(
       onTap: onTap,

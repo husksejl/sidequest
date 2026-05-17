@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sidequest/l10n/app_localizations.dart';
 
 import '../signup/signup_page.dart';
 import '../login/login_page.dart';
@@ -31,6 +32,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       backgroundColor: SettingsScreen.bgColor,
       body: SafeArea(
@@ -43,26 +46,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 showSettings: false,
                 showBackButton: true,
               ),
-              const SettingsProfileCard(
+              SettingsProfileCard(
                 userName: 'Alex Explorer',
                 userHandle: '@alexexplores',
                 streak: 5,
-                level: 'Rookie Adventurer',
+                level: l10n.rookieAdventurer,
               ),
               const SizedBox(height: 18),
               SettingsSection(
-                title: 'ACCOUNT',
+                title: l10n.account,
                 children: [
                   SettingsTile(
                     icon: Icons.person_rounded,
-                    title: 'Edit profile',
-                    subtitle: 'Name, username, photo and bio',
+                    title: l10n.editProfile,
+                    subtitle: l10n.editProfileSubtitle,
                     onTap: () {},
                   ),
                   SettingsTile(
                     icon: Icons.mail_rounded,
-                    title: 'Email & login',
-                    subtitle: 'Manage email, password and sign-in options',
+                    title: l10n.emailAndLogin,
+                    subtitle: l10n.emailAndLoginSubtitle,
                     onTap: () => Navigator.pushNamed(
                       context,
                       LoginScreen.routeName,
@@ -70,8 +73,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   SettingsTile(
                     icon: Icons.person_add_alt_1_rounded,
-                    title: 'Create New Profile',
-                    subtitle: 'Start A New SideQuest Streak',
+                    title: l10n.createNewProfile,
+                    subtitle: l10n.createNewProfileSubtitle,
                     accentColor: const Color(0xFF18D7FF),
                     onTap: () => Navigator.pushNamed(
                       context,
@@ -80,34 +83,34 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   SettingsTile(
                     icon: Icons.emoji_events_rounded,
-                    title: 'Quest preferences',
-                    subtitle: 'Topics, difficulty and daily quest style',
+                    title: l10n.questPreferences,
+                    subtitle: l10n.questPreferencesSubtitle,
                     onTap: () {},
                   ),
                 ],
               ),
               const SizedBox(height: 16),
               SettingsSection(
-                title: 'NOTIFICATIONS',
+                title: l10n.notifications.toUpperCase(),
                 children: [
                   SettingsSwitchTile(
                     icon: Icons.notifications_rounded,
-                    title: 'Push notifications',
-                    subtitle: 'Receive updates from SideQuest',
+                    title: l10n.pushNotifications,
+                    subtitle: l10n.pushNotificationsSubtitle,
                     value: pushNotifications,
                     onChanged: (value) => setState(() => pushNotifications = value),
                   ),
                   SettingsSwitchTile(
                     icon: Icons.today_rounded,
-                    title: 'Daily SideQuest reminder',
-                    subtitle: 'Get reminded when a new quest starts',
+                    title: l10n.dailySideQuestReminder,
+                    subtitle: l10n.dailySideQuestReminderSubtitle,
                     value: dailyQuestReminder,
                     onChanged: (value) => setState(() => dailyQuestReminder = value),
                   ),
                   SettingsSwitchTile(
                     icon: Icons.local_fire_department_rounded,
-                    title: 'Streak warning',
-                    subtitle: 'Warn me before my streak expires',
+                    title: l10n.streakWarning,
+                    subtitle: l10n.streakWarningSubtitle,
                     value: streakWarning,
                     onChanged: (value) => setState(() => streakWarning = value),
                     accentColor: const Color(0xFFFF8D84),
@@ -116,92 +119,92 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
               const SizedBox(height: 16),
               SettingsSection(
-                title: 'PRIVACY & SAFETY',
+                title: l10n.privacyAndSafety,
                 children: [
                   SettingsSwitchTile(
                     icon: Icons.lock_rounded,
-                    title: 'Private profile',
-                    subtitle: 'Only approved friends can see your quests',
+                    title: l10n.privateProfile,
+                    subtitle: l10n.privateProfileSubtitle,
                     value: privateProfile,
                     onChanged: (value) => setState(() => privateProfile = value),
                   ),
                   SettingsSwitchTile(
                     icon: Icons.group_add_rounded,
-                    title: 'Allow friend requests',
-                    subtitle: 'Let other adventurers send requests',
+                    title: l10n.allowFriendRequests,
+                    subtitle: l10n.allowFriendRequestsSubtitle,
                     value: allowFriendRequests,
                     onChanged: (value) => setState(() => allowFriendRequests = value),
                   ),
                   SettingsSwitchTile(
                     icon: Icons.location_on_rounded,
-                    title: 'Location hints',
-                    subtitle: 'Use rough location for nearby quest ideas',
+                    title: l10n.locationHints,
+                    subtitle: l10n.locationHintsSubtitle,
                     value: locationHints,
                     onChanged: (value) => setState(() => locationHints = value),
                     accentColor: const Color(0xFFFF8D84),
                   ),
                   SettingsTile(
                     icon: Icons.visibility_off_rounded,
-                    title: 'Blocked accounts',
-                    subtitle: 'Review people you have blocked',
+                    title: l10n.blockedAccounts,
+                    subtitle: l10n.blockedAccountsSubtitle,
                     onTap: () {},
                   ),
                 ],
               ),
               const SizedBox(height: 16),
               SettingsSection(
-                title: 'APP EXPERIENCE',
+                title: l10n.appExperience,
                 children: [
                   SettingsSwitchTile(
                     icon: Icons.vibration_rounded,
-                    title: 'Haptic feedback',
-                    subtitle: 'Small vibrations for taps and quest actions',
+                    title: l10n.hapticFeedback,
+                    subtitle: l10n.hapticFeedbackSubtitle,
                     value: hapticFeedback,
                     onChanged: (value) => setState(() => hapticFeedback = value),
                   ),
                   SettingsSwitchTile(
                     icon: Icons.photo_library_rounded,
-                    title: 'Save uploaded photos',
-                    subtitle: 'Keep a local copy after posting a quest',
+                    title: l10n.saveUploadedPhotos,
+                    subtitle: l10n.saveUploadedPhotosSubtitle,
                     value: saveUploadedPhotos,
                     onChanged: (value) => setState(() => saveUploadedPhotos = value),
                   ),
                   SettingsTile(
                     icon: Icons.palette_rounded,
-                    title: 'Appearance',
-                    subtitle: 'Dark mode, accent color and app icon',
-                    trailingText: 'Dark',
+                    title: l10n.appearance,
+                    subtitle: l10n.appearanceSubtitle,
+                    trailingText: l10n.dark,
                     onTap: () {},
                   ),
                   SettingsTile(
                     icon: Icons.language_rounded,
-                    title: 'Language',
-                    subtitle: 'Choose your preferred app language',
-                    trailingText: 'English',
+                    title: l10n.language,
+                    subtitle: l10n.languageSubtitle,
+                    trailingText: l10n.english,
                     onTap: () {},
                   ),
                 ],
               ),
               const SizedBox(height: 16),
               SettingsSection(
-                title: 'SUPPORT',
+                title: l10n.support,
                 children: [
                   SettingsTile(
                     icon: Icons.help_rounded,
-                    title: 'Help center',
-                    subtitle: 'Get support and read common answers',
+                    title: l10n.helpCenter,
+                    subtitle: l10n.helpCenterSubtitle,
                     onTap: () {},
                   ),
                   SettingsTile(
                     icon: Icons.bug_report_rounded,
-                    title: 'Report a problem',
-                    subtitle: 'Tell us when something does not work',
+                    title: l10n.reportProblem,
+                    subtitle: l10n.reportProblemSubtitle,
                     onTap: () {},
                   ),
                   SettingsTile(
                     icon: Icons.info_rounded,
-                    title: 'About SideQuest',
-                    subtitle: 'Version, credits and legal information',
+                    title: l10n.aboutSideQuest,
+                    subtitle: l10n.aboutSideQuestSubtitle,
                     trailingText: 'v1.0.0',
                     onTap: () {},
                   ),
@@ -212,7 +215,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               const SizedBox(height: 18),
               Center(
                 child: Text(
-                  'SideQuest • Keep exploring',
+                  l10n.keepExploring,
                   style: TextStyle(
                     color: Colors.white.withOpacity(0.32),
                     fontSize: 12,

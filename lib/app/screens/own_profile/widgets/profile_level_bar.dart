@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:sidequest/l10n/app_localizations.dart';
 
 class ProfileLevelBar extends StatelessWidget {
   const ProfileLevelBar({super.key});
@@ -9,6 +10,7 @@ class ProfileLevelBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final uid = FirebaseAuth.instance.currentUser?.uid;
 
     if (uid == null) return const SizedBox.shrink();
@@ -41,7 +43,7 @@ class ProfileLevelBar extends StatelessWidget {
               Row(
                 children: [
                   Text(
-                    'LEVEL $level',
+                    l10n.levelNumber(level),
                     style: const TextStyle(
                       color: Color(0xFF00B2AA),
                       fontSize: 13,
@@ -88,7 +90,7 @@ class ProfileLevelBar extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                '$xpUntilNextLevel XP until Level ${level + 1}',
+                l10n.xpUntilLevel(xpUntilNextLevel, level + 1),
                 style: const TextStyle(
                   color: Color(0xFFC8CDD5),
                   fontSize: 11,

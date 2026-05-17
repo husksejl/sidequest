@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sidequest/l10n/app_localizations.dart';
 
 class SocialHubTabs extends StatelessWidget {
   final int selectedTabIndex;
@@ -12,6 +13,8 @@ class SocialHubTabs extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 4, 20, 18),
       child: Container(
@@ -28,7 +31,7 @@ class SocialHubTabs extends StatelessWidget {
           children: [
             Expanded(
               child: buildTabButton(
-                text: 'Activity',
+                text: l10n.activity,
                 index: 0,
                 icon: Icons.notifications_none_rounded,
               ),
@@ -36,7 +39,7 @@ class SocialHubTabs extends StatelessWidget {
             const SizedBox(width: 6),
             Expanded(
               child: buildTabButton(
-                text: 'Messages',
+                text: l10n.messages,
                 index: 1,
                 icon: Icons.chat_bubble_outline_rounded,
               ),

@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:sidequest/l10n/app_localizations.dart';
 
 import '../../shared/services/chat_service.dart';
 import '../group_chat/group_chat_page.dart';
@@ -47,7 +48,7 @@ class _CreateGroupChatPageState extends State<CreateGroupChatPage> {
 
       return _SelectableUser(
         id: doc.id,
-        username: data['username'] ?? 'Unknown User',
+        username: data['username'] ?? AppLocalizations.of(context)!.unknownUser,
         email: data['email'] ?? '',
       );
     }).where((user) {
@@ -80,22 +81,23 @@ class _CreateGroupChatPageState extends State<CreateGroupChatPage> {
   }
 
   Future<void> _createGroupChat() async {
+    final l10n = AppLocalizations.of(context)!;
     final currentUser = FirebaseAuth.instance.currentUser;
 
     if (currentUser == null) {
-      _showError('You need to be logged in.');
+      _showError(l10n.pleaseLogIn);
       return;
     }
 
     final groupName = _groupNameController.text.trim();
 
     if (groupName.isEmpty) {
-      _showError('Please enter a group name.');
+      _showError(l10n.pleaseEnterGroupName);
       return;
     }
 
     if (_selectedUsers.isEmpty) {
-      _showError('Please select at least one user.');
+      _showError(l10n.pleaseSelectAtLeastOneUser);
       return;
     }
 
@@ -137,7 +139,7 @@ class _CreateGroupChatPageState extends State<CreateGroupChatPage> {
         return;
       }
 
-      _showError('Group chat could not be created.');
+      _showError(l10n.groupChatCouldNotBeCreated);
     }
 
     if (mounted) {
@@ -158,16 +160,17 @@ class _CreateGroupChatPageState extends State<CreateGroupChatPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final currentUser = FirebaseAuth.instance.currentUser;
 
     if (currentUser == null) {
-      return const Scaffold(
-        backgroundColor: Color(0xFF050608),
+      return Scaffold(
+        backgroundColor: const Color(0xFF050608),
         body: SafeArea(
           child: Center(
             child: Text(
-              'You need to be logged in.',
-              style: TextStyle(
+              l10n.pleaseLogIn,
+              style: const TextStyle(
                 color: Colors.white,
               ),
             ),
@@ -196,12 +199,12 @@ class _CreateGroupChatPageState extends State<CreateGroupChatPage> {
                     future: _searchUsers(currentUser.uid),
                     builder: (context, snapshot) {
                       if (snapshot.hasError) {
-                        return const Padding(
-                          padding: EdgeInsets.only(top: 30),
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 30),
                           child: Center(
                             child: Text(
-                              'Users could not be loaded.',
-                              style: TextStyle(
+                              l10n.usersCouldNotBeLoaded,
+                              style: const TextStyle(
                                 color: Colors.grey,
                                 fontSize: 14,
                               ),
@@ -211,12 +214,12 @@ class _CreateGroupChatPageState extends State<CreateGroupChatPage> {
                       }
 
                       if (_searchText.trim().isEmpty) {
-                        return const Padding(
-                          padding: EdgeInsets.only(top: 30),
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 30),
                           child: Center(
                             child: Text(
-                              'Search for users to add them.',
-                              style: TextStyle(
+                              l10n.searchForUsersToAddThem,
+                              style: const TextStyle(
                                 color: Colors.grey,
                                 fontSize: 14,
                               ),
@@ -239,12 +242,12 @@ class _CreateGroupChatPageState extends State<CreateGroupChatPage> {
                       final users = snapshot.data!;
 
                       if (users.isEmpty) {
-                        return const Padding(
-                          padding: EdgeInsets.only(top: 30),
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 30),
                           child: Center(
                             child: Text(
-                              'No users found.',
-                              style: TextStyle(
+                              l10n.noUsersFound,
+                              style: const TextStyle(
                                 color: Colors.grey,
                                 fontSize: 14,
                               ),
@@ -278,6 +281,8 @@ class _CreateGroupChatPageState extends State<CreateGroupChatPage> {
   }
 
   Widget buildHeader(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
       child: Row(
@@ -293,22 +298,22 @@ class _CreateGroupChatPageState extends State<CreateGroupChatPage> {
             ),
           ),
           const SizedBox(width: 14),
-          const Expanded(
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'CREATE GROUP',
-                  style: TextStyle(
+                  l10n.createGroup,
+                  style: const TextStyle(
                     color: Color(0xFF00E5FF),
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                SizedBox(height: 3),
+                const SizedBox(height: 3),
                 Text(
-                  'START A NEW GROUP CHAT',
-                  style: TextStyle(
+                  l10n.startNewGroupChat,
+                  style: const TextStyle(
                     color: Colors.grey,
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
@@ -340,12 +345,14 @@ class _CreateGroupChatPageState extends State<CreateGroupChatPage> {
   }
 
   Widget buildGroupNameField() {
+    final l10n = AppLocalizations.of(context)!;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'GROUP NAME',
-          style: TextStyle(
+        Text(
+          l10n.groupName,
+          style: const TextStyle(
             color: Color(0xFF00E5FF),
             fontSize: 11,
             fontWeight: FontWeight.bold,
@@ -369,9 +376,9 @@ class _CreateGroupChatPageState extends State<CreateGroupChatPage> {
               color: Colors.white,
               fontSize: 14,
             ),
-            decoration: const InputDecoration(
-              hintText: 'e.g. Weekend Warriors',
-              hintStyle: TextStyle(
+            decoration: InputDecoration(
+              hintText: l10n.groupNameHint,
+              hintStyle: const TextStyle(
                 color: Colors.grey,
                 fontSize: 13,
               ),
@@ -384,6 +391,8 @@ class _CreateGroupChatPageState extends State<CreateGroupChatPage> {
   }
 
   Widget buildSelectedUsers() {
+    final l10n = AppLocalizations.of(context)!;
+
     if (_selectedUsers.isEmpty) {
       return Container(
         padding: const EdgeInsets.all(14),
@@ -391,9 +400,9 @@ class _CreateGroupChatPageState extends State<CreateGroupChatPage> {
           color: const Color(0xFF101010),
           borderRadius: BorderRadius.circular(16),
         ),
-        child: const Text(
-          'No users selected yet.',
-          style: TextStyle(
+        child: Text(
+          l10n.noUsersSelectedYet,
+          style: const TextStyle(
             color: Colors.grey,
             fontSize: 13,
           ),
@@ -448,6 +457,8 @@ class _CreateGroupChatPageState extends State<CreateGroupChatPage> {
   }
 
   Widget buildSearchBar() {
+    final l10n = AppLocalizations.of(context)!;
+
     return Container(
       height: 48,
       padding: const EdgeInsets.symmetric(horizontal: 14),
@@ -475,9 +486,9 @@ class _CreateGroupChatPageState extends State<CreateGroupChatPage> {
                 color: Colors.white,
                 fontSize: 13,
               ),
-              decoration: const InputDecoration(
-                hintText: 'Search users...',
-                hintStyle: TextStyle(
+              decoration: InputDecoration(
+                hintText: l10n.searchUsers,
+                hintStyle: const TextStyle(
                   color: Colors.grey,
                   fontSize: 13,
                 ),
@@ -506,6 +517,8 @@ class _CreateGroupChatPageState extends State<CreateGroupChatPage> {
   }
 
   Widget buildCreateButton() {
+    final l10n = AppLocalizations.of(context)!;
+
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 10, 20, 18),
       color: const Color(0xFF050608),
@@ -529,9 +542,9 @@ class _CreateGroupChatPageState extends State<CreateGroupChatPage> {
                 color: Colors.black,
               ),
             )
-                : const Text(
-              'CREATE GROUP CHAT',
-              style: TextStyle(
+                : Text(
+              l10n.createGroupChat,
+              style: const TextStyle(
                 color: Colors.black,
                 fontSize: 13,
                 fontWeight: FontWeight.w900,
@@ -570,7 +583,8 @@ class _UserSelectCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final subtitle = user.email.isEmpty ? 'Add to group' : user.email;
+    final l10n = AppLocalizations.of(context)!;
+    final subtitle = user.email.isEmpty ? l10n.addToGroup : user.email;
 
     return GestureDetector(
       onTap: onTap,

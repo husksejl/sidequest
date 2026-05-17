@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:sidequest/l10n/app_localizations.dart';
 
 import 'login_text_field.dart';
 
@@ -97,11 +98,13 @@ class _LoginFormCardState extends State<LoginFormCard> {
   }
 
   Future<void> _login() async {
+    final l10n = AppLocalizations.of(context)!;
+
     final String usernameOrEmail = _usernameOrEmailController.text.trim();
     final String password = _passwordController.text.trim();
 
     if (usernameOrEmail.isEmpty || password.isEmpty) {
-      _showMessage('Please enter your username/email and password.');
+      _showMessage(l10n.enterUsernameEmailPassword);
       return;
     }
 
@@ -117,7 +120,7 @@ class _LoginFormCardState extends State<LoginFormCard> {
 
         if (foundEmail == null) {
           if (mounted) {
-            _showMessage('No account found. Please create a profile first.');
+            _showMessage(l10n.noAccountFound);
           }
           return;
         }
@@ -141,28 +144,28 @@ class _LoginFormCardState extends State<LoginFormCard> {
       }
 
       if (error.code == 'user-not-found') {
-        _showMessage('No account found. Please create a profile first.');
+        _showMessage(l10n.noAccountFound);
       } else if (error.code == 'wrong-password') {
-        _showMessage('Wrong password. Please try again.');
+        _showMessage(l10n.wrongPasswordTryAgain);
       } else if (error.code == 'invalid-email') {
-        _showMessage('This email address is not valid.');
+        _showMessage(l10n.invalidEmailAddress);
       } else if (error.code == 'invalid-credential') {
-        _showMessage('Username/email or password is wrong. Please try again.');
+        _showMessage(l10n.invalidLoginCredentials);
       } else if (error.code == 'user-disabled') {
-        _showMessage('This account has been disabled.');
+        _showMessage(l10n.accountDisabled);
       } else if (error.code == 'too-many-requests') {
-        _showMessage('Too many attempts. Please try again later.');
+        _showMessage(l10n.tooManyAttempts);
       } else if (error.code == 'network-request-failed') {
-        _showMessage('Network error. Please check your internet connection.');
+        _showMessage(l10n.networkError);
       } else {
-        _showMessage('Login failed. Please try again.');
+        _showMessage(l10n.loginFailed);
       }
     } catch (error) {
       if (!mounted) {
         return;
       }
 
-      _showMessage('Something went wrong. Please try again.');
+      _showMessage(l10n.somethingWentWrong);
     }
 
     if (mounted) {
@@ -173,10 +176,12 @@ class _LoginFormCardState extends State<LoginFormCard> {
   }
 
   Future<void> _resetPassword() async {
+    final l10n = AppLocalizations.of(context)!;
+
     final String usernameOrEmail = _usernameOrEmailController.text.trim();
 
     if (usernameOrEmail.isEmpty) {
-      _showMessage('Please enter your username or email address first.');
+      _showMessage(l10n.enterUsernameOrEmailFirst);
       return;
     }
 
@@ -188,7 +193,7 @@ class _LoginFormCardState extends State<LoginFormCard> {
 
         if (foundEmail == null) {
           if (mounted) {
-            _showMessage('No account found. Please create a profile first.');
+            _showMessage(l10n.noAccountFound);
           }
           return;
         }
@@ -204,30 +209,32 @@ class _LoginFormCardState extends State<LoginFormCard> {
         return;
       }
 
-      _showMessage('Password reset email has been sent.');
+      _showMessage(l10n.passwordResetSent);
     } on FirebaseAuthException catch (error) {
       if (!mounted) {
         return;
       }
 
       if (error.code == 'user-not-found') {
-        _showMessage('No account found. Please create a profile first.');
+        _showMessage(l10n.noAccountFound);
       } else if (error.code == 'invalid-email') {
-        _showMessage('This email address is not valid.');
+        _showMessage(l10n.invalidEmailAddress);
       } else {
-        _showMessage('Could not send password reset email.');
+        _showMessage(l10n.passwordResetCouldNotSend);
       }
     } catch (error) {
       if (!mounted) {
         return;
       }
 
-      _showMessage('Something went wrong. Please try again.');
+      _showMessage(l10n.somethingWentWrong);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
@@ -298,9 +305,9 @@ class _LoginFormCardState extends State<LoginFormCard> {
             ),
           ),
           const SizedBox(height: 18),
-          const Center(
+          Center(
             child: Text(
-              'LOGIN WITH YOUR PROFILE',
+              l10n.loginWithYourProfile,
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: Color(0xFF18D7FF),
@@ -313,15 +320,15 @@ class _LoginFormCardState extends State<LoginFormCard> {
           const SizedBox(height: 26),
           LoginTextField(
             controller: _usernameOrEmailController,
-            label: 'USERNAME OR EMAIL',
-            hintText: 'username or email@example.com',
+            label: l10n.usernameOrEmail,
+            hintText: l10n.usernameOrEmailHint,
             trailingIcon: Icons.alternate_email_rounded,
             keyboardType: TextInputType.emailAddress,
           ),
           const SizedBox(height: 16),
           LoginTextField(
             controller: _passwordController,
-            label: 'PASSWORD',
+            label: l10n.password,
             hintText: '••••••••••••',
             trailingIcon: Icons.lock_outline_rounded,
             obscureText: !_showPassword,
@@ -376,8 +383,8 @@ class _LoginFormCardState extends State<LoginFormCard> {
                           : null,
                     ),
                     const SizedBox(width: 10),
-                    const Text(
-                      'Remember me',
+                    Text(
+                      l10n.rememberMe,
                       style: TextStyle(
                         color: Color(0xFFB8BDC6),
                         fontSize: 13,
@@ -396,8 +403,8 @@ class _LoginFormCardState extends State<LoginFormCard> {
                   minimumSize: const Size(0, 34),
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
-                child: const Text(
-                  'Forgot password?',
+                child: Text(
+                  l10n.forgotPassword,
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w800,
@@ -439,8 +446,8 @@ class _LoginFormCardState extends State<LoginFormCard> {
                     color: Colors.black,
                   ),
                 )
-                    : const Text(
-                  'LOGIN',
+                    : Text(
+                  l10n.login,
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: 18,
@@ -486,8 +493,8 @@ class _CreateProfileButton extends StatelessWidget {
               borderRadius: BorderRadius.circular(999),
             ),
           ),
-          child: const Text(
-            'CREATE PROFILE',
+          child: Text(
+            AppLocalizations.of(context)!.createProfile,
             style: TextStyle(
               color: Colors.white,
               fontSize: 16,
