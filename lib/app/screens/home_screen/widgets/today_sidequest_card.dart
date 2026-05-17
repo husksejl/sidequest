@@ -160,16 +160,6 @@ class _TodaySideQuestCardState extends State<TodaySideQuestCard> {
               fontWeight: FontWeight.w500,
             ),
           ),
-          const SizedBox(height: 18),
-          Text(
-            '${widget.sideQuest.difficulty.toUpperCase()}  •  ${widget.sideQuest.xp} XP',
-            style: const TextStyle(
-              color: Color(0xFFEB5D4F),
-              fontSize: 11,
-              letterSpacing: 1.1,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
           const SizedBox(height: 22),
           const Text(
             'QUEST EXPIRES IN',

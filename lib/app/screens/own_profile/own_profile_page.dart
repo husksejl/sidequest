@@ -194,7 +194,7 @@ class OwnProfilePage extends StatelessWidget {
                       firestoreId: doc.id,
                       userName: data['username'] ?? 'Unknown',
                       timeAgo: _formatPostTime(data['createdAt']),
-                      location: 'SideQuest',
+                      location: '',
                       questTitle: data['questTitle'] ?? '',
                       caption: data['caption'] ?? '',
                       assetPath: data['mediaType'] == 'audio'

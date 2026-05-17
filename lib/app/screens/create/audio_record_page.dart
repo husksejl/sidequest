@@ -69,9 +69,9 @@ class _AudioRecordPageState extends State<AudioRecordPage> {
 
         await _recorder.start(
           const RecordConfig(
-            encoder: AudioEncoder.aacLc,
-            bitRate: 128000,
+            encoder: AudioEncoder.wav,
             sampleRate: 44100,
+            bitRate: 128000,
           ),
           path: path,
         );
@@ -113,7 +113,7 @@ class _AudioRecordPageState extends State<AudioRecordPage> {
         userID: user.uid,
         sideQuestID: widget.quest.id,
         date: widget.quest.date,
-        xp: widget.quest.xp,
+        xp: 0,
         mediaType: 'audio',
         mediaPath: 'local_audio_placeholder',
         caption: _captionController.text.trim(),
@@ -165,7 +165,7 @@ class _AudioRecordPageState extends State<AudioRecordPage> {
         ProfilePost(
           userName: user.email ?? 'You',
           timeAgo: 'now',
-          location: 'SideQuest',
+          location: '',
           caption: _captionController.text.trim(),
           questTitle: widget.quest.title,
           assetPath: '',

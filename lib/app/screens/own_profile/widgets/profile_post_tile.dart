@@ -38,15 +38,32 @@ class ProfilePostTile extends StatelessWidget {
     }
   }
 
+  bool get hasVotes =>
+      post.completedVotes > 0 || post.notCompletedVotes > 0;
+
+  bool get isTie =>
+      !post.votingOpen &&
+          post.voteStatus == VoteStatus.undecided &&
+          hasVotes;
+
+  bool get hasFrame =>
+      post.votingOpen ||
+          post.voteStatus == VoteStatus.completed ||
+          post.voteStatus == VoteStatus.failed ||
+          isTie;
+
+  @override
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(3),
+        padding: EdgeInsets.all(
+          isTie ? 3 : (hasFrame ? 2 : 0),
+        ),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(18),
-          gradient: post.voteStatus == VoteStatus.open
+          gradient: isTie
               ? const LinearGradient(
             colors: [
               Color(0xFFEB5D4F),
@@ -56,16 +73,21 @@ class ProfilePostTile extends StatelessWidget {
             end: Alignment.bottomRight,
           )
               : null,
-          color: post.voteStatus == VoteStatus.open
-              ? null
-              : post.voteStatus == VoteStatus.completed
-              ? const Color(0xFF00B2AA)
-              : post.voteStatus == VoteStatus.failed
-              ? const Color(0xFFEB5D4F)
-              : Colors.transparent,
+          border: hasFrame && !isTie
+              ? Border.all(
+            color: post.votingOpen
+                ? const Color(0xFF8A8F98)
+                : post.voteStatus == VoteStatus.completed
+                ? const Color(0xFF00B2AA)
+                : const Color(0xFFEB5D4F),
+            width: 2.5,
+          )
+              : null,
         ),
         child: Container(
-          padding: const EdgeInsets.all(4),
+          padding: EdgeInsets.all(
+            isTie ? 3 : (hasFrame ? 2 : 0),
+          ),
           decoration: BoxDecoration(
             color: const Color(0xFF050608),
             borderRadius: BorderRadius.circular(16),
@@ -89,51 +111,23 @@ class ProfilePostTile extends StatelessWidget {
                       end: Alignment.bottomRight,
                     ),
                   ),
-                  child: Stack(
-                    children: [
-                      Positioned(
-                        top: -20,
-                        right: -20,
-                        child: Container(
-                          width: 70,
-                          height: 70,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: const Color(0xFFEB5D4F).withOpacity(0.14),
-                          ),
-                        ),
+                  child: Center(
+                    child: post.type == ProfilePostType.audio
+                        ? const Icon(
+                      Icons.graphic_eq_rounded,
+                      color: Colors.white,
+                      size: 44,
+                    )
+                        : const Text(
+                      '"I complimented\nthree strangers today\nand honestly... it healed me a little."',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 8,
+                        height: 1.3,
+                        fontWeight: FontWeight.w800,
                       ),
-                      Positioned(
-                        bottom: -25,
-                        left: -20,
-                        child: Container(
-                          width: 80,
-                          height: 80,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: const Color(0xFF00B2AA).withOpacity(0.12),
-                          ),
-                        ),
-                      ),
-                      Center(
-                        child: post.type == ProfilePostType.audio
-                            ? const Icon(
-                          Icons.graphic_eq_rounded,
-                          color: Colors.white,
-                          size: 44,
-                        )
-                            : const Text(
-                          '"I complimented\nthree strangers today\nand honestly... it healed me a little."',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 8,
-                            height: 1.3,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 )
                     : post.assetPath.startsWith('http')
@@ -159,21 +153,7 @@ class ProfilePostTile extends StatelessWidget {
                   Container(
                     color: Colors.black.withOpacity(0.18),
                     child: Center(
-                      child: post.type == ProfilePostType.video
-                          ? Container(
-                        width: 42,
-                        height: 42,
-                        decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.45),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.play_arrow_rounded,
-                          color: Colors.white,
-                          size: 28,
-                        ),
-                      )
-                          : Icon(
+                      child: Icon(
                         overlayIcon,
                         color: Colors.white,
                         size: 32,

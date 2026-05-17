@@ -92,7 +92,7 @@ class _PhotoPreviewPageState extends State<PhotoPreviewPage> {
         userID: user.uid,
         sideQuestID: widget.quest.id,
         date: widget.quest.date,
-        xp: widget.quest.xp,
+        xp: 0,
         mediaType: 'image',
         mediaPath: widget.imagePath,
         caption: _captionController.text.trim(),
@@ -111,7 +111,7 @@ class _PhotoPreviewPageState extends State<PhotoPreviewPage> {
         'likes': 0,
         'comments': 0,
         'votingEndsAt': Timestamp.fromDate(
-          DateTime.now().add(const Duration(hours: 24)),
+            DateTime.now().add(const Duration(hours: 24))
         ),
         'completedVotes': 0,
         'failedVotes': 0,
@@ -125,7 +125,7 @@ class _PhotoPreviewPageState extends State<PhotoPreviewPage> {
         ProfilePost(
           userName: username,
           timeAgo: 'now',
-          location: 'SideQuest',
+          location: '',
           caption: _captionController.text.trim(),
           questTitle: widget.quest.title,
           assetPath: widget.imagePath,

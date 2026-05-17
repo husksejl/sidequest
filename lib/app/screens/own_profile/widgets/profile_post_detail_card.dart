@@ -99,26 +99,45 @@ class _ProfilePostDetailCardState extends State<ProfilePostDetailCard> {
 
 
   int get xpValue {
+    if (post.votingOpen) return -1;
+
     switch (post.voteStatus) {
       case VoteStatus.completed:
         return 100;
-
-      case VoteStatus.open:
-        return 50;
-
       case VoteStatus.undecided:
-        return 50;
-
+        return post.completedVotes == 0 &&
+            post.notCompletedVotes == 0
+            ? 0
+            : 50;
       case VoteStatus.failed:
+      case VoteStatus.open:
         return 0;
     }
   }
 
   Color get xpColor {
     if (xpValue == 100) return const Color(0xFF00B2AA);
-    if (xpValue == 50) return Colors.white70;
+    if (xpValue == 50) return const Color(0xFF00B2AA);
+
+    if (xpValue == 0 &&
+        post.voteStatus == VoteStatus.undecided) {
+      return Colors.white70;
+    }
+
     return const Color(0xFFEB5D4F);
   }
+
+  bool get hasVotes =>
+      post.completedVotes > 0 || post.notCompletedVotes > 0;
+
+  bool get isTie =>
+      !post.votingOpen && post.voteStatus == VoteStatus.undecided && hasVotes;
+
+  bool get hasFrame =>
+      post.votingOpen ||
+          post.voteStatus == VoteStatus.completed ||
+          post.voteStatus == VoteStatus.failed ||
+          isTie;
 
 
   @override
@@ -128,7 +147,9 @@ class _ProfilePostDetailCardState extends State<ProfilePostDetailCard> {
       decoration: BoxDecoration(
         color: const Color(0xFF0B0E12),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white.withOpacity(0.04)),
+        border: Border.all(
+          color: Colors.transparent,
+        ),
       ),
       child: SingleChildScrollView(
         child: Column(
@@ -164,7 +185,9 @@ class _ProfilePostDetailCardState extends State<ProfilePostDetailCard> {
                         ),
                       ),
                       Text(
-                        '${post.timeAgo} • ${post.location}',
+                        post.location.isEmpty
+                            ? post.timeAgo
+                            : '${post.timeAgo} • ${post.location}',
                         style: const TextStyle(
                           color: Color(0xFF8A8F98),
                           fontSize: 11,
@@ -175,23 +198,24 @@ class _ProfilePostDetailCardState extends State<ProfilePostDetailCard> {
                 ),
                 Row(
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-                      decoration: BoxDecoration(
-                        color: xpColor.withOpacity(0.12),
-                        borderRadius: BorderRadius.circular(999),
-                        border: Border.all(color: xpColor.withOpacity(0.7)),
-                      ),
-                      child: Text(
-                        '+$xpValue XP',
-                        style: TextStyle(
-                          color: xpColor,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 0.5,
+                    if (!post.votingOpen)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                        decoration: BoxDecoration(
+                          color: xpColor.withOpacity(0.12),
+                          borderRadius: BorderRadius.circular(999),
+                          border: Border.all(color: xpColor.withOpacity(0.7)),
+                        ),
+                        child: Text(
+                          '+$xpValue XP',
+                          style: TextStyle(
+                            color: xpColor,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0.5,
+                          ),
                         ),
                       ),
-                    ),
                     const SizedBox(width: 10),
                     Icon(
                       post.type == ProfilePostType.video
@@ -271,9 +295,42 @@ class _ProfilePostDetailCardState extends State<ProfilePostDetailCard> {
 
             const SizedBox(height: 14),
 
-            ClipRRect(
-              borderRadius: BorderRadius.circular(20),
-              child: post.type == ProfilePostType.text || post.type == ProfilePostType.audio
+            Container(
+              padding: EdgeInsets.all(hasFrame ? 3 : 0),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(23),
+
+                gradient: isTie
+                    ? const LinearGradient(
+                  colors: [
+                    Color(0xFFEB5D4F),
+                    Color(0xFF00B2AA),
+                  ],
+                )
+                    : null,
+
+                border: hasFrame && !isTie
+                    ? Border.all(
+                  color: post.votingOpen
+                      ? const Color(0xFF8A8F98)
+                      : post.voteStatus == VoteStatus.completed
+                      ? const Color(0xFF00B2AA)
+                      : const Color(0xFFEB5D4F),
+                  width: 2.5,
+                )
+                    : null,
+              ),
+              child: Container(
+                padding: EdgeInsets.all(
+                  isTie ? 4 : (hasFrame ? 2 : 0),
+                ),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF0B0E12),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: post.type == ProfilePostType.text || post.type == ProfilePostType.audio
                   ? Container(
                 height: 390,
                 width: double.infinity,
@@ -489,9 +546,11 @@ class _ProfilePostDetailCardState extends State<ProfilePostDetailCard> {
                         ),
                       ),
                     ),
-                ],
+                  ],
+                ),
+          ),
+                ),
               ),
-            ),
             ),
 
             const SizedBox(height: 14),
@@ -595,27 +654,36 @@ class _ProfilePostDetailCardState extends State<ProfilePostDetailCard> {
               ),
             ),
 
-            if (post.votingOpen) ...[
-              const SizedBox(height: 14),
+            StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+              stream: post.firestoreId == null
+                  ? null
+                  : FirebaseFirestore.instance
+                  .collection('posts')
+                  .doc(post.firestoreId)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                final data = snapshot.data?.data();
 
-              Row(
-                children: [
-                  _SmallStat(
-                    icon: Icons.check_rounded,
-                    value: '${post.completedVotes}',
-                    color: const Color(0xFF00B2AA),
-                  ),
+                final completedVotes = data?['completedVotes'] ?? post.completedVotes;
+                final failedVotes = data?['failedVotes'] ?? post.notCompletedVotes;
 
-                  const SizedBox(width: 8),
-
-                  _SmallStat(
-                    icon: Icons.close_rounded,
-                    value: '${post.notCompletedVotes}',
-                    color: const Color(0xFFEB5D4F),
-                  ),
-                ],
-              ),
-            ],
+                return Row(
+                  children: [
+                    _SmallStat(
+                      icon: Icons.check_rounded,
+                      value: '$completedVotes',
+                      color: const Color(0xFF00B2AA),
+                    ),
+                    const SizedBox(width: 8),
+                    _SmallStat(
+                      icon: Icons.close_rounded,
+                      value: '$failedVotes',
+                      color: const Color(0xFFEB5D4F),
+                    ),
+                  ],
+                );
+              },
+            ),
           ],
         ),
       ),

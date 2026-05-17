@@ -6,10 +6,14 @@ import 'widgets/other_profile_post_grid.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../social_hub/social_hub_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'widgets/other_profile_header.dart';
+import '../../shared/widgets/follow_list_sheet.dart';
 
 import '../../shared/services/chat_service.dart';
 import '../group_chat/group_chat_page.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'widgets/other_profile_actions.dart';
+import 'widgets/other_profile_meta.dart';
 
 class OtherProfilePage extends StatelessWidget {
   final String userId;
@@ -54,7 +58,7 @@ class OtherProfilePage extends StatelessWidget {
             final bio = userData['bio'] ?? '';
             final profileImageUrl = userData['profileImageUrl'];
             final xp = userData['xp'] ?? 0;
-            final level = (xp / 100).floor() + 1;
+            final level = (xp ~/ 1000);
 
             final currentUserId = FirebaseAuth.instance.currentUser?.uid;
             final followers = List<String>.from(userData['followers'] ?? []);
@@ -120,307 +124,114 @@ class OtherProfilePage extends StatelessWidget {
                     ],
                   ),
 
-                  Text(
-                    'LEVEL $level',
-                    style: const TextStyle(
-                      color: Color(0xFF00B2AA),
-                      fontSize: 13,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 1.4,
-                    ),
-                  ),
-
-                  const SizedBox(height: 14),
-
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _OtherProfileStat(
-                        number: '$followingCount',
-                        label: 'Following',
-                      ),
-
-                      const SizedBox(width: 28),
-
-                      Container(
-                        width: 108,
-                        height: 108,
-                        padding: const EdgeInsets.all(3),
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: LinearGradient(
-                            colors: [
-                              Color(0xFFEB5D4F),
-                              Color(0xFF00B2AA),
-                            ],
-                          ),
+                  OtherProfileHeader(
+                    level: level,
+                    followingCount: followingCount,
+                    followersCount: followersCount,
+                    profileImageUrl: profileImageUrl,
+                    onFollowingTap: () {
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: Colors.transparent,
+                        builder: (_) => FollowListSheet(
+                          title: 'Following',
+                          userIds: following,
                         ),
-                        child: CircleAvatar(
-                          backgroundColor: const Color(0xFF111317),
-                          backgroundImage: profileImageUrl != null
-                              ? NetworkImage(profileImageUrl!)
-                              : null,
-                          child: profileImageUrl == null
-                              ? const Icon(
-                            Icons.person_rounded,
-                            color: Colors.white54,
-                            size: 48,
-                          )
-                              : null,
+                      );
+                    },
+                    onFollowersTap: () {
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: Colors.transparent,
+                        builder: (_) => FollowListSheet(
+                          title: 'Followers',
+                          userIds: followers,
                         ),
-                      ),
-
-                      const SizedBox(width: 28),
-
-                      _OtherProfileStat(
-                        number: '$followersCount',
-                        label: 'Followers',
-                      ),
-                    ],
+                      );
+                    },
                   ),
 
                   const SizedBox(height: 16),
 
-                  Text(
-                    username,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.w900,
-                    ),
+                  OtherProfileMeta(
+                    username: username,
+                    bio: bio.toString(),
+                    location: location,
+                    locationLat: locationLat,
+                    locationLon: locationLon,
+                    website: website,
                   ),
-
-                  const SizedBox(height: 8),
-
-                  if (bio.toString().trim().isNotEmpty) ...[
-                    const SizedBox(height: 8),
-
-                    Text(
-                      bio.toString(),
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        color: Color(0xFFC8CDD5),
-                        fontSize: 13,
-                        height: 1.45,
-                      ),
-                    ),
-                  ],
-
-                  if (location != null && location.isNotEmpty) ...[
-                    const SizedBox(height: 8),
-
-                    GestureDetector(
-                      onTap: () async {
-                        final uri = locationLat != null &&
-                            locationLon != null
-                            ? Uri.parse(
-                          'https://www.google.com/maps/search/?api=1&query=$locationLat,$locationLon',
-                        )
-                            : Uri.parse(
-                          'https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(location)}',
-                        );
-
-                        await launchUrl(
-                          uri,
-                          mode: LaunchMode.externalApplication,
-                        );
-                      },
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(
-                            Icons.location_on_rounded,
-                            color: Color(0xFF00B2AA),
-                            size: 15,
-                          ),
-
-                          const SizedBox(width: 4),
-
-                          Flexible(
-                            child: Text(
-                              location,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-
-                  if (website != null && website.isNotEmpty) ...[
-                    const SizedBox(height: 8),
-
-                    GestureDetector(
-                      onTap: () async {
-                        String url = website.trim();
-
-                        if (!url.startsWith('http://') &&
-                            !url.startsWith('https://')) {
-                          url = 'https://$url';
-                        }
-
-                        final uri = Uri.parse(url);
-
-                        await launchUrl(
-                          uri,
-                          mode: LaunchMode.externalApplication,
-                        );
-                      },
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(
-                            Icons.link_rounded,
-                            color: Color(0xFFEB5D4F),
-                            size: 15,
-                          ),
-
-                          const SizedBox(width: 4),
-
-                          Flexible(
-                            child: Text(
-                              website,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
-                                decoration: TextDecoration.underline,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
 
 
                   const SizedBox(height: 22),
 
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () async {
-                            if (currentUserId == null) return;
+                  OtherProfileActions(
+                    isFollowing: isFollowing,
+                    onFollowTap: () async {
+                      if (currentUserId == null) return;
 
-                            final currentUserRef = FirebaseFirestore.instance
-                                .collection('users')
-                                .doc(currentUserId);
+                      final currentUserRef = FirebaseFirestore.instance
+                          .collection('users')
+                          .doc(currentUserId);
 
-                            final otherUserRef = FirebaseFirestore.instance
-                                .collection('users')
-                                .doc(userId);
+                      final otherUserRef = FirebaseFirestore.instance
+                          .collection('users')
+                          .doc(userId);
 
-                            if (isFollowing) {
-                              await currentUserRef.update({
-                                'following': FieldValue.arrayRemove([userId]),
-                                'followingCount': FieldValue.increment(-1),
-                              });
+                      if (isFollowing) {
+                        await currentUserRef.update({
+                          'following': FieldValue.arrayRemove([userId]),
+                          'followingCount': FieldValue.increment(-1),
+                        });
 
-                              await otherUserRef.update({
-                                'followers': FieldValue.arrayRemove([currentUserId]),
-                                'followersCount': FieldValue.increment(-1),
-                              });
-                            } else {
-                              await currentUserRef.set({
-                                'following': FieldValue.arrayUnion([userId]),
-                                'followingCount': FieldValue.increment(1),
-                              }, SetOptions(merge: true));
+                        await otherUserRef.update({
+                          'followers': FieldValue.arrayRemove([currentUserId]),
+                          'followersCount': FieldValue.increment(-1),
+                        });
+                      } else {
+                        await currentUserRef.set({
+                          'following': FieldValue.arrayUnion([userId]),
+                          'followingCount': FieldValue.increment(1),
+                        }, SetOptions(merge: true));
 
-                              await otherUserRef.set({
-                                'followers': FieldValue.arrayUnion([currentUserId]),
-                                'followersCount': FieldValue.increment(1),
-                              }, SetOptions(merge: true));
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: isFollowing
-                                ? Colors.transparent
-                                : const Color(0xFFEB5D4F),
+                        await otherUserRef.set({
+                          'followers': FieldValue.arrayUnion([currentUserId]),
+                          'followersCount': FieldValue.increment(1),
+                        }, SetOptions(merge: true));
+                      }
+                    },
+                    onMessageTap: () async {
+                      final currentUser = FirebaseAuth.instance.currentUser;
+                      if (currentUser == null) return;
 
-                            foregroundColor: isFollowing
-                                ? const Color(0xFFEB5D4F)
-                                : Colors.black,
-                            elevation: 0,
-                            padding: const EdgeInsets.symmetric(vertical: 15),
-                            side: const BorderSide(
-                              color: Color(0xFFEB5D4F),
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(999),
-                            ),
-                          ),
-                          child: Text(
-                            isFollowing ? 'FOLLOWING' : 'FOLLOW',
-                            style: const TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: 1,
+                      try {
+                        final chatService = ChatService();
+
+                        final chatID = await chatService.createDirectChat(
+                          currentUserID: currentUser.uid,
+                          otherUserID: userId,
+                        );
+
+                        if (!context.mounted) return;
+
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => GroupChatPage(
+                              chatID: chatID,
+                              chatName: username,
+                              isGroup: false,
                             ),
                           ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: () async {
-                            final currentUser = FirebaseAuth.instance.currentUser;
-
-                            if (currentUser == null) return;
-
-                            try {
-                              final chatService = ChatService();
-
-                              final chatID = await chatService.createDirectChat(
-                                currentUserID: currentUser.uid,
-                                otherUserID: userId,
-                              );
-
-                              if (!context.mounted) return;
-
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => GroupChatPage(
-                                    chatID: chatID,
-                                    chatName: username,
-                                    isGroup: false,
-                                  ),
-                                ),
-                              );
-                            } catch (e) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text('Could not open chat: $e'),
-                                ),
-                              );
-                            }
-                          },
-                          style: OutlinedButton.styleFrom(
-                            side: const BorderSide(color: Color(0xFF00B2AA)),
-                            foregroundColor: const Color(0xFF00B2AA),
-                            padding: const EdgeInsets.symmetric(vertical: 15),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(999),
-                            ),
-                          ),
-                          child: const Text(
-                            'MESSAGE',
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: 1,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+                        );
+                      } catch (e) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Could not open chat: $e')),
+                        );
+                      }
+                    },
                   ),
 
                   const SizedBox(height: 28),
@@ -478,42 +289,6 @@ class OtherProfilePage extends StatelessWidget {
           },
         ),
       ),
-    );
-  }
-}
-
-class _OtherProfileStat extends StatelessWidget {
-  final String number;
-  final String label;
-
-  const _OtherProfileStat({
-    required this.number,
-    required this.label,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text(
-          number,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 19,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label.toUpperCase(),
-          style: const TextStyle(
-            color: Color(0xFF8A8F98),
-            fontSize: 10,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 1,
-          ),
-        ),
-      ],
     );
   }
 }

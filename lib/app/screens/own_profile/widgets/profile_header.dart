@@ -7,6 +7,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../other_profile/other_profile_page.dart';
+import '../own_profile_page.dart';
+import '../../../shared/widgets/follow_list_sheet.dart';
 
 class ProfileHeader extends StatefulWidget {
   const ProfileHeader({super.key});
@@ -153,6 +156,24 @@ class _ProfileHeaderState extends State<ProfileHeader> {
     );
   }
 
+  void showFollowList({
+    required String title,
+    required List<String> userIds,
+  }) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: const Color(0xFF101216),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      builder: (_) => FollowListSheet(
+        title: title,
+        userIds: userIds,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -174,9 +195,17 @@ class _ProfileHeaderState extends State<ProfileHeader> {
             return Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _ProfileStat(
-                  number: '$followingCount',
-                  label: 'Following',
+                GestureDetector(
+                  onTap: () {
+                    showFollowList(
+                      title: 'Following',
+                      userIds: following,
+                    );
+                  },
+                  child: _ProfileStat(
+                    number: '$followingCount',
+                    label: 'Following',
+                  ),
                 ),
                 const SizedBox(width: 28),
 
@@ -212,9 +241,17 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                 ),
 
                 const SizedBox(width: 28),
-                _ProfileStat(
-                  number: '$followersCount',
-                  label: 'Followers',
+                GestureDetector(
+                  onTap: () {
+                    showFollowList(
+                      title: 'Followers',
+                      userIds: followers,
+                    );
+                  },
+                  child: _ProfileStat(
+                    number: '$followersCount',
+                    label: 'Followers',
+                  ),
                 ),
               ],
             );

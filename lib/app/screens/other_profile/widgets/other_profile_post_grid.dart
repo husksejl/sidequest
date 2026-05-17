@@ -55,12 +55,14 @@ class OtherProfilePostGrid extends StatelessWidget {
           post: ProfilePost(
             userName: data['username'] ?? 'Unknown',
             timeAgo: 'now',
-            location: 'SideQuest',
+            location: '',
             caption: data['caption'] ?? '',
             questTitle: data['questTitle'] ?? '',
             assetPath: data['mediaType'] == 'audio'
                 ? (data['audioUrl'] ?? '')
                 : (data['imageUrl'] ?? ''),
+            completedVotes: data['completedVotes'] ?? 0,
+            notCompletedVotes: data['failedVotes'] ?? 0,
             type: data['mediaType'] == 'audio'
                 ? ProfilePostType.audio
                 : ProfilePostType.image,
@@ -174,8 +176,12 @@ class _FirestorePostDetailPageState extends State<FirestorePostDetailPage> {
     return SideQuestPost(
       userId: data['userId'],
       userName: data['username'] ?? 'Unknown',
+      audioUrl: data['audioUrl'],
+      mediaType: data['mediaType'] ?? 'image',
+      voteStatus: _getVoteStatus(data),
+      votingOpen: _getVoteStatus(data) == 'open',
       timeAgo: _formatPostTime(data['createdAt']),
-      location: 'SideQuest',
+      location: '',
       title: data['questTitle'] ?? '',
       imageEmoji: '',
       imageLabelTop: '',

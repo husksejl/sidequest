@@ -12,7 +12,6 @@ import '../create/models/create_quest.dart';
 import '../create/photo_preview_page.dart';
 import 'models/sidequest_post.dart';
 import 'widgets/sidequest_post_card.dart';
-import 'widgets/stories_section.dart';
 import 'widgets/today_sidequest_card.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'widgets/search_bar.dart';
@@ -38,7 +37,9 @@ class _HomeScreenState extends State<HomeScreen>
 
   late Timer _dateTimer;
   late String _todayDate;
+
   int selectedFeedTab = 0;
+  List<String> forYouOrder = [];
 
   static const List<SideQuestPost> posts = [
     SideQuestPost(
@@ -311,7 +312,17 @@ class _HomeScreenState extends State<HomeScreen>
             }).toList();
 
             if (selectedFeedTab == 1) {
-              filteredDocs.shuffle();
+              if (forYouOrder.isEmpty) {
+                filteredDocs.shuffle();
+                forYouOrder = filteredDocs.map((doc) => doc.id).toList();
+              } else {
+                filteredDocs.sort((a, b) {
+                  final aIndex = forYouOrder.indexOf(a.id);
+                  final bIndex = forYouOrder.indexOf(b.id);
+
+                  return aIndex.compareTo(bIndex);
+                });
+              }
             }
 
             if (filteredDocs.isEmpty) {
@@ -333,7 +344,7 @@ class _HomeScreenState extends State<HomeScreen>
                     post: SideQuestPost(
                       userName: data['username'] ?? 'Unknown',
                       timeAgo: _formatPostTime(data['createdAt']),
-                      location: 'SideQuest',
+                      location: '',
                       userId: data['userId'],
                       title: data['questTitle'] ?? '',
                       imageEmoji: '',
@@ -381,8 +392,6 @@ class _HomeScreenState extends State<HomeScreen>
             children: [
               const AppTopBar(),
 
-              const StoriesSection(),
-              const SizedBox(height: 18),
 
               _buildTodaySideQuest(),
 
@@ -405,6 +414,10 @@ class _HomeScreenState extends State<HomeScreen>
                 onChanged: (index) {
                   setState(() {
                     selectedFeedTab = index;
+
+                    if (index == 1) {
+                      forYouOrder = [];
+                    }
                   });
                 },
               ),

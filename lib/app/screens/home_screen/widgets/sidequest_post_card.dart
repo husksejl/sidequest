@@ -29,13 +29,69 @@ class _SideQuestPostCardState extends State<SideQuestPostCard> {
 
   SideQuestPost get post => widget.post;
 
-  int get xpValue => 50;
+  int get xpValue {
+    if (post.votingOpen) return -1;
 
-  Color get xpColor => Colors.white70;
+    switch (post.voteStatus) {
+      case 'completed':
+        return 100;
 
-  Color get statusColor => const Color(0xFF00B2AA);
+      case 'undecided':
+        return post.completedVotes == 0 &&
+            post.notCompletedVotes == 0
+            ? 0
+            : 50;
 
-  String get statusText => 'Voting open';
+      case 'failed':
+        return 0;
+
+      default:
+        return 0;
+    }
+  }
+
+  Color get xpColor {
+    if (xpValue == 100) return const Color(0xFF00B2AA);
+    if (xpValue == 50) return const Color(0xFF00B2AA);
+
+    if (xpValue == 0 &&
+        post.voteStatus == 'undecided') {
+      return Colors.white70;
+    }
+
+    return const Color(0xFFEB5D4F);
+  }
+
+  Color get statusColor {
+    if (post.votingOpen) return const Color(0xFF00B2AA);
+
+    switch (post.voteStatus) {
+      case 'completed':
+        return const Color(0xFF00B2AA);
+      case 'failed':
+        return const Color(0xFFEB5D4F);
+      case 'undecided':
+        return Colors.white;
+      default:
+        return Colors.white;
+    }
+  }
+
+  String get statusText {
+    return post.votingOpen ? 'Voting open' : 'Voting closed';
+  }
+
+  bool get hasVotes =>
+      post.completedVotes > 0 || post.notCompletedVotes > 0;
+
+  bool get isTie =>
+      !post.votingOpen && post.voteStatus == 'undecided' && hasVotes;
+
+  bool get hasFrame =>
+      post.votingOpen ||
+          post.voteStatus == 'completed' ||
+          post.voteStatus == 'failed' ||
+          isTie;
 
   Future<void> deletePost() async {
     if (post.firestoreId == null) return;
@@ -111,7 +167,9 @@ class _SideQuestPostCardState extends State<SideQuestPostCard> {
       decoration: BoxDecoration(
         color: const Color(0xFF0B0E12),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white.withOpacity(0.04)),
+        border: Border.all(
+          color: Colors.transparent,
+        ),
       ),
       child: Column(
         children: [
@@ -161,7 +219,9 @@ class _SideQuestPostCardState extends State<SideQuestPostCard> {
                       ),
                     ),
                     Text(
-                      '${post.timeAgo} • ${post.location}',
+                      post.location.isEmpty
+                          ? post.timeAgo
+                          : '${post.timeAgo} • ${post.location}',
                       style: const TextStyle(
                         color: Color(0xFF8A8F98),
                         fontSize: 11,
@@ -172,26 +232,27 @@ class _SideQuestPostCardState extends State<SideQuestPostCard> {
               ),
               Row(
                 children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 9,
-                      vertical: 5,
-                    ),
-                    decoration: BoxDecoration(
-                      color: xpColor.withOpacity(0.12),
-                      borderRadius: BorderRadius.circular(999),
-                      border: Border.all(color: xpColor.withOpacity(0.7)),
-                    ),
-                    child: Text(
-                      '+$xpValue XP',
-                      style: TextStyle(
-                        color: xpColor,
-                        fontSize: 10,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 0.5,
+                  if (!post.votingOpen)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 9,
+                        vertical: 5,
+                      ),
+                      decoration: BoxDecoration(
+                        color: xpColor.withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(999),
+                        border: Border.all(color: xpColor.withOpacity(0.7)),
+                      ),
+                      child: Text(
+                        '+$xpValue XP',
+                        style: TextStyle(
+                          color: xpColor,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 0.5,
+                        ),
                       ),
                     ),
-                  ),
                   const SizedBox(width: 10),
                   const Icon(
                     Icons.image_rounded,
@@ -256,92 +317,123 @@ class _SideQuestPostCardState extends State<SideQuestPostCard> {
 
           const SizedBox(height: 14),
 
-          ClipRRect(
-            borderRadius: BorderRadius.circular(20),
-            child: SizedBox(
-              height: 390,
-              width: double.infinity,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  if (post.mediaType == 'audio')
-                    Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            const Color(0xFFEB5D4F).withOpacity(0.22),
-                            const Color(0xFF050608),
-                            const Color(0xFF00B2AA).withOpacity(0.18),
-                          ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                      ),
-                      child: Center(
-                        child: GestureDetector(
-                          onTap: () async {
-                            if (post.audioUrl == null) return;
-
-                            try {
-                              if (_isPlayingAudio) {
-                                await _audioPlayer.stop();
-
-                                setState(() {
-                                  _isPlayingAudio = false;
-                                });
-                              } else {
-                                print(post.audioUrl);
-
-                                await _audioPlayer.setUrl(post.audioUrl!);
-
-                                await _audioPlayer.play();
-
-                                setState(() {
-                                  _isPlayingAudio = true;
-                                });
-
-                                _audioPlayer.playerStateStream.listen((state) {
-                                  if (state.processingState == ProcessingState.completed) {
-                                    if (mounted) {
-                                      setState(() {
-                                        _isPlayingAudio = false;
-                                      });
-                                    }
-                                  }
-                                });
-                              }
-                            } catch (e) {
-                              print('JUST AUDIO ERROR: $e');
-                            }
-                          },
-                          child: Icon(
-                            _isPlayingAudio
-                                ? Icons.pause_circle_filled_rounded
-                                : Icons.play_circle_fill_rounded,
-                            color: Colors.white,
-                            size: 92,
-                          ),
-                        ),
-                      ),
-                    )
-                  else if (post.isFirestorePost && post.imageUrl != null)
-                    Image.network(
-                      post.imageUrl!,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                    )
-                  else
-                    Image.asset(
-                      post.userName == 'Charles L.'
-                          ? 'assets/images/Charles.jpg'
-                          : 'assets/images/Max.jpg',
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                    ),
+          Container(
+            padding: EdgeInsets.all(hasFrame ? 3 : 0),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(23),
+              gradient: isTie
+                  ? const LinearGradient(
+                colors: [
+                  Color(0xFFEB5D4F),
+                  Color(0xFF00B2AA),
                 ],
+              )
+                  : null,
+              border: hasFrame && !isTie
+                  ? Border.all(
+                color: post.votingOpen
+                    ? const Color(0xFF8A8F98)
+                    : statusColor,
+                width: 3,
+              )
+                  : null,
+            ),
+            child: Container(
+              padding: EdgeInsets.all(
+                isTie ? 4 : (hasFrame ? 2 : 0),
+              ),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                color: const Color(0xFF0B0E12),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(18),
+                child: SizedBox(
+                  height: 390,
+                  width: double.infinity,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      if (post.mediaType == 'audio')
+                        Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                const Color(0xFFEB5D4F).withOpacity(0.22),
+                                const Color(0xFF050608),
+                                const Color(0xFF00B2AA).withOpacity(0.18),
+                              ],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                          ),
+                          child: Center(
+                            child: GestureDetector(
+                              onTap: () async {
+                                if (post.audioUrl == null) return;
+
+                                try {
+                                  if (_isPlayingAudio) {
+                                    await _audioPlayer.stop();
+
+                                    setState(() {
+                                      _isPlayingAudio = false;
+                                    });
+                                  } else {
+                                    await _audioPlayer.setUrl(post.audioUrl!);
+                                    await _audioPlayer.play();
+
+                                    setState(() {
+                                      _isPlayingAudio = true;
+                                    });
+
+                                    _audioPlayer.playerStateStream.listen((state) {
+                                      if (state.processingState ==
+                                          ProcessingState.completed) {
+                                        if (mounted) {
+                                          setState(() {
+                                            _isPlayingAudio = false;
+                                          });
+                                        }
+                                      }
+                                    });
+                                  }
+                                } catch (e) {
+                                  print('JUST AUDIO ERROR: $e');
+                                }
+                              },
+                              child: Icon(
+                                _isPlayingAudio
+                                    ? Icons.pause_circle_filled_rounded
+                                    : Icons.play_circle_fill_rounded,
+                                color: Colors.white,
+                                size: 92,
+                              ),
+                            ),
+                          ),
+                        )
+                      else if (post.isFirestorePost && post.imageUrl != null)
+                        Image.network(
+                          post.imageUrl!,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                        )
+                      else
+                        Image.asset(
+                          post.userName == 'Charles L.'
+                              ? 'assets/images/Charles.jpg'
+                              : 'assets/images/Max.jpg',
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                        ),
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
+
+          const SizedBox(height: 14),
 
           const SizedBox(height: 14),
 

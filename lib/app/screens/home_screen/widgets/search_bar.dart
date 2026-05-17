@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import '../../other_profile/other_profile_page.dart';
+import '../../own_profile/own_profile_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class HomeSearchBar extends StatefulWidget {
   const HomeSearchBar({super.key});
@@ -128,14 +130,26 @@ class _HomeSearchBarState extends State<HomeSearchBar> {
                                 onTap: () {
                                   Navigator.pop(context);
 
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => OtherProfilePage(
-                                        userId: doc.id,
+                                  final currentUserId =
+                                      FirebaseAuth.instance.currentUser?.uid;
+
+                                  if (doc.id == currentUserId) {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => const OwnProfilePage(),
                                       ),
-                                    ),
-                                  );
+                                    );
+                                  } else {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => OtherProfilePage(
+                                          userId: doc.id,
+                                        ),
+                                      ),
+                                    );
+                                  }
                                 },
                                 leading: CircleAvatar(
                                   backgroundColor: const Color(0xFF1B2026),
