@@ -41,6 +41,7 @@ class _AudioRecordPageState extends State<AudioRecordPage> {
   @override
   void dispose() {
     _captionController.dispose();
+    _recorder.dispose();
     super.dispose();
   }
 
@@ -70,9 +71,12 @@ class _AudioRecordPageState extends State<AudioRecordPage> {
 
         await _recorder.start(
           const RecordConfig(
-            encoder: AudioEncoder.wav,
+            encoder: AudioEncoder.aacLc,
             sampleRate: 44100,
-            bitRate: 128000,
+            numChannels: 1,
+            echoCancel: true,
+            noiseSuppress: true,
+            autoGain: true,
           ),
           path: path,
         );
@@ -111,41 +115,58 @@ class _AudioRecordPageState extends State<AudioRecordPage> {
     });
 
     try {
+      String? audioUrl;
+
+      if (_recordedPath == null) {
+        throw Exception('No audio file found');
+      }
+
+      final audioFile = File(_recordedPath!);
+
+      if (!audioFile.existsSync() || audioFile.lengthSync() == 0) {
+        throw Exception('Audio file is empty or missing');
+      }
+
+      final ref = FirebaseStorage.instance
+          .ref()
+          .child('audio')
+          .child(user.uid)
+          .child('${DateTime.now().millisecondsSinceEpoch}.m4a');
+
+      await ref.putFile(
+        audioFile,
+        SettableMetadata(contentType: 'audio/mp4'),
+      );
+
+      audioUrl = await ref.getDownloadURL();
+
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+
+      final username = userDoc.data()?['username'] ?? 'Unknown user';
+      final profileImageUrl = userDoc.data()?['profileImageUrl'];
+
       await _dailySideQuestService.completeDailySideQuestFromUpload(
         userID: user.uid,
         sideQuestID: widget.quest.id,
         date: widget.quest.date,
         xp: 0,
         mediaType: 'audio',
-        mediaPath: 'local_audio_placeholder',
+        mediaPath: audioUrl,
         caption: _captionController.text.trim(),
       );
-
-      String? audioUrl;
-
-      if (_recordedPath != null) {
-        final ref = FirebaseStorage.instance
-            .ref()
-            .child('audio')
-            .child('${DateTime.now().millisecondsSinceEpoch}.m4a');
-
-        await ref.putFile(
-          File(_recordedPath!),
-          SettableMetadata(contentType: 'audio/mp4'),
-        );
-
-        audioUrl = await ref.getDownloadURL();
-
-        print('AUDIO DOWNLOAD URL: $audioUrl');
-      }
 
       await FirebaseFirestore.instance.collection('posts').add({
         'userId': user.uid,
         'userEmail': user.email,
-        'username': user.displayName ?? user.email ?? 'Unknown',
+        'username': username,
+        'profileImageUrl': profileImageUrl,
         'caption': _captionController.text.trim(),
         'questTitle': widget.quest.title,
         'questId': widget.quest.id,
+        'questDate': widget.quest.date,
         'mediaType': 'audio',
         'imageUrl': null,
         'audioUrl': audioUrl,
@@ -170,7 +191,7 @@ class _AudioRecordPageState extends State<AudioRecordPage> {
           location: '',
           caption: _captionController.text.trim(),
           questTitle: widget.quest.title,
-          assetPath: '',
+          assetPath: audioUrl,
           type: ProfilePostType.audio,
           voteStatus: VoteStatus.open,
           votingOpen: true,

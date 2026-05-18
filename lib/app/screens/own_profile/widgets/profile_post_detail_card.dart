@@ -3,10 +3,14 @@ import '../models/profile_post.dart';
 import 'dart:io';
 import '../../../data/profile_post_storage.dart';
 import '../own_profile_page.dart';
-import 'package:just_audio/just_audio.dart';
+import 'package:audioplayers/audioplayers.dart';
 import '../../home_screen/widgets/comments_bottom_sheet.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:gallery_saver_plus/gallery_saver.dart';
+import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
 
 
 class ProfilePostDetailCard extends StatefulWidget {
@@ -27,37 +31,32 @@ class _ProfilePostDetailCardState extends State<ProfilePostDetailCard> {
   bool isPlayingAudio = false;
 
   Future<void> toggleAudio() async {
-    if (post.type != ProfilePostType.audio) return;
-    if (post.assetPath.isEmpty) return;
+    final audioUrl = post.assetPath.trim();
+
+    if (audioUrl.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No audio URL found')),
+      );
+      return;
+    }
+
+    if (isPlayingAudio) {
+      await audioPlayer.stop();
+      setState(() => isPlayingAudio = false);
+      return;
+    }
 
     try {
-      if (isPlayingAudio) {
-        await audioPlayer.stop();
+      await audioPlayer.play(UrlSource(audioUrl));
+      setState(() => isPlayingAudio = true);
 
-        setState(() {
-          isPlayingAudio = false;
-        });
-      } else {
-        await audioPlayer.setUrl(post.assetPath);
-
-        await audioPlayer.play();
-
-        setState(() {
-          isPlayingAudio = true;
-        });
-
-        audioPlayer.playerStateStream.listen((state) {
-          if (state.processingState == ProcessingState.completed) {
-            if (mounted) {
-              setState(() {
-                isPlayingAudio = false;
-              });
-            }
-          }
-        });
-      }
+      audioPlayer.onPlayerComplete.listen((_) {
+        if (mounted) setState(() => isPlayingAudio = false);
+      });
     } catch (e) {
-      print('PROFILE AUDIO ERROR: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Audio failed: $e')),
+      );
     }
   }
 
@@ -138,7 +137,6 @@ class _ProfilePostDetailCardState extends State<ProfilePostDetailCard> {
           post.voteStatus == VoteStatus.completed ||
           post.voteStatus == VoteStatus.failed ||
           isTie;
-
 
   @override
   Widget build(BuildContext context) {
@@ -372,6 +370,147 @@ class _ProfilePostDetailCardState extends State<ProfilePostDetailCard> {
                         ),
                       ),
                     ),
+                    Positioned(
+                      top: 12,
+                      right: 12,
+                      child: PopupMenuButton<String>(
+                        color: const Color(0xFF15181D),
+                        icon: Container(
+                          padding: const EdgeInsets.all(7),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.45),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.more_horiz_rounded,
+                            color: Colors.white,
+                            size: 22,
+                          ),
+                        ),
+                        onSelected: (value) async {
+                          if (value == 'delete') {
+                            showDialog(
+                              context: context,
+                              builder: (context) {
+                                return AlertDialog(
+                                  backgroundColor: const Color(0xFF101216),
+                                  title: const Text(
+                                    'Delete post?',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                  content: Text(
+                                    post.votingOpen
+                                        ? 'Deleting this post will allow you to redo this SideQuest.'
+                                        : 'Voting for this SideQuest has already ended.\n\nIf you delete this post now, it will be gone forever and you cannot complete this SideQuest again.',
+                                    style: const TextStyle(color: Colors.white70),
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(context),
+                                      child: const Text('Cancel'),
+                                    ),
+                                    TextButton(
+                                      onPressed: () async {
+                                        try {
+                                          if (post.firestoreId == null) return;
+
+                                          final postRef = FirebaseFirestore.instance
+                                              .collection('posts')
+                                              .doc(post.firestoreId);
+
+                                          final postSnapshot = await postRef.get();
+                                          final postData = postSnapshot.data();
+
+                                          final votingEndsAt = postData?['votingEndsAt'];
+                                          final votingIsStillOpen = votingEndsAt == null
+                                              ? true
+                                              : DateTime.now().isBefore(votingEndsAt.toDate());
+
+                                          final currentUserId =
+                                              FirebaseAuth.instance.currentUser?.uid;
+                                          final questId = postData?['questId'];
+
+                                          if (votingIsStillOpen &&
+                                              currentUserId != null &&
+                                              questId != null) {
+                                            final completedSnapshot = await FirebaseFirestore
+                                                .instance
+                                                .collection('completed_sidequest')
+                                                .where('userID', isEqualTo: currentUserId)
+                                                .where('sideQuestID', isEqualTo: questId)
+                                                .get();
+
+                                            for (final doc in completedSnapshot.docs) {
+                                              await doc.reference.delete();
+                                            }
+                                          }
+
+                                          await postRef.delete();
+
+                                          ProfilePostStorage.posts.remove(widget.post);
+
+                                          if (!context.mounted) return;
+
+                                          Navigator.pop(context);
+
+                                          Navigator.pushAndRemoveUntil(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) => const OwnProfilePage(),
+                                            ),
+                                                (route) => false,
+                                          );
+                                        } catch (e) {
+                                          if (!context.mounted) return;
+
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(content: Text('Delete failed: $e')),
+                                          );
+                                        }
+                                      },
+                                      child: const Text(
+                                        'Delete',
+                                        style: TextStyle(color: Color(0xFFEB5D4F)),
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          }
+
+                          if (value == 'share') {
+                            await Share.share(
+                              'Check out this SideQuest post:\n\n${post.caption}\n\n${post.assetPath}',
+                            );
+                          }
+                        },
+                        itemBuilder: (context) => post.votingOpen
+                            ? const [
+                          PopupMenuItem(
+                            value: 'share',
+                            child: Text('Share post'),
+                          ),
+                          PopupMenuDivider(),
+                          PopupMenuItem(
+                            value: 'delete',
+                            child: Text(
+                              'Delete post',
+                              style: TextStyle(color: Color(0xFFEB5D4F)),
+                            ),
+                          ),
+                        ]
+                            : const [
+                          PopupMenuItem(
+                            value: 'delete',
+                            child: Text(
+                              'Delete post',
+                              style: TextStyle(color: Color(0xFFEB5D4F)),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                     Center(
                       child: post.type == ProfilePostType.audio
                           ? GestureDetector(
@@ -422,110 +561,7 @@ class _ProfilePostDetailCardState extends State<ProfilePostDetailCard> {
                       fit: BoxFit.cover,
                     ),
 
-                    Positioned(
-                      top: 12,
-                      right: 12,
-                      child: PopupMenuButton<String>(
-                        color: const Color(0xFF15181D),
-                        icon: Container(
-                          padding: const EdgeInsets.all(7),
-                          decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.45),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.more_horiz_rounded,
-                            color: Colors.white,
-                            size: 22,
-                          ),
-                        ),
-                        onSelected: (value) {
-                          if (value == 'delete') {
-                            showDialog(
-                              context: context,
-                              builder: (context) {
-                                return AlertDialog(
-                                  backgroundColor: const Color(0xFF101216),
-                                  title: const Text(
-                                    'Delete post?',
-                                    style: TextStyle(color: Colors.white),
-                                  ),
-                                  content: const Text(
-                                    'This post will be removed from your profile.',
-                                    style: TextStyle(color: Colors.white70),
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () => Navigator.pop(context),
-                                      child: const Text('Cancel'),
-                                    ),
-                                    TextButton(
-                                      onPressed: () {
-                                        ProfilePostStorage.posts.remove(widget.post);
 
-                                        Navigator.pop(context);
-
-                                        Navigator.pushAndRemoveUntil(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) => const OwnProfilePage(),
-                                          ),
-                                              (route) => false,
-                                        );
-                                      },
-                                      child: const Text(
-                                        'Delete',
-                                        style: TextStyle(color: Color(0xFFEB5D4F)),
-                                      ),
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
-                          }
-
-                          if (value == 'edit') {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Edit caption coming soon')),
-                            );
-                          }
-
-                          if (value == 'save') {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Save image coming soon')),
-                            );
-                          }
-
-                          if (value == 'share') {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Share post coming soon')),
-                            );
-                          }
-                        },
-                        itemBuilder: (context) => const [
-                          PopupMenuItem(
-                            value: 'edit',
-                            child: Text('Edit caption'),
-                          ),
-                          PopupMenuItem(
-                            value: 'save',
-                            child: Text('Save image'),
-                          ),
-                          PopupMenuItem(
-                            value: 'share',
-                            child: Text('Share post'),
-                          ),
-                          PopupMenuDivider(),
-                          PopupMenuItem(
-                            value: 'delete',
-                            child: Text(
-                              'Delete post',
-                              style: TextStyle(color: Color(0xFFEB5D4F)),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
 
                   if (post.type == ProfilePostType.video)
                     Container(
@@ -544,6 +580,149 @@ class _ProfilePostDetailCardState extends State<ProfilePostDetailCard> {
                             size: 46,
                           ),
                         ),
+                      ),
+                    ),
+
+
+
+                    Positioned(
+                      top: 12,
+                      right: 12,
+                      child: PopupMenuButton<String>(
+                        color: const Color(0xFF15181D),
+                        icon: Container(
+                          padding: const EdgeInsets.all(7),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.45),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.more_horiz_rounded,
+                            color: Colors.white,
+                            size: 22,
+                          ),
+                        ),
+                        onSelected: (value) async {
+                          if (value == 'share') {
+                            await Share.share(
+                              'Check out this SideQuest post:\n\n${post.caption}\n\n${post.assetPath}',
+                            );
+                          }
+
+                          if (value == 'delete') {
+                            showDialog(
+                              context: context,
+                              builder: (context) {
+                                return AlertDialog(
+                                  backgroundColor: const Color(0xFF101216),
+                                  title: const Text(
+                                    'Delete post?',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                  content: Text(
+                                    post.votingOpen
+                                        ? 'Deleting this post will allow you to redo this SideQuest.'
+                                        : 'Voting for this SideQuest has already ended.\n\nIf you delete this post now, it will be gone forever and you cannot complete this SideQuest again.',
+                                    style: const TextStyle(color: Colors.white70),
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(context),
+                                      child: const Text('Cancel'),
+                                    ),
+                                    TextButton(
+                                      onPressed: () async {
+                                        try {
+                                          if (post.firestoreId == null) return;
+
+                                          final postRef = FirebaseFirestore.instance
+                                              .collection('posts')
+                                              .doc(post.firestoreId);
+
+                                          final postSnapshot = await postRef.get();
+                                          final postData = postSnapshot.data();
+
+                                          final votingEndsAt = postData?['votingEndsAt'];
+                                          final votingIsStillOpen = votingEndsAt == null
+                                              ? true
+                                              : DateTime.now().isBefore(votingEndsAt.toDate());
+
+                                          final currentUserId =
+                                              FirebaseAuth.instance.currentUser?.uid;
+                                          final questId = postData?['questId'];
+
+                                          if (votingIsStillOpen &&
+                                              currentUserId != null &&
+                                              questId != null) {
+                                            final completedSnapshot = await FirebaseFirestore
+                                                .instance
+                                                .collection('completed_sidequest')
+                                                .where('userID', isEqualTo: currentUserId)
+                                                .where('sideQuestID', isEqualTo: questId)
+                                                .get();
+
+                                            for (final doc in completedSnapshot.docs) {
+                                              await doc.reference.delete();
+                                            }
+                                          }
+
+                                          await postRef.delete();
+                                          ProfilePostStorage.posts.remove(widget.post);
+
+                                          if (!context.mounted) return;
+
+                                          Navigator.pop(context);
+
+                                          Navigator.pushAndRemoveUntil(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) => const OwnProfilePage(),
+                                            ),
+                                                (route) => false,
+                                          );
+                                        } catch (e) {
+                                          if (!context.mounted) return;
+
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(content: Text('Delete failed: $e')),
+                                          );
+                                        }
+                                      },
+                                      child: const Text(
+                                        'Delete',
+                                        style: TextStyle(color: Color(0xFFEB5D4F)),
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          }
+                        },
+                        itemBuilder: (context) => post.votingOpen
+                            ? const [
+                          PopupMenuItem(
+                            value: 'share',
+                            child: Text('Share post'),
+                          ),
+                          PopupMenuDivider(),
+                          PopupMenuItem(
+                            value: 'delete',
+                            child: Text(
+                              'Delete post',
+                              style: TextStyle(color: Color(0xFFEB5D4F)),
+                            ),
+                          ),
+                        ]
+                            : const [
+                          PopupMenuItem(
+                            value: 'delete',
+                            child: Text(
+                              'Delete post',
+                              style: TextStyle(color: Color(0xFFEB5D4F)),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],

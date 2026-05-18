@@ -6,7 +6,12 @@ import '../models/sidequest_post.dart';
 import '../../other_profile/other_profile_page.dart';
 import 'comments_bottom_sheet.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:just_audio/just_audio.dart';
+import 'package:audioplayers/audioplayers.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:gallery_saver_plus/gallery_saver.dart';
+import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
 
 
 class SideQuestPostCard extends StatefulWidget {
@@ -25,7 +30,6 @@ class _SideQuestPostCardState extends State<SideQuestPostCard> {
   bool isLiked = false;
 
   final AudioPlayer _audioPlayer = AudioPlayer();
-
   bool _isPlayingAudio = false;
 
   SideQuestPost get post => widget.post;
@@ -95,13 +99,64 @@ class _SideQuestPostCardState extends State<SideQuestPostCard> {
           post.voteStatus == 'failed' ||
           isTie;
 
+
+  @override
+  void dispose() {
+    _audioPlayer.dispose();
+    super.dispose();
+  }
+
+
   Future<void> deletePost() async {
     if (post.firestoreId == null) return;
 
-    await FirebaseFirestore.instance
+    final postRef = FirebaseFirestore.instance
         .collection('posts')
-        .doc(post.firestoreId)
-        .delete();
+        .doc(post.firestoreId);
+
+    final postSnapshot = await postRef.get();
+    final postData = postSnapshot.data();
+
+    final votingEndsAt = postData?['votingEndsAt'];
+
+    final votingStillOpen = votingEndsAt == null
+        ? true
+        : DateTime.now().isBefore(votingEndsAt.toDate());
+
+    final currentUserId = FirebaseAuth.instance.currentUser?.uid;
+    final questId = postData?['questId'];
+
+    if (votingStillOpen &&
+        currentUserId != null &&
+        questId != null) {
+
+      final completedSnapshot = await FirebaseFirestore.instance
+          .collection('completed_sidequest')
+          .where('userID', isEqualTo: currentUserId)
+          .where('sideQuestID', isEqualTo: questId)
+          .get();
+
+      for (final doc in completedSnapshot.docs) {
+        await doc.reference.delete();
+      }
+    }
+
+    await postRef.delete();
+  }
+
+  Future<void> reportPost() async {
+    if (post.firestoreId == null) return;
+
+    final currentUserId = FirebaseAuth.instance.currentUser?.uid;
+    if (currentUserId == null) return;
+
+    await FirebaseFirestore.instance.collection('reports').add({
+      'postId': post.firestoreId,
+      'reportedUserId': post.userId,
+      'reportedBy': currentUserId,
+      'reason': 'post_reported',
+      'createdAt': FieldValue.serverTimestamp(),
+    });
   }
 
 
@@ -374,36 +429,32 @@ class _SideQuestPostCardState extends State<SideQuestPostCard> {
                           child: Center(
                             child: GestureDetector(
                               onTap: () async {
-                                if (post.audioUrl == null) return;
+                                final audioUrl = post.audioUrl?.trim();
+
+                                if (audioUrl == null || audioUrl.isEmpty) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('No audio URL found')),
+                                  );
+                                  return;
+                                }
+
+                                if (_isPlayingAudio) {
+                                  await _audioPlayer.stop();
+                                  setState(() => _isPlayingAudio = false);
+                                  return;
+                                }
 
                                 try {
-                                  if (_isPlayingAudio) {
-                                    await _audioPlayer.stop();
+                                  await _audioPlayer.play(UrlSource(audioUrl));
+                                  setState(() => _isPlayingAudio = true);
 
-                                    setState(() {
-                                      _isPlayingAudio = false;
-                                    });
-                                  } else {
-                                    await _audioPlayer.setUrl(post.audioUrl!);
-                                    await _audioPlayer.play();
-
-                                    setState(() {
-                                      _isPlayingAudio = true;
-                                    });
-
-                                    _audioPlayer.playerStateStream.listen((state) {
-                                      if (state.processingState ==
-                                          ProcessingState.completed) {
-                                        if (mounted) {
-                                          setState(() {
-                                            _isPlayingAudio = false;
-                                          });
-                                        }
-                                      }
-                                    });
-                                  }
+                                  _audioPlayer.onPlayerComplete.listen((_) {
+                                    if (mounted) setState(() => _isPlayingAudio = false);
+                                  });
                                 } catch (e) {
-                                  print('JUST AUDIO ERROR: $e');
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text('Audio failed: $e')),
+                                  );
                                 }
                               },
                               child: Icon(
@@ -429,6 +480,199 @@ class _SideQuestPostCardState extends State<SideQuestPostCard> {
                               : 'assets/images/Max.jpg',
                           width: double.infinity,
                           fit: BoxFit.cover,
+                        ),
+
+                      Positioned(
+                          top: 12,
+                          right: 12,
+                          child: PopupMenuButton<String>(
+                            color: const Color(0xFF15181D),
+                            icon: Container(
+                              padding: const EdgeInsets.all(7),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withOpacity(0.45),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.more_horiz_rounded,
+                                color: Colors.white,
+                                size: 22,
+                              ),
+                            ),
+                            onSelected: (value) async {
+                              if (value == 'save') {
+                                try {
+                                  final imagePath = post.imageUrl ?? '';
+                                  if (imagePath.isEmpty) return;
+
+                                  final response = await http.get(Uri.parse(imagePath));
+                                  final tempDir = await getTemporaryDirectory();
+
+                                  final file = File(
+                                    '${tempDir.path}/sidequest_${DateTime.now().millisecondsSinceEpoch}.jpg',
+                                  );
+
+                                  await file.writeAsBytes(response.bodyBytes);
+
+                                  final success = await GallerySaver.saveImage(
+                                    file.path,
+                                    albumName: 'SideQuest',
+                                  );
+
+                                  if (!context.mounted) return;
+
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        success == true ? 'Saved to gallery' : 'Could not save image',
+                                      ),
+                                    ),
+                                  );
+                                } catch (e) {
+                                  if (!context.mounted) return;
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text('Save failed: $e')),
+                                  );
+                                }
+                              }
+
+                              if (value == 'share') {
+                                final mediaUrl = post.mediaType == 'audio'
+                                    ? post.audioUrl
+                                    : post.imageUrl;
+
+                                await Share.share(
+                                  'Check out this SideQuest post:\n\n${post.caption}\n\n${mediaUrl ?? ''}',
+                                );
+                              }
+
+                              if (value == 'report') {
+                                showDialog(
+                                  context: context,
+                                  builder: (context) {
+                                    return AlertDialog(
+                                      backgroundColor: const Color(0xFF101216),
+                                      title: const Text(
+                                        'Report post?',
+                                        style: TextStyle(color: Colors.white),
+                                      ),
+                                      content: const Text(
+                                        'Are you sure you want to report this post?',
+                                        style: TextStyle(color: Colors.white70),
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () => Navigator.pop(context),
+                                          child: const Text('Cancel'),
+                                        ),
+                                        TextButton(
+                                          onPressed: () async {
+                                            Navigator.pop(context);
+
+                                            await reportPost();
+
+                                            if (!context.mounted) return;
+
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              const SnackBar(
+                                                content: Text('Post reported'),
+                                              ),
+                                            );
+                                          },
+                                          child: const Text(
+                                            'Report',
+                                            style: TextStyle(color: Color(0xFFEB5D4F)),
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+                              }
+
+                              if (value == 'delete') {
+                                showDialog(
+                                  context: context,
+                                  builder: (context) {
+                                    return AlertDialog(
+                                      backgroundColor: const Color(0xFF101216),
+                                      title: const Text(
+                                        'Delete post?',
+                                        style: TextStyle(color: Colors.white),
+                                      ),
+                                      content: Text(
+                                        post.votingOpen
+                                            ? 'Deleting this post will allow you to redo this SideQuest.'
+                                            : '\nIf you delete this post now, it cannot be restored and this SideQuest cannot be completed again.',
+                                        style: const TextStyle(color: Colors.white70),
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () => Navigator.pop(context),
+                                          child: const Text('Cancel'),
+                                        ),
+                                        TextButton(
+                                          onPressed: () async {
+                                            Navigator.pop(context);
+                                            await deletePost();
+                                          },
+                                          child: const Text(
+                                            'Delete',
+                                            style: TextStyle(color: Color(0xFFEB5D4F)),
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+                              }
+                            },
+                            itemBuilder: (context) {
+                              final canSaveImage = post.mediaType != 'audio';
+
+                              if (post.isOwnPost) {
+                                return [
+                                  if (canSaveImage)
+                                    const PopupMenuItem(
+                                      value: 'save',
+                                      child: Text('Save image'),
+                                    ),
+                                  const PopupMenuItem(
+                                    value: 'share',
+                                    child: Text('Share post'),
+                                  ),
+                                  const PopupMenuDivider(),
+                                  const PopupMenuItem(
+                                    value: 'delete',
+                                    child: Text(
+                                      'Delete post',
+                                      style: TextStyle(color: Color(0xFFEB5D4F)),
+                                    ),
+                                  ),
+                                ];
+                              }
+
+                              return [
+                                if (canSaveImage)
+                                  const PopupMenuItem(
+                                    value: 'save',
+                                    child: Text('Save image'),
+                                  ),
+                                const PopupMenuItem(
+                                  value: 'share',
+                                  child: Text('Share post'),
+                                ),
+                                const PopupMenuDivider(),
+                                const PopupMenuItem(
+                                  value: 'report',
+                                  child: Text(
+                                    'Report post',
+                                    style: TextStyle(color: Color(0xFFEB5D4F)),
+                                  ),
+                                ),
+                              ];
+                            },
+                          ),
                         ),
                     ],
                   ),

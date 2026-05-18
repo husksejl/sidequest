@@ -346,6 +346,39 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
                                       if (value == 'delete' &&
                                           currentUserId != null &&
                                           data['userId'] == currentUserId) {
+
+                                        final confirmed = await showDialog<bool>(
+                                          context: context,
+                                          builder: (context) {
+                                            return AlertDialog(
+                                              backgroundColor: const Color(0xFF101216),
+                                              title: const Text(
+                                                'Delete comment?',
+                                                style: TextStyle(color: Colors.white),
+                                              ),
+                                              content: const Text(
+                                                'This comment will be permanently removed.',
+                                                style: TextStyle(color: Colors.white70),
+                                              ),
+                                              actions: [
+                                                TextButton(
+                                                  onPressed: () => Navigator.pop(context, false),
+                                                  child: const Text('Cancel'),
+                                                ),
+                                                TextButton(
+                                                  onPressed: () => Navigator.pop(context, true),
+                                                  child: const Text(
+                                                    'Delete',
+                                                    style: TextStyle(color: Color(0xFFEB5D4F)),
+                                                  ),
+                                                ),
+                                              ],
+                                            );
+                                          },
+                                        );
+
+                                        if (confirmed != true) return;
+
                                         await FirebaseFirestore.instance
                                             .collection('posts')
                                             .doc(widget.postId)
@@ -359,6 +392,27 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
                                             .update({
                                           'comments': FieldValue.increment(-1),
                                         });
+
+                                        return;
+                                      }
+
+                                      if (value == 'report') {
+                                        if (currentUserId == null) return;
+
+                                        await FirebaseFirestore.instance.collection('comments_reports').add({
+                                          'postId': widget.postId,
+                                          'commentId': doc.id,
+                                          'commentUserId': data['userId'],
+                                          'reportedBy': currentUserId,
+                                          'text': data['text'],
+                                          'createdAt': FieldValue.serverTimestamp(),
+                                        });
+
+                                        ScaffoldMessenger.of(this.context).showSnackBar(
+                                          const SnackBar(
+                                            content: Text('Comment reported'),
+                                          ),
+                                        );
                                       }
                                     },
                                     itemBuilder: (context) {

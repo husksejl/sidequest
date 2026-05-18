@@ -262,6 +262,14 @@ class _CreateScreenPageState extends State<CreateScreenPage> {
                         icon: Icons.mic_rounded,
                       ),
                     ),
+                    //IgnorePointer(
+                    //   child: Opacity(
+                    //     opacity: 0.35,
+                    //     child: const CreateActionButton(
+                    //       icon: Icons.mic_rounded,
+                    //     ),
+                    //   ),
+                    // ),
                   ],
                 ),
                 const SizedBox(height: 12),

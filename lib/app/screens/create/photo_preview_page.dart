@@ -11,6 +11,7 @@ import '../../shared/services/daily_sidequest_service.dart';
 import 'models/create_quest.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 
 class PhotoPreviewPage extends StatefulWidget {
   final String imagePath;
@@ -36,9 +37,16 @@ class _PhotoPreviewPageState extends State<PhotoPreviewPage> {
     required String userId,
     required String imagePath,
   }) async {
-    final file = File(imagePath);
-
     final fileName = '${DateTime.now().millisecondsSinceEpoch}.jpg';
+
+    final compressedBytes = await FlutterImageCompress.compressWithFile(
+      imagePath,
+      minWidth: 1080,
+      minHeight: 1080,
+      quality: 75,
+    );
+
+    if (compressedBytes == null) throw Exception('Image compression failed');
 
     final ref = FirebaseStorage.instance
         .ref()
@@ -46,8 +54,8 @@ class _PhotoPreviewPageState extends State<PhotoPreviewPage> {
         .child(userId)
         .child(fileName);
 
-    await ref.putFile(
-      file,
+    await ref.putData(
+      compressedBytes,
       SettableMetadata(contentType: 'image/jpeg'),
     );
 
@@ -107,6 +115,7 @@ class _PhotoPreviewPageState extends State<PhotoPreviewPage> {
         'caption': _captionController.text.trim(),
         'questTitle': widget.quest.title,
         'questId': widget.quest.id,
+        'questDate': widget.quest.date,
         'imageUrl': imageUrl,
         'mediaType': 'image',
         'createdAt': FieldValue.serverTimestamp(),

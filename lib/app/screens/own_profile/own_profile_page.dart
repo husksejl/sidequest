@@ -187,6 +187,15 @@ class OwnProfilePage extends StatelessWidget {
 
                   final docs = snapshot.data!.docs;
 
+                  docs.sort((a, b) {
+                    final aTime = a.data()['createdAt'] as Timestamp?;
+                    final bTime = b.data()['createdAt'] as Timestamp?;
+
+                    if (aTime == null || bTime == null) return 0;
+
+                    return bTime.compareTo(aTime);
+                  });
+
                   final firebasePosts = docs.map((doc) {
                     final data = doc.data();
 
