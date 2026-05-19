@@ -79,8 +79,14 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
       maxChildSize: 0.92,
       expand: false,
       builder: (context, scrollController) {
-        return Container(
-          padding: const EdgeInsets.fromLTRB(18, 12, 18, 14),
+        return AnimatedPadding(
+            duration: const Duration(milliseconds: 180),
+            curve: Curves.easeOut,
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+            ),
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(18, 12, 18, 14),
           decoration: const BoxDecoration(
             color: Color(0xFF101216),
             borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
@@ -509,6 +515,7 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
               ),
             ],
           ),
+            ),
         );
       },
     );
