@@ -76,8 +76,14 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
       maxChildSize: 0.94,
       expand: false,
       builder: (context, scrollController) {
-        return Container(
-          padding: const EdgeInsets.fromLTRB(18, 12, 18, 18),
+        return AnimatedPadding(
+            duration: const Duration(milliseconds: 180),
+            curve: Curves.easeOut,
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+            ),
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(18, 12, 18, 18),
           decoration: const BoxDecoration(
             color: Color(0xFF101216),
             borderRadius: BorderRadius.vertical(
@@ -287,6 +293,7 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
               );
             },
           ),
+            ),
         );
       },
     );
