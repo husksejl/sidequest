@@ -4,14 +4,11 @@ import 'package:flutter/material.dart';
 import '../../shared/widgets/custom_bottom_nav.dart';
 import 'widgets/other_profile_post_grid.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../social_hub/social_hub_page.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'widgets/other_profile_header.dart';
 import '../../shared/widgets/follow_list_sheet.dart';
 
 import '../../shared/services/chat_service.dart';
 import '../group_chat/group_chat_page.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'widgets/other_profile_actions.dart';
 import 'widgets/other_profile_meta.dart';
 

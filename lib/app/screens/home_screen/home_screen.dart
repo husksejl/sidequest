@@ -42,36 +42,6 @@ class _HomeScreenState extends State<HomeScreen>
   int selectedFeedTab = 0;
   List<String> forYouOrder = [];
 
-  static const List<SideQuestPost> posts = [
-    SideQuestPost(
-      userName: 'Max V.',
-      timeAgo: '20m ago',
-      location: 'Melbourne',
-      title: 'URBAN OASIS',
-      imageEmoji: '🌿',
-      imageLabelTop: 'Y O U R S',
-      imageLabelBottom: 'SAFE  •  SOFT  •  WILD',
-      caption: 'I put on a wig and suddenly have opinions #quirky',
-      likes: 124,
-      comments: 18,
-      completedVotes: 21,
-      notCompletedVotes: 3,
-    ),
-    SideQuestPost(
-      userName: 'Charles L.',
-      timeAgo: '42m ago',
-      location: 'Monte Carlo',
-      title: 'SMILE HUNT',
-      imageEmoji: '📸',
-      imageLabelTop: 'M O M E N T',
-      imageLabelBottom: 'LIGHT  •  JOY  •  CITY',
-      caption: 'The mask told me to do it 🤪',
-      likes: 89,
-      comments: 11,
-      completedVotes: 17,
-      notCompletedVotes: 2,
-    ),
-  ];
 
   @override
   void initState() {
@@ -379,7 +349,6 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-  @override
   @override
   Widget build(BuildContext context) {
     super.build(context);

@@ -27,7 +27,6 @@ class SideQuestPostCard extends StatefulWidget {
 }
 
 class _SideQuestPostCardState extends State<SideQuestPostCard> {
-  bool isLiked = false;
 
   final AudioPlayer _audioPlayer = AudioPlayer();
   bool _isPlayingAudio = false;
@@ -472,14 +471,6 @@ class _SideQuestPostCardState extends State<SideQuestPostCard> {
                           post.imageUrl!,
                           width: double.infinity,
                           fit: BoxFit.cover,
-                        )
-                      else
-                        Image.asset(
-                          post.userName == 'Charles L.'
-                              ? 'assets/images/Charles.jpg'
-                              : 'assets/images/Max.jpg',
-                          width: double.infinity,
-                          fit: BoxFit.cover,
                         ),
 
                       Positioned(
@@ -681,9 +672,7 @@ class _SideQuestPostCardState extends State<SideQuestPostCard> {
             ),
           ),
 
-          const SizedBox(height: 14),
-
-          const SizedBox(height: 14),
+          const SizedBox(height: 28),
 
           Row(
             children: [

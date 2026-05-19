@@ -8,9 +8,6 @@ import '../../home_screen/widgets/comments_bottom_sheet.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:gallery_saver_plus/gallery_saver.dart';
-import 'package:http/http.dart' as http;
-import 'package:path_provider/path_provider.dart';
 
 
 class ProfilePostDetailCard extends StatefulWidget {
@@ -26,7 +23,6 @@ class ProfilePostDetailCard extends StatefulWidget {
 }
 
 class _ProfilePostDetailCardState extends State<ProfilePostDetailCard> {
-  bool isLiked = false;
   final AudioPlayer audioPlayer = AudioPlayer();
   bool isPlayingAudio = false;
 
@@ -899,45 +895,6 @@ class _SmallStat extends StatelessWidget {
               color: Colors.white,
               fontSize: 12,
               fontWeight: FontWeight.w800,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _VotePreviewButton extends StatelessWidget {
-  final String label;
-  final Color color;
-  final IconData icon;
-
-  const _VotePreviewButton({
-    required this.label,
-    required this.color,
-    required this.icon,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 34,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: color),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, color: color, size: 18),
-          const SizedBox(width: 6),
-          Text(
-            label.toUpperCase(),
-            style: TextStyle(
-              color: color,
-              fontSize: 10,
-              fontWeight: FontWeight.w800,
-              letterSpacing: 0.7,
             ),
           ),
         ],
