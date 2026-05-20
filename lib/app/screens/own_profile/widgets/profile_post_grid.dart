@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:sidequest/l10n/app_localizations.dart';
 import '../models/profile_post.dart';
 import 'profile_post_tile.dart';
-import 'profile_post_detail_card.dart';
+import '../../home_screen/widgets/sidequest_post_card.dart';
+import '../../home_screen/models/sidequest_post.dart';
 
 class ProfilePostGrid extends StatelessWidget {
   final List<ProfilePost> posts;
@@ -64,6 +65,32 @@ class _ProfilePostDetailPageState extends State<ProfilePostDetailPage> {
 
   static const double estimatedPostHeight = 560;
 
+  SideQuestPost _toSideQuestPost(ProfilePost post) {
+    return SideQuestPost(
+      userName: post.userName,
+      timeAgo: post.timeAgo,
+      location: post.location,
+      title: post.questTitle,
+      imageEmoji: '',
+      imageLabelTop: '',
+      imageLabelBottom: '',
+      caption: post.caption,
+      likes: post.likes,
+      comments: post.comments,
+      completedVotes: post.completedVotes,
+      notCompletedVotes: post.notCompletedVotes,
+      imageUrl: post.type == ProfilePostType.audio ? null : post.assetPath,
+      audioUrl: post.type == ProfilePostType.audio ? post.assetPath : null,
+      profileImageUrl: post.profileImageUrl,
+      firestoreId: post.firestoreId,
+      isOwnPost: true,
+      isFirestorePost: true,
+      voteStatus: post.voteStatus.name,
+      votingOpen: post.votingOpen,
+      mediaType: post.type == ProfilePostType.audio ? 'audio' : 'image',
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -106,7 +133,9 @@ class _ProfilePostDetailPageState extends State<ProfilePostDetailPage> {
         itemBuilder: (context, index) {
           return Padding(
             padding: const EdgeInsets.only(bottom: 16),
-            child: ProfilePostDetailCard(post: widget.posts[index]),
+            child: SideQuestPostCard(
+              post: _toSideQuestPost(widget.posts[index]),
+            ),
           );
         },
       ),

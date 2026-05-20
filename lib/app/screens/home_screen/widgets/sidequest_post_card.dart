@@ -12,6 +12,9 @@ import 'package:gallery_saver_plus/gallery_saver.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
+import '../../../shared/widgets/post/post_media.dart';
+import '../../../shared/widgets/post/post_popup_menu.dart';
+import '../../../shared/widgets/post/post_actions_row.dart';
 
 
 class SideQuestPostCard extends StatefulWidget {
@@ -233,23 +236,7 @@ class _SideQuestPostCardState extends State<SideQuestPostCard> {
         children: [
           Row(
             children: [
-              CircleAvatar(
-                radius: 22,
-                backgroundColor: const Color(0xFF1B2026),
-                backgroundImage: post.profileImageUrl != null &&
-                    post.profileImageUrl!.isNotEmpty
-                    ? NetworkImage(post.profileImageUrl!)
-                    : null,
-                child: post.profileImageUrl == null ||
-                    post.profileImageUrl!.isEmpty
-                    ? const Icon(
-                  Icons.person_rounded,
-                  color: Colors.white54,
-                  size: 24,
-                )
-                    : null,
-              ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 14),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -412,259 +399,151 @@ class _SideQuestPostCardState extends State<SideQuestPostCard> {
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
-                      if (post.mediaType == 'audio')
-                        Container(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                const Color(0xFFEB5D4F).withOpacity(0.22),
-                                const Color(0xFF050608),
-                                const Color(0xFF00B2AA).withOpacity(0.18),
-                              ],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                          ),
-                          child: Center(
-                            child: GestureDetector(
-                              onTap: () async {
-                                final audioUrl = post.audioUrl?.trim();
 
-                                if (audioUrl == null || audioUrl.isEmpty) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('No audio URL found')),
-                                  );
-                                  return;
-                                }
-
-                                if (_isPlayingAudio) {
-                                  await _audioPlayer.stop();
-                                  setState(() => _isPlayingAudio = false);
-                                  return;
-                                }
-
-                                try {
-                                  await _audioPlayer.play(UrlSource(audioUrl));
-                                  setState(() => _isPlayingAudio = true);
-
-                                  _audioPlayer.onPlayerComplete.listen((_) {
-                                    if (mounted) setState(() => _isPlayingAudio = false);
-                                  });
-                                } catch (e) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('Audio failed: $e')),
-                                  );
-                                }
-                              },
-                              child: Icon(
-                                _isPlayingAudio
-                                    ? Icons.pause_circle_filled_rounded
-                                    : Icons.play_circle_fill_rounded,
-                                color: Colors.white,
-                                size: 92,
-                              ),
-                            ),
-                          ),
-                        )
-                      else if (post.isFirestorePost && post.imageUrl != null)
-                        Image.network(
-                          post.imageUrl!,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                        ),
+                      PostMedia(
+                        mediaType: post.mediaType,
+                        imageUrl: post.imageUrl,
+                        audioUrl: post.audioUrl,
+                      ),
 
                       Positioned(
-                          top: 12,
-                          right: 12,
-                          child: PopupMenuButton<String>(
-                            color: const Color(0xFF15181D),
-                            icon: Container(
-                              padding: const EdgeInsets.all(7),
-                              decoration: BoxDecoration(
-                                color: Colors.black.withOpacity(0.45),
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.more_horiz_rounded,
-                                color: Colors.white,
-                                size: 22,
-                              ),
-                            ),
-                            onSelected: (value) async {
-                              if (value == 'save') {
-                                try {
-                                  final imagePath = post.imageUrl ?? '';
-                                  if (imagePath.isEmpty) return;
+                        top: 12,
+                        right: 12,
+                        child: PostPopupMenu(
+                          isOwnPost: post.isOwnPost,
+                          canSaveImage: post.mediaType != 'audio',
 
-                                  final response = await http.get(Uri.parse(imagePath));
-                                  final tempDir = await getTemporaryDirectory();
+                          onSave: () async {
+                            try {
+                              final imagePath = post.imageUrl ?? '';
+                              if (imagePath.isEmpty) return;
 
-                                  final file = File(
-                                    '${tempDir.path}/sidequest_${DateTime.now().millisecondsSinceEpoch}.jpg',
-                                  );
+                              final response = await http.get(Uri.parse(imagePath));
+                              final tempDir = await getTemporaryDirectory();
 
-                                  await file.writeAsBytes(response.bodyBytes);
+                              final file = File(
+                                '${tempDir.path}/sidequest_${DateTime.now().millisecondsSinceEpoch}.jpg',
+                              );
 
-                                  final success = await GallerySaver.saveImage(
-                                    file.path,
-                                    albumName: 'SideQuest',
-                                  );
+                              await file.writeAsBytes(response.bodyBytes);
 
-                                  if (!context.mounted) return;
+                              final success = await GallerySaver.saveImage(
+                                file.path,
+                                albumName: 'SideQuest',
+                              );
 
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        success == true ? 'Saved to gallery' : 'Could not save image',
-                                      ),
-                                    ),
-                                  );
-                                } catch (e) {
-                                  if (!context.mounted) return;
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('Save failed: $e')),
-                                  );
-                                }
-                              }
+                              if (!context.mounted) return;
 
-                              if (value == 'share') {
-                                final mediaUrl = post.mediaType == 'audio'
-                                    ? post.audioUrl
-                                    : post.imageUrl;
-
-                                await Share.share(
-                                  'Check out this SideQuest post:\n\n${post.caption}\n\n${mediaUrl ?? ''}',
-                                );
-                              }
-
-                              if (value == 'report') {
-                                showDialog(
-                                  context: context,
-                                  builder: (context) {
-                                    return AlertDialog(
-                                      backgroundColor: const Color(0xFF101216),
-                                      title: const Text(
-                                        'Report post?',
-                                        style: TextStyle(color: Colors.white),
-                                      ),
-                                      content: const Text(
-                                        'Are you sure you want to report this post?',
-                                        style: TextStyle(color: Colors.white70),
-                                      ),
-                                      actions: [
-                                        TextButton(
-                                          onPressed: () => Navigator.pop(context),
-                                          child: const Text('Cancel'),
-                                        ),
-                                        TextButton(
-                                          onPressed: () async {
-                                            Navigator.pop(context);
-
-                                            await reportPost();
-
-                                            if (!context.mounted) return;
-
-                                            ScaffoldMessenger.of(context).showSnackBar(
-                                              const SnackBar(
-                                                content: Text('Post reported'),
-                                              ),
-                                            );
-                                          },
-                                          child: const Text(
-                                            'Report',
-                                            style: TextStyle(color: Color(0xFFEB5D4F)),
-                                          ),
-                                        ),
-                                      ],
-                                    );
-                                  },
-                                );
-                              }
-
-                              if (value == 'delete') {
-                                showDialog(
-                                  context: context,
-                                  builder: (context) {
-                                    return AlertDialog(
-                                      backgroundColor: const Color(0xFF101216),
-                                      title: const Text(
-                                        'Delete post?',
-                                        style: TextStyle(color: Colors.white),
-                                      ),
-                                      content: Text(
-                                        post.votingOpen
-                                            ? 'Deleting this post will allow you to redo this SideQuest.'
-                                            : '\nIf you delete this post now, it cannot be restored and this SideQuest cannot be completed again.',
-                                        style: const TextStyle(color: Colors.white70),
-                                      ),
-                                      actions: [
-                                        TextButton(
-                                          onPressed: () => Navigator.pop(context),
-                                          child: const Text('Cancel'),
-                                        ),
-                                        TextButton(
-                                          onPressed: () async {
-                                            Navigator.pop(context);
-                                            await deletePost();
-                                          },
-                                          child: const Text(
-                                            'Delete',
-                                            style: TextStyle(color: Color(0xFFEB5D4F)),
-                                          ),
-                                        ),
-                                      ],
-                                    );
-                                  },
-                                );
-                              }
-                            },
-                            itemBuilder: (context) {
-                              final canSaveImage = post.mediaType != 'audio';
-
-                              if (post.isOwnPost) {
-                                return [
-                                  if (canSaveImage)
-                                    const PopupMenuItem(
-                                      value: 'save',
-                                      child: Text('Save image'),
-                                    ),
-                                  const PopupMenuItem(
-                                    value: 'share',
-                                    child: Text('Share post'),
-                                  ),
-                                  const PopupMenuDivider(),
-                                  const PopupMenuItem(
-                                    value: 'delete',
-                                    child: Text(
-                                      'Delete post',
-                                      style: TextStyle(color: Color(0xFFEB5D4F)),
-                                    ),
-                                  ),
-                                ];
-                              }
-
-                              return [
-                                if (canSaveImage)
-                                  const PopupMenuItem(
-                                    value: 'save',
-                                    child: Text('Save image'),
-                                  ),
-                                const PopupMenuItem(
-                                  value: 'share',
-                                  child: Text('Share post'),
-                                ),
-                                const PopupMenuDivider(),
-                                const PopupMenuItem(
-                                  value: 'report',
-                                  child: Text(
-                                    'Report post',
-                                    style: TextStyle(color: Color(0xFFEB5D4F)),
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    success == true
+                                        ? 'Saved to gallery'
+                                        : 'Could not save image',
                                   ),
                                 ),
-                              ];
-                            },
-                          ),
+                              );
+                            } catch (e) {
+                              if (!context.mounted) return;
+
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Save failed: $e')),
+                              );
+                            }
+                          },
+
+                          onShare: () async {
+                            final mediaUrl = post.mediaType == 'audio'
+                                ? post.audioUrl
+                                : post.imageUrl;
+
+                            await Share.share(
+                              'Check out this SideQuest post:\n\n${post.caption}\n\n${mediaUrl ?? ''}',
+                            );
+                          },
+
+                          onDelete: () {
+                            showDialog(
+                              context: context,
+                              builder: (context) {
+                                return AlertDialog(
+                                  backgroundColor: const Color(0xFF101216),
+                                  title: const Text(
+                                    'Delete post?',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                  content: Text(
+                                    post.votingOpen
+                                        ? 'Deleting this post will allow you to redo this SideQuest.'
+                                        : '\nIf you delete this post now, it cannot be restored and this SideQuest cannot be completed again.',
+                                    style: const TextStyle(color: Colors.white70),
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(context),
+                                      child: const Text('Cancel'),
+                                    ),
+                                    TextButton(
+                                      onPressed: () async {
+                                        Navigator.pop(context);
+                                        await deletePost();
+                                      },
+                                      child: const Text(
+                                        'Delete',
+                                        style: TextStyle(color: Color(0xFFEB5D4F)),
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          },
+
+                          onReport: () {
+                            showDialog(
+                              context: context,
+                              builder: (context) {
+                                return AlertDialog(
+                                  backgroundColor: const Color(0xFF101216),
+                                  title: const Text(
+                                    'Report post?',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                  content: const Text(
+                                    'Are you sure you want to report this post?',
+                                    style: TextStyle(color: Colors.white70),
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(context),
+                                      child: const Text('Cancel'),
+                                    ),
+                                    TextButton(
+                                      onPressed: () async {
+                                        Navigator.pop(context);
+
+                                        await reportPost();
+
+                                        if (!context.mounted) return;
+
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          const SnackBar(
+                                            content: Text('Post reported'),
+                                          ),
+                                        );
+                                      },
+                                      child: const Text(
+                                        'Report',
+                                        style: TextStyle(color: Color(0xFFEB5D4F)),
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          },
                         ),
+                      ),
                     ],
                   ),
                 ),
@@ -674,90 +553,12 @@ class _SideQuestPostCardState extends State<SideQuestPostCard> {
 
           const SizedBox(height: 28),
 
-          Row(
-            children: [
-              StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-                stream: FirebaseFirestore.instance
-                    .collection('posts')
-                    .doc(post.firestoreId)
-                    .snapshots(),
-                builder: (context, snapshot) {
-                  final data = snapshot.data?.data();
-
-                  final likedBy = List<String>.from(data?['likedBy'] ?? []);
-                  final currentUserId = FirebaseAuth.instance.currentUser?.uid ?? '';
-                  final isLiked = likedBy.contains(currentUserId);
-                  final likes = data?['likes'] ?? post.likes;
-
-                  return GestureDetector(
-                    onTap: () async {
-                      if (post.firestoreId == null || currentUserId.isEmpty) return;
-
-                      final postRef = FirebaseFirestore.instance
-                          .collection('posts')
-                          .doc(post.firestoreId);
-
-                      if (isLiked) {
-                        await postRef.update({
-                          'likedBy': FieldValue.arrayRemove([currentUserId]),
-                          'likes': FieldValue.increment(-1),
-                        });
-                      } else {
-                        await postRef.update({
-                          'likedBy': FieldValue.arrayUnion([currentUserId]),
-                          'likes': FieldValue.increment(1),
-                        });
-                      }
-                    },
-                    child: _SmallStat(
-                      icon: isLiked ? Icons.favorite : Icons.favorite_border_rounded,
-                      value: '$likes',
-                      color: const Color(0xFFEB5D4F),
-                    ),
-                  );
-                },
-              ),
-              const SizedBox(width: 8),
-              GestureDetector(
-                onTap: () {
-                  if (post.firestoreId == null) return;
-
-                  showModalBottomSheet(
-                    context: context,
-                    isScrollControlled: true,
-                    backgroundColor: Colors.transparent,
-                    builder: (_) => CommentsBottomSheet(
-                      postId: post.firestoreId!,
-                    ),
-                  );
-                },
-                child: _SmallStat(
-                  icon: Icons.chat_bubble_outline_rounded,
-                  value: '${post.comments}',
-                  color: const Color(0xFF00B2AA),
-                ),
-              ),
-              const Spacer(),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(999),
-                  border: Border.all(color: statusColor),
-                ),
-                child: Text(
-                  statusText(context).toUpperCase(),
-                  style: TextStyle(
-                    color: statusColor,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 0.8,
-                  ),
-                ),
-              ),
-            ],
+          PostActionsRow(
+            firestoreId: post.firestoreId,
+            initialLikes: post.likes,
+            initialComments: post.comments,
+            statusColor: statusColor,
+            statusText: statusText(context),
           ),
 
           const SizedBox(height: 12),
