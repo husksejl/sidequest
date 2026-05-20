@@ -24,6 +24,7 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
   String? selectedLocationLon;
 
   bool isSaving = false;
+  bool hasLoadedInitialData = false;
 
   @override
   void dispose() {
@@ -113,18 +114,30 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
 
               final data = snapshot.data!.data() ?? {};
 
-              usernameController.text =
-                  data['username']?.toString() ?? '';
-              fullNameController.text =
-                  data['fullName']?.toString() ?? '';
-              bioController.text = data['bio']?.toString() ?? '';
-              locationController.text =
-                  data['location']?.toString() ?? '';
-              selectedLocationLat = data['locationLat']?.toString();
-              selectedLocationLon = data['locationLon']?.toString();
+              if (!hasLoadedInitialData) {
+                usernameController.text =
+                    data['username']?.toString() ?? '';
 
-              websiteController.text =
-                  data['website']?.toString() ?? '';
+                fullNameController.text =
+                    data['fullName']?.toString() ?? '';
+
+                bioController.text =
+                    data['bio']?.toString() ?? '';
+
+                locationController.text =
+                    data['location']?.toString() ?? '';
+
+                selectedLocationLat =
+                    data['locationLat']?.toString();
+
+                selectedLocationLon =
+                    data['locationLon']?.toString();
+
+                websiteController.text =
+                    data['website']?.toString() ?? '';
+
+                hasLoadedInitialData = true;
+              }
 
               return ListView(
                 controller: scrollController,
