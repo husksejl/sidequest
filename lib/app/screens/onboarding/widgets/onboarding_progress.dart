@@ -25,12 +25,12 @@ class OnboardingProgress extends StatelessWidget {
           decoration: BoxDecoration(
             color: isActive
                 ? const Color(0xFF00D9E8)
-                : Colors.white.withOpacity(0.18),
+                : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.18),
             borderRadius: BorderRadius.circular(99),
             boxShadow: isActive
                 ? [
               BoxShadow(
-                color: const Color(0xFF00D9E8).withOpacity(0.45),
+                color: const Color(0xFF00D9E8).withValues(alpha: 0.45),
                 blurRadius: 12,
               ),
             ]

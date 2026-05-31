@@ -20,21 +20,21 @@ class MessageThreadCard extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 14),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: const Color(0xFF151515),
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(24),
         ),
         child: Row(
           children: [
-            buildAvatar(),
+            buildAvatar(context),
             const SizedBox(width: 14),
             Expanded(
-              child: buildTextContent(),
+              child: buildTextContent(context),
             ),
             const SizedBox(width: 8),
             Text(
               thread.time.toUpperCase(),
-              style: const TextStyle(
-                color: Colors.grey,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.56),
                 fontSize: 9,
                 fontWeight: FontWeight.bold,
               ),
@@ -45,23 +45,23 @@ class MessageThreadCard extends StatelessWidget {
     );
   }
 
-  Widget buildAvatar() {
+  Widget buildAvatar(BuildContext context) {
     return Stack(
       children: [
         Container(
           width: 54,
           height: 54,
           decoration: BoxDecoration(
-            color: const Color(0xFF102326),
+            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.12),
             shape: BoxShape.circle,
             border: Border.all(
-              color: const Color(0xFF00E5FF),
+              color: Theme.of(context).colorScheme.primary,
               width: 1.5,
             ),
           ),
           child: Icon(
             thread.isGroup ? Icons.groups_rounded : Icons.person,
-            color: Colors.white,
+            color: Theme.of(context).colorScheme.onSurface,
             size: 26,
           ),
         ),
@@ -76,7 +76,7 @@ class MessageThreadCard extends StatelessWidget {
                 color: Colors.greenAccent,
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: const Color(0xFF151515),
+                  color: Theme.of(context).colorScheme.surface,
                   width: 2,
                 ),
               ),
@@ -86,14 +86,14 @@ class MessageThreadCard extends StatelessWidget {
     );
   }
 
-  Widget buildTextContent() {
+  Widget buildTextContent(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           thread.name,
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurface,
             fontWeight: FontWeight.bold,
             fontSize: 15,
           ),
@@ -102,8 +102,8 @@ class MessageThreadCard extends StatelessWidget {
         Text(
           thread.preview,
           overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
-            color: Colors.grey,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.64),
             fontSize: 12,
           ),
         ),

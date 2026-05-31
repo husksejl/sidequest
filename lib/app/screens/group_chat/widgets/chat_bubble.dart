@@ -13,13 +13,16 @@ class ChatBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (message.isOwnMessage) {
-      return buildOwnMessage();
+      return buildOwnMessage(context);
     } else {
-      return buildOtherMessage();
+      return buildOtherMessage(context);
     }
   }
 
-  Widget buildOwnMessage() {
+  Widget buildOwnMessage(BuildContext context) {
+    final theme = Theme.of(context);
+    final isLight = theme.brightness == Brightness.light;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Column(
@@ -27,8 +30,8 @@ class ChatBubble extends StatelessWidget {
         children: [
           Text(
             message.senderName,
-            style: const TextStyle(
-              color: Color(0xFF00E5FF),
+            style: TextStyle(
+              color: theme.colorScheme.primary,
               fontSize: 10,
               fontWeight: FontWeight.bold,
             ),
@@ -38,16 +41,20 @@ class ChatBubble extends StatelessWidget {
             constraints: const BoxConstraints(maxWidth: 250),
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: const Color(0xFF4A2421),
+              color: isLight
+                  ? const Color(0xFFFF7A66).withValues(alpha: 0.14)
+                  : const Color(0xFF4A2421),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: const Color(0xFFFF7A66).withOpacity(0.25),
+                color: const Color(0xFFFF7A66).withValues(
+                  alpha: isLight ? 0.35 : 0.25,
+                ),
               ),
             ),
             child: Text(
               message.text,
-              style: const TextStyle(
-                color: Colors.white,
+              style: TextStyle(
+                color: theme.colorScheme.onSurface,
                 fontSize: 13,
                 height: 1.35,
               ),
@@ -58,21 +65,24 @@ class ChatBubble extends StatelessWidget {
     );
   }
 
-  Widget buildOtherMessage() {
+  Widget buildOtherMessage(BuildContext context) {
+    final theme = Theme.of(context);
+    final isLight = theme.brightness == Brightness.light;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          buildAvatar(),
+          buildAvatar(context),
           const SizedBox(width: 9),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 message.senderName,
-                style: const TextStyle(
-                  color: Colors.grey,
+                style: TextStyle(
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.62),
                   fontSize: 10,
                   fontWeight: FontWeight.bold,
                 ),
@@ -82,16 +92,20 @@ class ChatBubble extends StatelessWidget {
                 constraints: const BoxConstraints(maxWidth: 250),
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF102326),
+                  color: isLight
+                      ? const Color(0xFF00E5FF).withValues(alpha: 0.10)
+                      : const Color(0xFF102326),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: const Color(0xFF00E5FF).withOpacity(0.2),
+                    color: const Color(0xFF00E5FF).withValues(
+                      alpha: isLight ? 0.28 : 0.2,
+                    ),
                   ),
                 ),
                 child: Text(
                   message.text,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: theme.colorScheme.onSurface,
                     fontSize: 13,
                     height: 1.35,
                   ),
@@ -104,21 +118,26 @@ class ChatBubble extends StatelessWidget {
     );
   }
 
-  Widget buildAvatar() {
+  Widget buildAvatar(BuildContext context) {
+    final theme = Theme.of(context);
+    final isLight = theme.brightness == Brightness.light;
+
     return Container(
       width: 32,
       height: 32,
       decoration: BoxDecoration(
-        color: const Color(0xFF102326),
+        color: isLight
+            ? const Color(0xFF00E5FF).withValues(alpha: 0.10)
+            : const Color(0xFF102326),
         shape: BoxShape.circle,
         border: Border.all(
           color: const Color(0xFF00E5FF),
           width: 1,
         ),
       ),
-      child: const Icon(
+      child: Icon(
         Icons.person,
-        color: Colors.white,
+        color: theme.colorScheme.onSurface,
         size: 18,
       ),
     );

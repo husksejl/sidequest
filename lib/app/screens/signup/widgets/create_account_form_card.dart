@@ -229,10 +229,10 @@ class _CreateAccountFormCardState extends State<CreateAccountFormCard> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        border: Border.all(color: Colors.white12),
+        border: Border.all(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.12)),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF18D7FF).withOpacity(0.08),
+            color: const Color(0xFF18D7FF).withValues(alpha: 0.08),
             blurRadius: 30,
             spreadRadius: 1,
           ),
@@ -285,7 +285,7 @@ class _CreateAccountFormCardState extends State<CreateAccountFormCard> {
                 _showPassword
                     ? Icons.visibility_off_outlined
                     : Icons.visibility_outlined,
-                color: Colors.white70,
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.70),
                 size: 22,
               ),
             ),
@@ -308,7 +308,7 @@ class _CreateAccountFormCardState extends State<CreateAccountFormCard> {
                 _showConfirmPassword
                     ? Icons.visibility_off_outlined
                     : Icons.visibility_outlined,
-                color: Colors.white70,
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.70),
                 size: 22,
               ),
             ),
@@ -331,9 +331,9 @@ class _CreateAccountFormCardState extends State<CreateAccountFormCard> {
               width: double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.04),
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.04),
                 borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: Colors.white.withOpacity(0.06)),
+                border: Border.all(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.06)),
               ),
               child: Row(
                 children: [
@@ -349,11 +349,11 @@ class _CreateAccountFormCardState extends State<CreateAccountFormCard> {
                       border: Border.all(
                         color: _acceptedTerms
                             ? const Color(0xFF18D7FF)
-                            : Colors.white24,
+                            : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.24),
                       ),
                     ),
                     child: _acceptedTerms
-                        ? const Icon(
+                        ? Icon(
                       Icons.check_rounded,
                       color: Colors.black,
                       size: 20,
@@ -368,11 +368,11 @@ class _CreateAccountFormCardState extends State<CreateAccountFormCard> {
                         children: [
                           TextSpan(
                             text: l10n.termsPrivacyPolicy,
-                            style: const TextStyle(color: Colors.white),
+                            style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
                           ),
                         ],
                       ),
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: Color(0xFFC1C6CF),
                         fontSize: 14,
                         height: 1.3,
@@ -398,15 +398,15 @@ class _CreateAccountFormCardState extends State<CreateAccountFormCard> {
                     Color(0xFFFF9B8F),
                   ]
                       : [
-                    Colors.white.withOpacity(0.12),
-                    Colors.white.withOpacity(0.08),
+                    Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.12),
+                    Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.08),
                   ],
                   begin: Alignment.centerLeft,
                   end: Alignment.centerRight,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFFFF8D84).withOpacity(0.18),
+                    color: const Color(0xFFFF8D84).withValues(alpha: 0.18),
                     blurRadius: 22,
                     offset: const Offset(0, 10),
                   ),
@@ -435,7 +435,7 @@ class _CreateAccountFormCardState extends State<CreateAccountFormCard> {
                 )
                     : Text(
                   l10n.createAccountButton,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: Colors.black,
                     fontWeight: FontWeight.w900,
                     fontSize: 17,
@@ -462,7 +462,7 @@ class _CreateAccountFormCardState extends State<CreateAccountFormCard> {
                 children: [
                   TextSpan(
                     text: l10n.logInCaps,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: Color(0xFF18D7FF),
                       fontWeight: FontWeight.w900,
                     ),
@@ -470,7 +470,7 @@ class _CreateAccountFormCardState extends State<CreateAccountFormCard> {
                 ],
               ),
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                 color: Color(0xFF9AA0AA),
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
@@ -498,16 +498,16 @@ class _SignupErrorBox extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
       decoration: BoxDecoration(
-        color: const Color(0xFFFF4D6D).withOpacity(0.14),
+        color: const Color(0xFFFF4D6D).withValues(alpha: 0.14),
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: const Color(0xFFFF4D6D).withOpacity(0.42),
+          color: const Color(0xFFFF4D6D).withValues(alpha: 0.42),
         ),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(
+          Icon(
             Icons.error_outline_rounded,
             color: Color(0xFFFFB3C0),
             size: 20,
@@ -516,7 +516,7 @@ class _SignupErrorBox extends StatelessWidget {
           Expanded(
             child: Text(
               message,
-              style: const TextStyle(
+              style: TextStyle(
                 color: Color(0xFFFFC2CC),
                 fontSize: 13,
                 height: 1.35,

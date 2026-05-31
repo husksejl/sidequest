@@ -48,7 +48,7 @@ class _HomeSearchBarState extends State<HomeSearchBar> {
                       width: 42,
                       height: 5,
                       decoration: BoxDecoration(
-                        color: Colors.white24,
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.24),
                         borderRadius: BorderRadius.circular(999),
                       ),
                     ),
@@ -56,7 +56,7 @@ class _HomeSearchBarState extends State<HomeSearchBar> {
                     TextField(
                       controller: controller,
                       autofocus: true,
-                      style: const TextStyle(color: Colors.white),
+                      style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
                       onChanged: (value) {
                         setSheetState(() {
                           searchText = value.trim().toLowerCase();
@@ -64,10 +64,10 @@ class _HomeSearchBarState extends State<HomeSearchBar> {
                       },
                       decoration: InputDecoration(
                         hintText: 'Search users or usernames...',
-                        hintStyle: const TextStyle(color: Colors.white38),
-                        prefixIcon: const Icon(
+                        hintStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38)),
+                        prefixIcon: Icon(
                           Icons.search,
-                          color: Colors.white54,
+                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54),
                         ),
                         filled: true,
                         fillColor: const Color(0xFF171A20),
@@ -80,10 +80,10 @@ class _HomeSearchBarState extends State<HomeSearchBar> {
                     const SizedBox(height: 18),
                     Expanded(
                       child: searchText.isEmpty
-                          ? const Center(
+                          ? Center(
                         child: Text(
                           'Search for a user.',
-                          style: TextStyle(color: Colors.white54),
+                          style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54)),
                         ),
                       )
                           : FutureBuilder<QuerySnapshot<Map<String, dynamic>>>(
@@ -108,10 +108,10 @@ class _HomeSearchBarState extends State<HomeSearchBar> {
                           }).toList();
 
                           if (users.isEmpty) {
-                            return const Center(
+                            return Center(
                               child: Text(
                                 'No users found.',
-                                style: TextStyle(color: Colors.white54),
+                                style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54)),
                               ),
                             );
                           }
@@ -159,16 +159,16 @@ class _HomeSearchBarState extends State<HomeSearchBar> {
                                       : null,
                                   child: profileImageUrl == null ||
                                       profileImageUrl.isEmpty
-                                      ? const Icon(
+                                      ? Icon(
                                     Icons.person_rounded,
-                                    color: Colors.white54,
+                                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54),
                                   )
                                       : null,
                                 ),
                                 title: Text(
                                   username,
-                                  style: const TextStyle(
-                                    color: Colors.white,
+                                  style: TextStyle(
+                                    color: Theme.of(context).colorScheme.onSurface,
                                     fontWeight: FontWeight.w800,
                                   ),
                                 ),
@@ -197,11 +197,11 @@ class _HomeSearchBarState extends State<HomeSearchBar> {
         padding: const EdgeInsets.symmetric(horizontal: 12),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(999),
-          border: Border.all(color: Colors.white70),
+          border: Border.all(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.70)),
         ),
-        child: const Row(
+        child: Row(
           children: [
-            Icon(Icons.search, color: Colors.white70, size: 30),
+            Icon(Icons.search, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.70), size: 30),
           ],
         ),
       ),

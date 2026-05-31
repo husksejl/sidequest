@@ -14,9 +14,9 @@ class CreateHeader extends StatelessWidget {
         const Spacer(),
         IconButton(
           onPressed: () {},
-          icon: const Icon(
+          icon: Icon(
             Icons.notifications_none_rounded,
-            color: Colors.white70,
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.70),
             size: 30,
           ),
         ),

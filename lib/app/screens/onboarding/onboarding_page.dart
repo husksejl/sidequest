@@ -86,7 +86,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
     final currentStep = _steps[_currentIndex];
 
     return Scaffold(
-      backgroundColor: const Color(0xFF050608),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(22, 18, 22, 24),

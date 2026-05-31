@@ -101,7 +101,7 @@ class _SplashScreenPageState extends State<SplashScreenPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF050608),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Center(
         child: AnimatedBuilder(
           animation: controller,
@@ -119,12 +119,12 @@ class _SplashScreenPageState extends State<SplashScreenPage>
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF10C7BE).withOpacity(0.22),
+                          color: const Color(0xFF10C7BE).withValues(alpha: 0.22),
                           blurRadius: 70,
                           spreadRadius: 8,
                         ),
                         BoxShadow(
-                          color: const Color(0xFFFF6358).withOpacity(0.18),
+                          color: const Color(0xFFFF6358).withValues(alpha: 0.18),
                           blurRadius: 90,
                           spreadRadius: 4,
                         ),

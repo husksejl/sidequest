@@ -67,13 +67,18 @@ class _TodaySideQuestCardState extends State<TodaySideQuestCard> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final isLight = theme.brightness == Brightness.light;
 
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(18, 20, 18, 22),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(50),
-        gradient: const LinearGradient(
+        color: isLight ? theme.colorScheme.surface : null,
+        gradient: isLight
+            ? null
+            : const LinearGradient(
           colors: [
             Color(0xFF3C1F1C),
             Color(0xFF000000),
@@ -82,9 +87,14 @@ class _TodaySideQuestCardState extends State<TodaySideQuestCard> {
           begin: Alignment.topRight,
           end: Alignment.bottomLeft,
         ),
+        border: Border.all(
+          color: isLight
+              ? theme.colorScheme.outline.withValues(alpha: 0.18)
+              : theme.colorScheme.primary.withValues(alpha: 0.18),
+        ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF18D7FF).withOpacity(0.08),
+            color: const Color(0xFF18D7FF).withValues(alpha: 0.08),
             blurRadius: 28,
             spreadRadius: 1,
           ),
@@ -98,16 +108,16 @@ class _TodaySideQuestCardState extends State<TodaySideQuestCard> {
               vertical: 10,
             ),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.04),
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.04),
               borderRadius: BorderRadius.circular(999),
               border: Border.all(
-                color: Colors.white.withOpacity(0.05),
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.05),
               ),
             ),
             child: Text(
               l10n.newSideQuest,
-              style: const TextStyle(
-                color: Color(0xFF00B2AA),
+              style: TextStyle(
+                color: theme.colorScheme.primary,
                 fontSize: 12,
                 letterSpacing: 1.3,
                 fontWeight: FontWeight.w700,
@@ -122,21 +132,21 @@ class _TodaySideQuestCardState extends State<TodaySideQuestCard> {
               height: 104,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.white.withOpacity(0.04),
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.04),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.white.withOpacity(0.16),
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.16),
                     blurRadius: 10,
                     spreadRadius: 2,
                   ),
                 ],
                 border: Border.all(
-                  color: Colors.white.withOpacity(0.05),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.05),
                 ),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.camera_alt_rounded,
-                color: Color(0xFFEB5D4F),
+                color: theme.colorScheme.secondary,
                 size: 50,
               ),
             ),
@@ -145,8 +155,8 @@ class _TodaySideQuestCardState extends State<TodaySideQuestCard> {
           Text(
             widget.sideQuest.title,
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: theme.colorScheme.onSurface,
               fontSize: 22,
               height: 1.2,
               fontWeight: FontWeight.w800,
@@ -156,8 +166,8 @@ class _TodaySideQuestCardState extends State<TodaySideQuestCard> {
           Text(
             widget.sideQuest.description,
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: Color(0xFF9DA3AD),
+            style: TextStyle(
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.72),
               fontSize: 13,
               height: 1.35,
               fontWeight: FontWeight.w500,
@@ -166,8 +176,8 @@ class _TodaySideQuestCardState extends State<TodaySideQuestCard> {
           const SizedBox(height: 22),
           Text(
             l10n.questExpiresIn,
-            style: const TextStyle(
-              color: Color(0xFF777982),
+            style: TextStyle(
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.58),
               fontSize: 12,
               letterSpacing: 1.2,
               fontWeight: FontWeight.w700,
@@ -176,8 +186,8 @@ class _TodaySideQuestCardState extends State<TodaySideQuestCard> {
           const SizedBox(height: 10),
           Text(
             _formatTime(_remaining),
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: theme.colorScheme.onSurface,
               fontSize: 28,
               fontWeight: FontWeight.w900,
             ),

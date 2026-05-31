@@ -80,442 +80,442 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
       expand: false,
       builder: (context, scrollController) {
         return AnimatedPadding(
-            duration: const Duration(milliseconds: 180),
-            curve: Curves.easeOut,
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewInsets.bottom,
-            ),
-            child: Container(
-              padding: const EdgeInsets.fromLTRB(18, 12, 18, 14),
-          decoration: const BoxDecoration(
-            color: Color(0xFF101216),
-            borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+          duration: const Duration(milliseconds: 180),
+          curve: Curves.easeOut,
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
           ),
-          child: Column(
-            children: [
-              Container(
-                width: 42,
-                height: 5,
-                decoration: BoxDecoration(
-                  color: Colors.white24,
-                  borderRadius: BorderRadius.circular(999),
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(18, 12, 18, 14),
+            decoration: const BoxDecoration(
+              color: Color(0xFF101216),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+            ),
+            child: Column(
+              children: [
+                Container(
+                  width: 42,
+                  height: 5,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.24),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 18),
-              const Text(
-                'COMMENTS',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 1.2,
+                const SizedBox(height: 18),
+                Text(
+                  'COMMENTS',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 1.2,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 16),
+                const SizedBox(height: 16),
 
-              Expanded(
-                child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                  stream: FirebaseFirestore.instance
-                      .collection('posts')
-                      .doc(widget.postId)
-                      .collection('comments')
-                      .orderBy('createdAt', descending: false)
-                      .snapshots(),
-                  builder: (context, snapshot) {
-                    if (!snapshot.hasData) {
-                      return const Center(
-                        child: CircularProgressIndicator(
-                          color: Color(0xFF00B2AA),
-                        ),
-                      );
-                    }
+                Expanded(
+                  child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                    stream: FirebaseFirestore.instance
+                        .collection('posts')
+                        .doc(widget.postId)
+                        .collection('comments')
+                        .orderBy('createdAt', descending: false)
+                        .snapshots(),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) {
+                        return const Center(
+                          child: CircularProgressIndicator(
+                            color: Color(0xFF00B2AA),
+                          ),
+                        );
+                      }
 
-                    final comments = snapshot.data!.docs;
+                      final comments = snapshot.data!.docs;
 
-                    if (comments.isEmpty) {
-                      return const Center(
-                        child: Text(
-                          'No comments yet.',
-                          style: TextStyle(color: Colors.white54),
-                        ),
-                      );
-                    }
+                      if (comments.isEmpty) {
+                        return Center(
+                          child: Text(
+                            'No comments yet.',
+                            style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54)),
+                          ),
+                        );
+                      }
 
-                    return ListView.builder(
-                      controller: scrollController,
-                      itemCount: comments.length,
-                      itemBuilder: (context, index) {
-                        final doc = comments[index];
-                        final data = doc.data();
+                      return ListView.builder(
+                        controller: scrollController,
+                        itemCount: comments.length,
+                        itemBuilder: (context, index) {
+                          final doc = comments[index];
+                          final data = doc.data();
 
-                        final profileImageUrl =
-                        data['profileImageUrl']?.toString();
+                          final profileImageUrl =
+                          data['profileImageUrl']?.toString();
 
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 16),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              GestureDetector(
-                                onTap: () {
-                                  if (data['userId'] == null) return;
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 16),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                GestureDetector(
+                                  onTap: () {
+                                    if (data['userId'] == null) return;
 
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => OtherProfilePage(
-                                        userId: data['userId'],
-                                      ),
-                                    ),
-                                  );
-                                },
-                                child: CircleAvatar(
-                                  radius: 18,
-                                  backgroundColor: const Color(0xFF1B2026),
-                                  backgroundImage: profileImageUrl != null &&
-                                      profileImageUrl.isNotEmpty
-                                      ? NetworkImage(profileImageUrl)
-                                      : null,
-                                  child: profileImageUrl == null ||
-                                      profileImageUrl.isEmpty
-                                      ? const Icon(
-                                    Icons.person_rounded,
-                                    color: Colors.white54,
-                                    size: 20,
-                                  )
-                                      : null,
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    if (data['replyToUsername'] != null) ...[
-                                      Row(
-                                        children: [
-                                          const Icon(
-                                            Icons.subdirectory_arrow_right_rounded,
-                                            color: Color(0xFF8A8F98),
-                                            size: 15,
-                                          ),
-                                          const SizedBox(width: 4),
-                                          Text(
-                                            'Reply to ${data['replyToUsername']}',
-                                            style: const TextStyle(
-                                              color: Color(0xFF8A8F98),
-                                              fontSize: 10,
-                                              fontWeight: FontWeight.w700,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 3),
-                                    ],
-                                    Text(
-                                      data['username'] ?? 'Unknown',
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w800,
-                                        fontSize: 13,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 3),
-                                    Text(
-                                      data['text'] ?? '',
-                                      style: const TextStyle(
-                                        color: Color(0xFFC8CDD5),
-                                        fontSize: 13,
-                                        height: 1.35,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 7),
-                                    Row(
-                                      children: [
-                                        GestureDetector(
-                                          onTap: () {
-                                            FirebaseFirestore.instance
-                                                .collection('posts')
-                                                .doc(widget.postId)
-                                                .collection('comments')
-                                                .doc(doc.id)
-                                                .update({
-                                              'likes':
-                                              FieldValue.increment(1),
-                                            });
-                                          },
-                                          child: Text(
-                                            'Like · ${data['likes'] ?? 0}',
-                                            style: const TextStyle(
-                                              color: Color(0xFF8A8F98),
-                                              fontSize: 11,
-                                              fontWeight: FontWeight.w700,
-                                            ),
-                                          ),
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => OtherProfilePage(
+                                          userId: data['userId'],
                                         ),
-                                        const SizedBox(width: 14),
-                                        GestureDetector(
-                                          onTap: () {
-                                            setState(() {
-                                              replyingToCommentId = doc.id;
-                                              replyingToUsername = data['username'] ?? 'Unknown';
-                                            });
-
-                                            commentController.text = '@${replyingToUsername!} ';
-                                            commentController.selection = TextSelection.fromPosition(
-                                              TextPosition(offset: commentController.text.length),
-                                            );
-                                          },
-                                          child: const Text(
-                                            'Reply',
-                                            style: TextStyle(
-                                              color: Color(0xFF8A8F98),
-                                              fontSize: 11,
-                                              fontWeight: FontWeight.w700,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
+                                      ),
+                                    );
+                                  },
+                                  child: CircleAvatar(
+                                    radius: 18,
+                                    backgroundColor: const Color(0xFF1B2026),
+                                    backgroundImage: profileImageUrl != null &&
+                                        profileImageUrl.isNotEmpty
+                                        ? NetworkImage(profileImageUrl)
+                                        : null,
+                                    child: profileImageUrl == null ||
+                                        profileImageUrl.isEmpty
+                                        ? Icon(
+                                      Icons.person_rounded,
+                                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54),
+                                      size: 20,
+                                    )
+                                        : null,
+                                  ),
                                 ),
-                              ),
-                              Row(
-                                children: [
-                                  StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-                                    stream: FirebaseFirestore.instance
-                                        .collection('posts')
-                                        .doc(widget.postId)
-                                        .collection('comments')
-                                        .doc(doc.id)
-                                        .snapshots(),
-                                    builder: (context, likeSnapshot) {
-                                      final liveData = likeSnapshot.data?.data();
-
-                                      final likedBy = List<String>.from(liveData?['likedBy'] ?? []);
-                                      final currentUserId = FirebaseAuth.instance.currentUser?.uid ?? '';
-                                      final isLiked = likedBy.contains(currentUserId);
-
-                                      return GestureDetector(
-                                        onTap: () async {
-                                          final commentRef = FirebaseFirestore.instance
-                                              .collection('posts')
-                                              .doc(widget.postId)
-                                              .collection('comments')
-                                              .doc(doc.id);
-
-                                          if (isLiked) {
-                                            await commentRef.update({
-                                              'likedBy': FieldValue.arrayRemove([currentUserId]),
-                                              'likes': FieldValue.increment(-1),
-                                            });
-                                          } else {
-                                            await commentRef.update({
-                                              'likedBy': FieldValue.arrayUnion([currentUserId]),
-                                              'likes': FieldValue.increment(1),
-                                            });
-                                          }
-                                        },
-                                        child: Row(
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      if (data['replyToUsername'] != null) ...[
+                                        Row(
                                           children: [
                                             Icon(
-                                              isLiked
-                                                  ? Icons.favorite_rounded
-                                                  : Icons.favorite_border_rounded,
-                                              color: const Color(0xFFEB5D4F),
-                                              size: 18,
+                                              Icons.subdirectory_arrow_right_rounded,
+                                              color: Color(0xFF8A8F98),
+                                              size: 15,
                                             ),
                                             const SizedBox(width: 4),
                                             Text(
-                                              '${liveData?['likes'] ?? 0}',
-                                              style: const TextStyle(
-                                                color: Colors.white70,
-                                                fontSize: 11,
+                                              'Reply to ${data['replyToUsername']}',
+                                              style: TextStyle(
+                                                color: Color(0xFF8A8F98),
+                                                fontSize: 10,
                                                 fontWeight: FontWeight.w700,
                                               ),
                                             ),
                                           ],
                                         ),
-                                      );
-                                    },
-                                  ),
-                                  const SizedBox(width: 8),
-
-                                  PopupMenuButton<String>(
-                                    color: const Color(0xFF15181D),
-                                    icon: const Icon(
-                                      Icons.more_horiz_rounded,
-                                      color: Colors.white54,
-                                    ),
-                                    onSelected: (value) async {
-                                      final currentUserId = FirebaseAuth.instance.currentUser?.uid;
-
-                                      if (value == 'delete' &&
-                                          currentUserId != null &&
-                                          data['userId'] == currentUserId) {
-
-                                        final confirmed = await showDialog<bool>(
-                                          context: context,
-                                          builder: (context) {
-                                            return AlertDialog(
-                                              backgroundColor: const Color(0xFF101216),
-                                              title: const Text(
-                                                'Delete comment?',
-                                                style: TextStyle(color: Colors.white),
-                                              ),
-                                              content: const Text(
-                                                'This comment will be permanently removed.',
-                                                style: TextStyle(color: Colors.white70),
-                                              ),
-                                              actions: [
-                                                TextButton(
-                                                  onPressed: () => Navigator.pop(context, false),
-                                                  child: const Text('Cancel'),
-                                                ),
-                                                TextButton(
-                                                  onPressed: () => Navigator.pop(context, true),
-                                                  child: const Text(
-                                                    'Delete',
-                                                    style: TextStyle(color: Color(0xFFEB5D4F)),
-                                                  ),
-                                                ),
-                                              ],
-                                            );
-                                          },
-                                        );
-
-                                        if (confirmed != true) return;
-
-                                        await FirebaseFirestore.instance
-                                            .collection('posts')
-                                            .doc(widget.postId)
-                                            .collection('comments')
-                                            .doc(doc.id)
-                                            .delete();
-
-                                        await FirebaseFirestore.instance
-                                            .collection('posts')
-                                            .doc(widget.postId)
-                                            .update({
-                                          'comments': FieldValue.increment(-1),
-                                        });
-
-                                        return;
-                                      }
-
-                                      if (value == 'report') {
-                                        if (currentUserId == null) return;
-
-                                        await FirebaseFirestore.instance.collection('comments_reports').add({
-                                          'postId': widget.postId,
-                                          'commentId': doc.id,
-                                          'commentUserId': data['userId'],
-                                          'reportedBy': currentUserId,
-                                          'text': data['text'],
-                                          'createdAt': FieldValue.serverTimestamp(),
-                                        });
-
-                                        ScaffoldMessenger.of(this.context).showSnackBar(
-                                          const SnackBar(
-                                            content: Text('Comment reported'),
-                                          ),
-                                        );
-                                      }
-                                    },
-                                    itemBuilder: (context) {
-                                      final currentUserId = FirebaseAuth.instance.currentUser?.uid;
-                                      final isOwnComment = data['userId'] == currentUserId;
-
-                                      return [
-                                        if (isOwnComment)
-                                          const PopupMenuItem(
-                                            value: 'delete',
+                                        const SizedBox(height: 3),
+                                      ],
+                                      Text(
+                                        data['username'] ?? 'Unknown',
+                                        style: TextStyle(
+                                          color: Theme.of(context).colorScheme.onSurface,
+                                          fontWeight: FontWeight.w800,
+                                          fontSize: 13,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 3),
+                                      Text(
+                                        data['text'] ?? '',
+                                        style: TextStyle(
+                                          color: Color(0xFFC8CDD5),
+                                          fontSize: 13,
+                                          height: 1.35,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 7),
+                                      Row(
+                                        children: [
+                                          GestureDetector(
+                                            onTap: () {
+                                              FirebaseFirestore.instance
+                                                  .collection('posts')
+                                                  .doc(widget.postId)
+                                                  .collection('comments')
+                                                  .doc(doc.id)
+                                                  .update({
+                                                'likes':
+                                                FieldValue.increment(1),
+                                              });
+                                            },
                                             child: Text(
-                                              'Delete comment',
-                                              style: TextStyle(color: Color(0xFFEB5D4F)),
+                                              'Like · ${data['likes'] ?? 0}',
+                                              style: TextStyle(
+                                                color: Color(0xFF8A8F98),
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.w700,
+                                              ),
                                             ),
                                           ),
-                                        const PopupMenuItem(
-                                          value: 'report',
-                                          child: Text('Report comment'),
-                                        ),
-                                      ];
-                                    },
+                                          const SizedBox(width: 14),
+                                          GestureDetector(
+                                            onTap: () {
+                                              setState(() {
+                                                replyingToCommentId = doc.id;
+                                                replyingToUsername = data['username'] ?? 'Unknown';
+                                              });
+
+                                              commentController.text = '@${replyingToUsername!} ';
+                                              commentController.selection = TextSelection.fromPosition(
+                                                TextPosition(offset: commentController.text.length),
+                                              );
+                                            },
+                                            child: const Text(
+                                              'Reply',
+                                              style: TextStyle(
+                                                color: Color(0xFF8A8F98),
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.w700,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
                                   ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    );
-                  },
+                                ),
+                                Row(
+                                  children: [
+                                    StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+                                      stream: FirebaseFirestore.instance
+                                          .collection('posts')
+                                          .doc(widget.postId)
+                                          .collection('comments')
+                                          .doc(doc.id)
+                                          .snapshots(),
+                                      builder: (context, likeSnapshot) {
+                                        final liveData = likeSnapshot.data?.data();
+
+                                        final likedBy = List<String>.from(liveData?['likedBy'] ?? []);
+                                        final currentUserId = FirebaseAuth.instance.currentUser?.uid ?? '';
+                                        final isLiked = likedBy.contains(currentUserId);
+
+                                        return GestureDetector(
+                                          onTap: () async {
+                                            final commentRef = FirebaseFirestore.instance
+                                                .collection('posts')
+                                                .doc(widget.postId)
+                                                .collection('comments')
+                                                .doc(doc.id);
+
+                                            if (isLiked) {
+                                              await commentRef.update({
+                                                'likedBy': FieldValue.arrayRemove([currentUserId]),
+                                                'likes': FieldValue.increment(-1),
+                                              });
+                                            } else {
+                                              await commentRef.update({
+                                                'likedBy': FieldValue.arrayUnion([currentUserId]),
+                                                'likes': FieldValue.increment(1),
+                                              });
+                                            }
+                                          },
+                                          child: Row(
+                                            children: [
+                                              Icon(
+                                                isLiked
+                                                    ? Icons.favorite_rounded
+                                                    : Icons.favorite_border_rounded,
+                                                color: const Color(0xFFEB5D4F),
+                                                size: 18,
+                                              ),
+                                              const SizedBox(width: 4),
+                                              Text(
+                                                '${liveData?['likes'] ?? 0}',
+                                                style: TextStyle(
+                                                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.70),
+                                                  fontSize: 11,
+                                                  fontWeight: FontWeight.w700,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                    const SizedBox(width: 8),
+
+                                    PopupMenuButton<String>(
+                                      color: Theme.of(context).colorScheme.surface,
+                                      icon: Icon(
+                                        Icons.more_horiz_rounded,
+                                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54),
+                                      ),
+                                      onSelected: (value) async {
+                                        final currentUserId = FirebaseAuth.instance.currentUser?.uid;
+
+                                        if (value == 'delete' &&
+                                            currentUserId != null &&
+                                            data['userId'] == currentUserId) {
+
+                                          final confirmed = await showDialog<bool>(
+                                            context: context,
+                                            builder: (context) {
+                                              return AlertDialog(
+                                                backgroundColor: const Color(0xFF101216),
+                                                title: Text(
+                                                  'Delete comment?',
+                                                  style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                                                ),
+                                                content: Text(
+                                                  'This comment will be permanently removed.',
+                                                  style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.70)),
+                                                ),
+                                                actions: [
+                                                  TextButton(
+                                                    onPressed: () => Navigator.pop(context, false),
+                                                    child: const Text('Cancel'),
+                                                  ),
+                                                  TextButton(
+                                                    onPressed: () => Navigator.pop(context, true),
+                                                    child: const Text(
+                                                      'Delete',
+                                                      style: TextStyle(color: Color(0xFFEB5D4F)),
+                                                    ),
+                                                  ),
+                                                ],
+                                              );
+                                            },
+                                          );
+
+                                          if (confirmed != true) return;
+
+                                          await FirebaseFirestore.instance
+                                              .collection('posts')
+                                              .doc(widget.postId)
+                                              .collection('comments')
+                                              .doc(doc.id)
+                                              .delete();
+
+                                          await FirebaseFirestore.instance
+                                              .collection('posts')
+                                              .doc(widget.postId)
+                                              .update({
+                                            'comments': FieldValue.increment(-1),
+                                          });
+
+                                          return;
+                                        }
+
+                                        if (value == 'report') {
+                                          if (currentUserId == null) return;
+
+                                          await FirebaseFirestore.instance.collection('comments_reports').add({
+                                            'postId': widget.postId,
+                                            'commentId': doc.id,
+                                            'commentUserId': data['userId'],
+                                            'reportedBy': currentUserId,
+                                            'text': data['text'],
+                                            'createdAt': FieldValue.serverTimestamp(),
+                                          });
+
+                                          ScaffoldMessenger.of(this.context).showSnackBar(
+                                            const SnackBar(
+                                              content: Text('Comment reported'),
+                                            ),
+                                          );
+                                        }
+                                      },
+                                      itemBuilder: (context) {
+                                        final currentUserId = FirebaseAuth.instance.currentUser?.uid;
+                                        final isOwnComment = data['userId'] == currentUserId;
+
+                                        return [
+                                          if (isOwnComment)
+                                            const PopupMenuItem(
+                                              value: 'delete',
+                                              child: Text(
+                                                'Delete comment',
+                                                style: TextStyle(color: Color(0xFFEB5D4F)),
+                                              ),
+                                            ),
+                                          const PopupMenuItem(
+                                            value: 'report',
+                                            child: Text('Report comment'),
+                                          ),
+                                        ];
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
                 ),
-              ),
 
-              const SizedBox(height: 10),
+                const SizedBox(height: 10),
 
-              if (replyingToUsername != null) ...[
+                if (replyingToUsername != null) ...[
+                  Row(
+                    children: [
+                      Text(
+                        'Replying to @$replyingToUsername',
+                        style: TextStyle(
+                          color: Color(0xFF00B2AA),
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      const Spacer(),
+                      GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            replyingToCommentId = null;
+                            replyingToUsername = null;
+                            commentController.clear();
+                          });
+                        },
+                        child: Icon(
+                          Icons.close_rounded,
+                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54),
+                          size: 18,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                ],
+
                 Row(
                   children: [
-                    Text(
-                      'Replying to @$replyingToUsername',
-                      style: const TextStyle(
-                        color: Color(0xFF00B2AA),
-                        fontSize: 11,
-                        fontWeight: FontWeight.w800,
+                    Expanded(
+                      child: TextField(
+                        controller: commentController,
+                        style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                        decoration: InputDecoration(
+                          hintText: 'Add a comment...',
+                          hintStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38)),
+                          filled: true,
+                          fillColor: const Color(0xFF171A20),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(999),
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
                       ),
                     ),
-                    const Spacer(),
-                    GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          replyingToCommentId = null;
-                          replyingToUsername = null;
-                          commentController.clear();
-                        });
-                      },
-                      child: const Icon(
-                        Icons.close_rounded,
-                        color: Colors.white54,
-                        size: 18,
+                    const SizedBox(width: 10),
+                    IconButton(
+                      onPressed: addComment,
+                      icon: Icon(
+                        Icons.send_rounded,
+                        color: Color(0xFF00B2AA),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
               ],
-
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: commentController,
-                      style: const TextStyle(color: Colors.white),
-                      decoration: InputDecoration(
-                        hintText: 'Add a comment...',
-                        hintStyle: const TextStyle(color: Colors.white38),
-                        filled: true,
-                        fillColor: const Color(0xFF171A20),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(999),
-                          borderSide: BorderSide.none,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  IconButton(
-                    onPressed: addComment,
-                    icon: const Icon(
-                      Icons.send_rounded,
-                      color: Color(0xFF00B2AA),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
             ),
+          ),
         );
       },
     );

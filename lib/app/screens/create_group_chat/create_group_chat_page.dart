@@ -165,13 +165,13 @@ class _CreateGroupChatPageState extends State<CreateGroupChatPage> {
 
     if (currentUser == null) {
       return Scaffold(
-        backgroundColor: const Color(0xFF050608),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: SafeArea(
           child: Center(
             child: Text(
               l10n.pleaseLogIn,
-              style: const TextStyle(
-                color: Colors.white,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
           ),
@@ -180,7 +180,7 @@ class _CreateGroupChatPageState extends State<CreateGroupChatPage> {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFF050608),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           children: [
@@ -204,7 +204,7 @@ class _CreateGroupChatPageState extends State<CreateGroupChatPage> {
                           child: Center(
                             child: Text(
                               l10n.usersCouldNotBeLoaded,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 color: Colors.grey,
                                 fontSize: 14,
                               ),
@@ -219,7 +219,7 @@ class _CreateGroupChatPageState extends State<CreateGroupChatPage> {
                           child: Center(
                             child: Text(
                               l10n.searchForUsersToAddThem,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 color: Colors.grey,
                                 fontSize: 14,
                               ),
@@ -247,7 +247,7 @@ class _CreateGroupChatPageState extends State<CreateGroupChatPage> {
                           child: Center(
                             child: Text(
                               l10n.noUsersFound,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 color: Colors.grey,
                                 fontSize: 14,
                               ),
@@ -291,7 +291,7 @@ class _CreateGroupChatPageState extends State<CreateGroupChatPage> {
             onTap: () {
               Navigator.pop(context);
             },
-            child: const Icon(
+            child: Icon(
               Icons.arrow_back,
               color: Color(0xFF00E5FF),
               size: 24,
@@ -304,7 +304,7 @@ class _CreateGroupChatPageState extends State<CreateGroupChatPage> {
               children: [
                 Text(
                   l10n.createGroup,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: Color(0xFF00E5FF),
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -313,7 +313,7 @@ class _CreateGroupChatPageState extends State<CreateGroupChatPage> {
                 const SizedBox(height: 3),
                 Text(
                   l10n.startNewGroupChat,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: Colors.grey,
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
@@ -333,7 +333,7 @@ class _CreateGroupChatPageState extends State<CreateGroupChatPage> {
                 color: const Color(0xFF00E5FF).withOpacity(0.6),
               ),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.groups_rounded,
               color: Color(0xFF00E5FF),
               size: 22,
@@ -352,7 +352,7 @@ class _CreateGroupChatPageState extends State<CreateGroupChatPage> {
       children: [
         Text(
           l10n.groupName,
-          style: const TextStyle(
+          style: TextStyle(
             color: Color(0xFF00E5FF),
             fontSize: 11,
             fontWeight: FontWeight.bold,
@@ -372,13 +372,13 @@ class _CreateGroupChatPageState extends State<CreateGroupChatPage> {
           ),
           child: TextField(
             controller: _groupNameController,
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurface,
               fontSize: 14,
             ),
             decoration: InputDecoration(
               hintText: l10n.groupNameHint,
-              hintStyle: const TextStyle(
+              hintStyle: TextStyle(
                 color: Colors.grey,
                 fontSize: 13,
               ),
@@ -402,7 +402,7 @@ class _CreateGroupChatPageState extends State<CreateGroupChatPage> {
         ),
         child: Text(
           l10n.noUsersSelectedYet,
-          style: const TextStyle(
+          style: TextStyle(
             color: Colors.grey,
             fontSize: 13,
           ),
@@ -436,14 +436,14 @@ class _CreateGroupChatPageState extends State<CreateGroupChatPage> {
                 children: [
                   Text(
                     _selectedUsers[i].username,
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(width: 6),
-                  const Icon(
+                  Icon(
                     Icons.close_rounded,
                     color: Color(0xFF00E5FF),
                     size: 16,
@@ -468,7 +468,7 @@ class _CreateGroupChatPageState extends State<CreateGroupChatPage> {
       ),
       child: Row(
         children: [
-          const Icon(
+          Icon(
             Icons.search,
             color: Colors.grey,
             size: 22,
@@ -482,13 +482,13 @@ class _CreateGroupChatPageState extends State<CreateGroupChatPage> {
                   _searchText = value;
                 });
               },
-              style: const TextStyle(
-                color: Colors.white,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface,
                 fontSize: 13,
               ),
               decoration: InputDecoration(
                 hintText: l10n.searchUsers,
-                hintStyle: const TextStyle(
+                hintStyle: TextStyle(
                   color: Colors.grey,
                   fontSize: 13,
                 ),
@@ -505,7 +505,7 @@ class _CreateGroupChatPageState extends State<CreateGroupChatPage> {
                   _searchText = '';
                 });
               },
-              child: const Icon(
+              child: Icon(
                 Icons.close_rounded,
                 color: Colors.grey,
                 size: 20,
@@ -544,7 +544,7 @@ class _CreateGroupChatPageState extends State<CreateGroupChatPage> {
             )
                 : Text(
               l10n.createGroupChat,
-              style: const TextStyle(
+              style: TextStyle(
                 color: Colors.black,
                 fontSize: 13,
                 fontWeight: FontWeight.w900,
@@ -617,7 +617,7 @@ class _UserSelectCard extends StatelessWidget {
                 isSelected
                     ? Icons.check_rounded
                     : Icons.person_add_alt_1_rounded,
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.onSurface,
                 size: 25,
               ),
             ),
@@ -628,8 +628,8 @@ class _UserSelectCard extends StatelessWidget {
                 children: [
                   Text(
                     user.username,
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
                       fontWeight: FontWeight.bold,
                       fontSize: 15,
                     ),
@@ -638,7 +638,7 @@ class _UserSelectCard extends StatelessWidget {
                   Text(
                     subtitle,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: Colors.grey,
                       fontSize: 12,
                     ),

@@ -17,9 +17,9 @@ class PostStat extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
+        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: Colors.white.withOpacity(0.04)),
+        border: Border.all(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.04)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -28,8 +28,8 @@ class PostStat extends StatelessWidget {
           const SizedBox(width: 5),
           Text(
             value,
-            style: const TextStyle(
-              color: Colors.white70,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.70),
               fontSize: 12,
               fontWeight: FontWeight.w700,
             ),

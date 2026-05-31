@@ -112,13 +112,13 @@ class _ProfilePhotoPickerState extends State<ProfilePhotoPicker> {
               ),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF18D7FF).withOpacity(0.18),
+                  color: const Color(0xFF18D7FF).withValues(alpha: 0.18),
                   blurRadius: 28,
                   spreadRadius: 2,
                   offset: const Offset(-8, 0),
                 ),
                 BoxShadow(
-                  color: const Color(0xFFFF8D84).withOpacity(0.16),
+                  color: const Color(0xFFFF8D84).withValues(alpha: 0.16),
                   blurRadius: 28,
                   spreadRadius: 2,
                   offset: const Offset(8, 0),
@@ -131,9 +131,9 @@ class _ProfilePhotoPickerState extends State<ProfilePhotoPicker> {
                 color: Color(0xFF111317),
               ),
               child: selectedImagePath == null
-                  ? const Icon(
+                  ? Icon(
                 Icons.add_rounded,
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.onSurface,
                 size: 40,
               )
                   : ClipOval(
@@ -152,7 +152,7 @@ class _ProfilePhotoPickerState extends State<ProfilePhotoPicker> {
           selectedImagePath == null
               ? 'ADD PROFILE PHOTO'
               : 'CHANGE PROFILE PHOTO',
-          style: const TextStyle(
+          style: TextStyle(
             color: Color(0xFF18D7FF),
             fontSize: 13,
             letterSpacing: 1.6,
@@ -187,9 +187,9 @@ class _PickerOptionButton extends StatelessWidget {
             height: 64,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: const Color(0xFF15181D),
+              color: Theme.of(context).colorScheme.surface,
               border: Border.all(
-                color: const Color(0xFF18D7FF).withOpacity(0.45),
+                color: const Color(0xFF18D7FF).withValues(alpha: 0.45),
               ),
             ),
             child: Icon(
@@ -201,8 +201,8 @@ class _PickerOptionButton extends StatelessWidget {
           const SizedBox(height: 10),
           Text(
             label,
-            style: const TextStyle(
-              color: Colors.white70,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.70),
               fontSize: 11,
               fontWeight: FontWeight.w800,
               letterSpacing: 1.2,

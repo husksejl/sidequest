@@ -33,7 +33,7 @@ class OtherProfileActions extends StatelessWidget {
             ),
             child: Text(
               isFollowing ? 'FOLLOWING' : 'FOLLOW',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w900,
                 letterSpacing: 1,

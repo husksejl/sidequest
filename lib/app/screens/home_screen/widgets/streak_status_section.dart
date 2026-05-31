@@ -5,7 +5,7 @@ class StreakStatusSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Row(
+    return Row(
       children: [
         Expanded(
           child: Column(
@@ -16,7 +16,7 @@ class StreakStatusSection extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 40,
                   fontWeight: FontWeight.w800,
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.onSurface,
                   height: 1,
                 ),
               ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../shared/theme/app_theme.dart';
 
 class SettingsSection extends StatelessWidget {
   final String title;
@@ -19,7 +20,7 @@ class SettingsSection extends StatelessWidget {
           padding: const EdgeInsets.only(left: 4, bottom: 10),
           child: Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               color: Color(0xFF18D7FF),
               fontSize: 12,
               letterSpacing: 1.4,
@@ -29,9 +30,9 @@ class SettingsSection extends StatelessWidget {
         ),
         Container(
           decoration: BoxDecoration(
-            color: const Color(0xFF0B0E12),
+            color: context.appCardColor,
             borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: Colors.white.withOpacity(0.05)),
+            border: Border.all(color: context.appBorderColor),
           ),
           child: Column(
             children: [
@@ -43,7 +44,7 @@ class SettingsSection extends StatelessWidget {
                     thickness: 1,
                     indent: 64,
                     endIndent: 16,
-                    color: Colors.white.withOpacity(0.05),
+                    color: context.appBorderColor,
                   ),
               ],
             ],

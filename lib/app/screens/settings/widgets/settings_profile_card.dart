@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../shared/theme/app_theme.dart';
 import 'package:sidequest/l10n/app_localizations.dart';
 
 class SettingsProfileCard extends StatelessWidget {
@@ -24,8 +25,14 @@ class SettingsProfileCard extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(28),
-        gradient: const LinearGradient(
-          colors: [
+        gradient: LinearGradient(
+          colors: context.isLightMode
+              ? const [
+            Color(0xFFFFFFFF),
+            Color(0xFFF3F8FB),
+            Color(0xFFEAFBFF),
+          ]
+              : const [
             Color(0xFF1A171B),
             Color(0xFF101317),
             Color(0xFF0A1618),
@@ -33,7 +40,7 @@ class SettingsProfileCard extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        border: Border.all(color: Colors.white.withOpacity(0.08)),
+        border: Border.all(color: context.appBorderColor),
         boxShadow: [
           BoxShadow(
             color: const Color(0xFF18D7FF).withOpacity(0.08),
@@ -54,11 +61,11 @@ class SettingsProfileCard extends StatelessWidget {
                 colors: [Color(0xFFFF9B8F), Color(0xFF18D7FF)],
               ),
             ),
-            child: const CircleAvatar(
-              backgroundColor: Color(0xFF1B2026),
+            child: CircleAvatar(
+              backgroundColor: context.isLightMode ? Colors.white : const Color(0xFF1B2026),
               child: Icon(
                 Icons.person_rounded,
-                color: Colors.white70,
+                color: context.appIconColor,
                 size: 30,
               ),
             ),
@@ -70,8 +77,8 @@ class SettingsProfileCard extends StatelessWidget {
               children: [
                 Text(
                   userName,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: context.appTextColor,
                     fontSize: 18,
                     fontWeight: FontWeight.w800,
                   ),
@@ -79,8 +86,8 @@ class SettingsProfileCard extends StatelessWidget {
                 const SizedBox(height: 3),
                 Text(
                   userHandle,
-                  style: const TextStyle(
-                    color: Color(0xFF8A8F98),
+                  style: TextStyle(
+                    color: context.appMutedTextColor,
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                   ),
@@ -105,9 +112,9 @@ class SettingsProfileCard extends StatelessWidget {
               ],
             ),
           ),
-          const Icon(
+          Icon(
             Icons.chevron_right_rounded,
-            color: Colors.white38,
+            color: context.appMutedTextColor,
             size: 28,
           ),
         ],

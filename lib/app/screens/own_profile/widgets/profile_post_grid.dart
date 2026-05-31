@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sidequest/l10n/app_localizations.dart';
+
 import '../models/profile_post.dart';
 import 'profile_post_tile.dart';
 import '../../home_screen/widgets/sidequest_post_card.dart';
@@ -96,6 +97,8 @@ class _ProfilePostDetailPageState extends State<ProfilePostDetailPage> {
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_scrollController.hasClients) return;
+
       _scrollController.jumpTo(
         widget.initialIndex * estimatedPostHeight,
       );
@@ -111,17 +114,20 @@ class _ProfilePostDetailPageState extends State<ProfilePostDetailPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: const Color(0xFF050608),
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF050608),
+        backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: IconThemeData(
+          color: theme.colorScheme.onSurface,
+        ),
         title: Text(
           l10n.sideQuestPosts,
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: theme.colorScheme.onSurface,
             fontWeight: FontWeight.w800,
           ),
         ),

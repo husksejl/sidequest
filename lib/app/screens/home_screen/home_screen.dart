@@ -233,7 +233,7 @@ class _HomeScreenState extends State<HomeScreen>
     if (currentUserId == null) {
       return Text(
         l10n.pleaseLogIn,
-        style: const TextStyle(color: Colors.white54),
+        style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54)),
       );
     }
 
@@ -266,7 +266,7 @@ class _HomeScreenState extends State<HomeScreen>
             if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
               return Text(
                 l10n.noPostsYet,
-                style: const TextStyle(color: Colors.white54),
+                style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54)),
               );
             }
 
@@ -304,7 +304,7 @@ class _HomeScreenState extends State<HomeScreen>
                 selectedFeedTab == 0
                     ? l10n.noFollowingPostsYet
                     : l10n.noForYouPostsYet,
-                style: const TextStyle(color: Colors.white54),
+                style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54)),
               );
             }
 
@@ -355,7 +355,7 @@ class _HomeScreenState extends State<HomeScreen>
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      backgroundColor: HomeScreen.bgColor,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       bottomNavigationBar: const CustomBottomNav(currentIndex: 0),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -374,8 +374,8 @@ class _HomeScreenState extends State<HomeScreen>
 
               Text(
                 l10n.todaysMissions,
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface,
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
                 ),
@@ -459,15 +459,15 @@ class _TabButton extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(999),
             border: Border.all(
-              color: isActive ? Colors.white : const Color(0xFF1A1A1A),
+              color: isActive ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.40),
             ),
-            color: isActive ? const Color(0xFF1A1A1A) : Colors.transparent,
+            color: isActive ? Theme.of(context).colorScheme.surface : Colors.transparent,
           ),
           child: Center(
             child: Text(
               label,
-              style: const TextStyle(
-                color: Colors.white,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface,
                 fontSize: 10,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 1,

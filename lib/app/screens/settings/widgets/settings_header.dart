@@ -12,8 +12,8 @@ class SettingsHeader extends StatelessWidget {
           height: 46,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: const Color(0xFF1A222B),
-            border: Border.all(color: Colors.white.withOpacity(0.08)),
+            color: Theme.of(context).colorScheme.surface,
+            border: Border.all(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.08)),
             boxShadow: [
               BoxShadow(
                 color: const Color(0xFF18D7FF).withOpacity(0.10),
@@ -22,21 +22,21 @@ class SettingsHeader extends StatelessWidget {
               ),
             ],
           ),
-          child: const Icon(
+          child: Icon(
             Icons.tune_rounded,
             color: Color(0xFF18D7FF),
             size: 22,
           ),
         ),
         const SizedBox(width: 12),
-        const Expanded(
+        Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 'Settings',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.onSurface,
                   fontSize: 28,
                   fontWeight: FontWeight.w800,
                   height: 1,
@@ -62,9 +62,9 @@ class SettingsHeader extends StatelessWidget {
               Navigator.of(context).pop();
             }
           },
-          icon: const Icon(
+          icon: Icon(
             Icons.close_rounded,
-            color: Colors.white70,
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.70),
           ),
         ),
       ],

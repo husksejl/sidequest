@@ -43,7 +43,7 @@ class SoloQuestCard extends StatelessWidget {
           Text(
             quest.title,
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: TextStyle(
               color: Color(0xFFE5ECEC),
               fontSize: 20,
               height: 1.35,
@@ -56,7 +56,7 @@ class SoloQuestCard extends StatelessWidget {
           Text(
             quest.description,
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: TextStyle(
               color: Color(0xFF9DA3AD),
               fontSize: 13,
               height: 1.35,
@@ -80,8 +80,8 @@ class SoloQuestCard extends StatelessWidget {
 
           Text(
             quest.expiresIn,
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurface,
               fontSize: 32,
               fontWeight: FontWeight.w800,
             ),

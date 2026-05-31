@@ -128,13 +128,13 @@ class _GroupChatPageState extends State<GroupChatPage> {
 
     if (currentUser == null) {
       return Scaffold(
-        backgroundColor: const Color(0xFF050608),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: SafeArea(
           child: Center(
             child: Text(
               l10n.youNeedToBeLoggedInToViewChat,
               style: TextStyle(
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.onSurface,
                 fontSize: 14,
               ),
             ),
@@ -144,7 +144,7 @@ class _GroupChatPageState extends State<GroupChatPage> {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFF050608),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           children: [
@@ -160,8 +160,8 @@ class _GroupChatPageState extends State<GroupChatPage> {
                         child: Text(
                           l10n.messagesCouldNotBeLoaded(snapshot.error.toString()),
                           textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            color: Colors.white,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface,
                             fontSize: 14,
                           ),
                         ),
@@ -229,7 +229,7 @@ class _GroupChatPageState extends State<GroupChatPage> {
             onTap: () {
               Navigator.pop(context);
             },
-            child: const Icon(
+            child: Icon(
               Icons.arrow_back,
               color: Color(0xFF00E5FF),
               size: 24,
@@ -242,7 +242,7 @@ class _GroupChatPageState extends State<GroupChatPage> {
               children: [
                 Text(
                   widget.chatName,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: Color(0xFF00E5FF),
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -251,7 +251,7 @@ class _GroupChatPageState extends State<GroupChatPage> {
                 const SizedBox(height: 3),
                 Text(
                   widget.isGroup ? l10n.groupChat : l10n.directMessage,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: Colors.grey,
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
@@ -268,7 +268,7 @@ class _GroupChatPageState extends State<GroupChatPage> {
               color: const Color(0xFF102326),
               shape: BoxShape.circle,
               border: Border.all(
-                color: const Color(0xFF00E5FF).withOpacity(0.6),
+                color: const Color(0xFF00E5FF).withValues(alpha: 0.6),
               ),
             ),
             child: Icon(

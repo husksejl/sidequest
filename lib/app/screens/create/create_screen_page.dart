@@ -144,15 +144,15 @@ class _CreateScreenPageState extends State<CreateScreenPage> {
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: const Color(0xFF111317),
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(32),
         border: Border.all(
-          color: Colors.white.withOpacity(0.08),
+          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.08),
         ),
       ),
       child: Column(
         children: [
-          const Icon(
+          Icon(
             Icons.check_circle_rounded,
             color: Color(0xFF00B2AA),
             size: 54,
@@ -162,7 +162,7 @@ class _CreateScreenPageState extends State<CreateScreenPage> {
             l10n.dailySideQuestCompleted,
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.onSurface,
               fontSize: 21,
               fontWeight: FontWeight.w800,
             ),
@@ -191,7 +191,7 @@ class _CreateScreenPageState extends State<CreateScreenPage> {
       return Text(
         l10n.loginToSolveToday,
         style: TextStyle(
-          color: Colors.white,
+          color: Theme.of(context).colorScheme.onSurface,
           fontSize: 16,
           fontWeight: FontWeight.w700,
         ),
@@ -215,7 +215,7 @@ class _CreateScreenPageState extends State<CreateScreenPage> {
           return Text(
             l10n.noDailySideQuestFound,
             style: TextStyle(
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.onSurface,
               fontSize: 16,
               fontWeight: FontWeight.w700,
             ),
@@ -294,7 +294,7 @@ class _CreateScreenPageState extends State<CreateScreenPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: CreateScreenPage.bgColor,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       bottomNavigationBar: const CustomBottomNav(currentIndex: 2),
       body: SafeArea(
         child: SingleChildScrollView(

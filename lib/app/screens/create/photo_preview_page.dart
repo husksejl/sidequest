@@ -177,10 +177,10 @@ class _PhotoPreviewPageState extends State<PhotoPreviewPage> {
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF050608),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF050608),
-        foregroundColor: Colors.white,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        foregroundColor: Theme.of(context).colorScheme.onSurface,
         elevation: 0,
         title: Text(
           l10n.create,
@@ -199,7 +199,7 @@ class _PhotoPreviewPageState extends State<PhotoPreviewPage> {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(34),
                   border: Border.all(
-                    color: Colors.white.withOpacity(0.08),
+                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.08),
                   ),
                 ),
                 clipBehavior: Clip.antiAlias,
@@ -222,8 +222,8 @@ class _PhotoPreviewPageState extends State<PhotoPreviewPage> {
                 children: [
                   Text(
                     widget.quest.title,
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
                       fontSize: 19,
                       fontWeight: FontWeight.w800,
                     ),
@@ -232,13 +232,13 @@ class _PhotoPreviewPageState extends State<PhotoPreviewPage> {
                   TextField(
                     controller: _captionController,
                     maxLines: 3,
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
                       fontSize: 14,
                     ),
                     decoration: InputDecoration(
                       hintText: l10n.addCaption,
-                      hintStyle: const TextStyle(
+                      hintStyle: TextStyle(
                         color: Color(0xFF777982),
                       ),
                       filled: true,
@@ -263,18 +263,18 @@ class _PhotoPreviewPageState extends State<PhotoPreviewPage> {
                         ),
                       ),
                       child: _isPosting
-                          ? const SizedBox(
+                          ? SizedBox(
                         width: 22,
                         height: 22,
                         child: CircularProgressIndicator(
                           strokeWidth: 2.5,
-                          color: Colors.white,
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                       )
                           : Text(
                         l10n.postSolution,
                         style: TextStyle(
-                          color: Colors.white,
+                          color: Theme.of(context).colorScheme.onSurface,
                           fontSize: 14,
                           letterSpacing: 1.2,
                           fontWeight: FontWeight.w900,

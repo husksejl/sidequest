@@ -33,9 +33,9 @@ class ProfileLevelBar extends StatelessWidget {
         return Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            color: const Color(0xFF0B0E12),
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.white.withOpacity(0.05)),
+            border: Border.all(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -44,7 +44,7 @@ class ProfileLevelBar extends StatelessWidget {
                 children: [
                   Text(
                     l10n.levelNumber(level),
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: Color(0xFF00B2AA),
                       fontSize: 13,
                       fontWeight: FontWeight.w900,
@@ -54,7 +54,7 @@ class ProfileLevelBar extends StatelessWidget {
                   const Spacer(),
                   Text(
                     '$currentLevelXp / $xpPerLevel XP',
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: Color(0xFF8A8F98),
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
@@ -69,7 +69,7 @@ class ProfileLevelBar extends StatelessWidget {
                   children: [
                     Container(
                       height: 9,
-                      color: const Color(0xFF1A1A1A),
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.10),
                     ),
                     FractionallySizedBox(
                       widthFactor: progress,
@@ -91,7 +91,7 @@ class ProfileLevelBar extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 l10n.xpUntilLevel(xpUntilNextLevel, level + 1),
-                style: const TextStyle(
+                style: TextStyle(
                   color: Color(0xFFC8CDD5),
                   fontSize: 11,
                 ),

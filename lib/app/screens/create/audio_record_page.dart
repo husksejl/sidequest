@@ -231,10 +231,10 @@ class _AudioRecordPageState extends State<AudioRecordPage> {
     _isRecording ? const Color(0xFFEB5D4F) : const Color(0xFF00B2AA);
 
     return Scaffold(
-      backgroundColor: const Color(0xFF050608),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF050608),
-        foregroundColor: Colors.white,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        foregroundColor: Theme.of(context).colorScheme.onSurface,
         elevation: 0,
         title: Text(
           l10n.audioSolution,
@@ -263,7 +263,7 @@ class _AudioRecordPageState extends State<AudioRecordPage> {
                     end: Alignment.bottomRight,
                   ),
                   border: Border.all(
-                    color: Colors.white12,
+                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.12),
                   ),
                 ),
                 child: Column(
@@ -271,8 +271,8 @@ class _AudioRecordPageState extends State<AudioRecordPage> {
                     Text(
                       widget.quest.title,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
                         fontSize: 22,
                         height: 1.25,
                         fontWeight: FontWeight.w900,
@@ -282,7 +282,7 @@ class _AudioRecordPageState extends State<AudioRecordPage> {
                     Text(
                       widget.quest.description,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: Color(0xFF9DA3AD),
                         fontSize: 13,
                         height: 1.4,
@@ -326,8 +326,8 @@ class _AudioRecordPageState extends State<AudioRecordPage> {
                           : _hasRecording
                           ? l10n.recordingReady
                           : l10n.tapToRecord,
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
                       ),
@@ -339,12 +339,12 @@ class _AudioRecordPageState extends State<AudioRecordPage> {
               TextField(
                 controller: _captionController,
                 maxLines: 3,
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
                 decoration: InputDecoration(
                   hintText: l10n.addCaption,
-                  hintStyle: const TextStyle(
+                  hintStyle: TextStyle(
                     color: Color(0xFF777982),
                   ),
                   filled: true,
@@ -369,18 +369,18 @@ class _AudioRecordPageState extends State<AudioRecordPage> {
                     ),
                   ),
                   child: _isPosting
-                      ? const SizedBox(
+                      ? SizedBox(
                     width: 22,
                     height: 22,
                     child: CircularProgressIndicator(
                       strokeWidth: 2.5,
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   )
                       : Text(
                     l10n.postAudioSolution,
                     style: TextStyle(
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.onSurface,
                       fontSize: 14,
                       letterSpacing: 1.1,
                       fontWeight: FontWeight.w900,

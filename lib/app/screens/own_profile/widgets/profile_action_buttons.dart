@@ -27,15 +27,15 @@ class ProfileActionButtons extends StatelessWidget {
             child: Container(
               height: 38,
               decoration: BoxDecoration(
-                color: const Color(0xFF1A1A1A),
+                color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(999),
-                border: Border.all(color: Colors.white.withOpacity(0.06)),
+                border: Border.all(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.06)),
               ),
               child: Center(
                 child: Text(
                   l10n.editProfileCaps,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface,
                     fontSize: 11,
                     fontWeight: FontWeight.w800,
                     letterSpacing: 1,
@@ -82,13 +82,13 @@ ${website.toString().isNotEmpty ? '🔗 $website' : ''}
             width: 42,
             height: 38,
             decoration: BoxDecoration(
-              color: const Color(0xFF1A1A1A),
+              color: Theme.of(context).colorScheme.surface,
               borderRadius: BorderRadius.circular(999),
-              border: Border.all(color: Colors.white.withOpacity(0.06)),
+              border: Border.all(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.06)),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.ios_share_rounded,
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.onSurface,
               size: 18,
             ),
           ),

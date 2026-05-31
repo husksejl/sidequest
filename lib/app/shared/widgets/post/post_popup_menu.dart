@@ -21,11 +21,11 @@ class PostPopupMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PopupMenuButton<String>(
-      color: const Color(0xFF15181D),
+      color: Theme.of(context).colorScheme.surface,
       icon: Container(
         padding: const EdgeInsets.all(7),
         decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.45),
+          color: Theme.of(context).colorScheme.surface.withOpacity(0.70),
           shape: BoxShape.circle,
         ),
         child: const Icon(

@@ -7,11 +7,11 @@ class SideQuestHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        const Expanded(
+        Expanded(
           child: Text(
             "New SideQuest",
             style: TextStyle(
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.onSurface,
               fontSize: 18,
               fontWeight: FontWeight.w800,
               letterSpacing: 0.8,
@@ -21,9 +21,9 @@ class SideQuestHeader extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
           decoration: BoxDecoration(
-            color: const Color(0xFF18D7FF).withOpacity(0.10),
+            color: const Color(0xFF18D7FF).withValues(alpha: 0.10),
             borderRadius: BorderRadius.circular(999),
-            border: Border.all(color: const Color(0xFF18D7FF).withOpacity(0.18)),
+            border: Border.all(color: const Color(0xFF18D7FF).withValues(alpha: 0.18)),
           ),
           child: const Text(
             'EXPLORE',

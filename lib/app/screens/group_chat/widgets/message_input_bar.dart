@@ -43,15 +43,19 @@ class _MessageInputBarState extends State<MessageInputBar> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final isLight = theme.brightness == Brightness.light;
 
     return Container(
       padding: const EdgeInsets.fromLTRB(18, 8, 18, 18),
-      color: const Color(0xFF050608),
+      color: isLight
+          ? theme.scaffoldBackgroundColor
+          : theme.colorScheme.surface,
       child: Row(
         children: [
-          const Icon(
+          Icon(
             Icons.add,
-            color: Colors.grey,
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.58),
             size: 25,
           ),
           const SizedBox(width: 12),
@@ -60,20 +64,27 @@ class _MessageInputBarState extends State<MessageInputBar> {
               height: 48,
               padding: const EdgeInsets.symmetric(horizontal: 18),
               decoration: BoxDecoration(
-                color: Colors.black,
+                color: isLight
+                    ? theme.colorScheme.surface
+                    : theme.colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(28),
+                border: Border.all(
+                  color: theme.colorScheme.outline.withValues(
+                    alpha: isLight ? 0.30 : 0.16,
+                  ),
+                ),
               ),
               child: TextField(
                 controller: _messageController,
                 enabled: !widget.isSending,
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: theme.colorScheme.onSurface,
                   fontSize: 13,
                 ),
                 decoration: InputDecoration(
                   hintText: l10n.typeMessage,
-                  hintStyle: const TextStyle(
-                    color: Colors.grey,
+                  hintStyle: TextStyle(
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.48),
                     fontSize: 13,
                   ),
                   border: InputBorder.none,
@@ -92,7 +103,7 @@ class _MessageInputBarState extends State<MessageInputBar> {
               height: 50,
               decoration: BoxDecoration(
                 color: widget.isSending
-                    ? const Color(0xFF4A4A4A)
+                    ? theme.colorScheme.onSurface.withValues(alpha: 0.20)
                     : const Color(0xFFFF7A66),
                 shape: BoxShape.circle,
               ),
@@ -104,7 +115,7 @@ class _MessageInputBarState extends State<MessageInputBar> {
                   color: Colors.black,
                 ),
               )
-                  : const Icon(
+                  : Icon(
                 Icons.send_rounded,
                 color: Colors.black,
                 size: 24,

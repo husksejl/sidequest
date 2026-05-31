@@ -23,7 +23,7 @@ class OnboardingActionButton extends StatelessWidget {
           backgroundColor: const Color(0xFFFF7F6F),
           foregroundColor: const Color(0xFF120F10),
           elevation: 10,
-          shadowColor: const Color(0xFFFF7F6F).withOpacity(0.35),
+          shadowColor: const Color(0xFFFF7F6F).withValues(alpha: 0.35),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(24),
           ),
@@ -33,7 +33,7 @@ class OnboardingActionButton extends StatelessWidget {
           children: [
             Text(
               text.toUpperCase(),
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w900,
                 letterSpacing: 0.8,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sidequest/l10n/app_localizations.dart';
+import '../theme/app_theme.dart';
 
 import 'nav_item.dart';
 
@@ -63,10 +64,10 @@ class CustomBottomNav extends StatelessWidget {
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       padding: const EdgeInsets.symmetric(vertical: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFF111317),
+        color: context.appElevatedCardColor,
         borderRadius: BorderRadius.circular(26),
         border: Border.all(
-          color: Colors.white.withOpacity(0.05),
+          color: context.appBorderColor,
         ),
       ),
       child: Row(

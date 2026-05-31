@@ -27,8 +27,8 @@ class OtherProfileMeta extends StatelessWidget {
       children: [
         Text(
           username,
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurface,
             fontSize: 24,
             fontWeight: FontWeight.w900,
           ),
@@ -39,7 +39,7 @@ class OtherProfileMeta extends StatelessWidget {
           Text(
             trimmedBio,
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: TextStyle(
               color: Color(0xFFC8CDD5),
               fontSize: 13,
               height: 1.45,
@@ -67,7 +67,7 @@ class OtherProfileMeta extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(
+                Icon(
                   Icons.location_on_rounded,
                   color: Color(0xFF00B2AA),
                   size: 15,
@@ -77,8 +77,8 @@ class OtherProfileMeta extends StatelessWidget {
                   child: Text(
                     location!,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
                     ),
@@ -110,7 +110,7 @@ class OtherProfileMeta extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(
+                Icon(
                   Icons.link_rounded,
                   color: Color(0xFFEB5D4F),
                   size: 15,
@@ -120,8 +120,8 @@ class OtherProfileMeta extends StatelessWidget {
                   child: Text(
                     website!,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
                       decoration: TextDecoration.underline,

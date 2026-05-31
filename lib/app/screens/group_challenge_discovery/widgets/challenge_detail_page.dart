@@ -13,7 +13,7 @@ class ChallengeDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF050608),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           children: [
@@ -22,32 +22,32 @@ class ChallengeDetailPage extends StatelessWidget {
               child: ListView(
                 padding: EdgeInsets.zero,
                 children: [
-                  _buildHero(),
+                  _buildHero(context),
                   Padding(
                     padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildStats(),
+                        _buildStats(context),
                         const SizedBox(height: 28),
-                        _buildSectionTitle('The Brief'),
+                        _buildSectionTitle(context, 'The Brief'),
                         const SizedBox(height: 10),
                         Text(
                           challenge.description,
-                          style: const TextStyle(
-                            color: Colors.white70,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.70),
                             height: 1.5,
                             fontSize: 13,
                           ),
                         ),
                         const SizedBox(height: 28),
-                        _buildSectionTitle('Quest Ideas'),
+                        _buildSectionTitle(context, 'Quest Ideas'),
                         const SizedBox(height: 14),
                         ...challenge.questIdeas.map(
-                              (idea) => _buildQuestIdea(idea),
+                              (idea) => _buildQuestIdea(context, idea),
                         ),
                         const SizedBox(height: 24),
-                        _buildReadyCard(),
+                        _buildReadyCard(context),
                         const SizedBox(height: 24),
                       ],
                     ),
@@ -70,18 +70,18 @@ class ChallengeDetailPage extends StatelessWidget {
             onPressed: () {
               Navigator.pop(context);
             },
-            icon: const Icon(
+            icon: Icon(
               Icons.arrow_back,
               color: Color(0xFF00D7E8),
             ),
           ),
           const Spacer(),
-          const CircleAvatar(
+          CircleAvatar(
             radius: 15,
             backgroundColor: Color(0xFF1C1F24),
             child: Icon(
               Icons.person,
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.onSurface,
               size: 17,
             ),
           ),
@@ -90,7 +90,7 @@ class ChallengeDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildHero() {
+  Widget _buildHero(BuildContext context) {
     return SizedBox(
       height: 270,
       child: Stack(
@@ -102,7 +102,7 @@ class ChallengeDetailPage extends StatelessWidget {
             errorBuilder: (context, error, stackTrace) {
               return Container(
                 color: const Color(0xFF111820),
-                child: const Icon(
+                child: Icon(
                   Icons.landscape_rounded,
                   color: Color(0xFF00D7E8),
                   size: 70,
@@ -116,9 +116,9 @@ class ChallengeDetailPage extends StatelessWidget {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  Colors.black.withOpacity(0.05),
-                  Colors.black.withOpacity(0.2),
-                  Colors.black.withOpacity(0.95),
+                  Colors.black.withValues(alpha: 0.05),
+                  Colors.black.withValues(alpha: 0.2),
+                  Colors.black.withValues(alpha: 0.95),
                 ],
               ),
             ),
@@ -134,8 +134,8 @@ class ChallengeDetailPage extends StatelessWidget {
                 const SizedBox(height: 12),
                 Text(
                   challenge.title,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface,
                     fontSize: 26,
                     fontWeight: FontWeight.w900,
                     height: 1.05,
@@ -144,8 +144,8 @@ class ChallengeDetailPage extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   challenge.subtitle,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface,
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
                     height: 1.05,
@@ -171,7 +171,7 @@ class ChallengeDetailPage extends StatelessWidget {
       ),
       child: Text(
         text,
-        style: const TextStyle(
+        style: TextStyle(
           color: Color(0xFF00D7E8),
           fontSize: 10,
           fontWeight: FontWeight.w700,
@@ -180,29 +180,29 @@ class ChallengeDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildStats() {
+  Widget _buildStats(BuildContext context) {
     return Row(
       children: [
         Expanded(
-          child: _buildStatItem('Reward', challenge.reward),
+          child: _buildStatItem(context, 'Reward', challenge.reward),
         ),
         Expanded(
-          child: _buildStatItem('Time', challenge.time),
+          child: _buildStatItem(context, 'Time', challenge.time),
         ),
         Expanded(
-          child: _buildStatItem('Level', challenge.level),
+          child: _buildStatItem(context, 'Level', challenge.level),
         ),
       ],
     );
   }
 
-  Widget _buildStatItem(String label, String value) {
+  Widget _buildStatItem(BuildContext context, String label, String value) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label.toUpperCase(),
-          style: const TextStyle(
+          style: TextStyle(
             color: Color(0xFFFF7668),
             fontSize: 10,
             fontWeight: FontWeight.w800,
@@ -211,8 +211,8 @@ class ChallengeDetailPage extends StatelessWidget {
         const SizedBox(height: 5),
         Text(
           value,
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurface,
             fontSize: 13,
             fontWeight: FontWeight.w700,
           ),
@@ -221,18 +221,18 @@ class ChallengeDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildSectionTitle(String title) {
+  Widget _buildSectionTitle(BuildContext context, String title) {
     return Text(
       title,
-      style: const TextStyle(
-        color: Colors.white,
+      style: TextStyle(
+        color: Theme.of(context).colorScheme.onSurface,
         fontSize: 17,
         fontWeight: FontWeight.w800,
       ),
     );
   }
 
-  Widget _buildQuestIdea(String idea) {
+  Widget _buildQuestIdea(BuildContext context, String idea) {
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.all(16),
@@ -253,7 +253,7 @@ class ChallengeDetailPage extends StatelessWidget {
               color: const Color(0xFF0E3E44),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.auto_awesome,
               color: Color(0xFF00D7E8),
               size: 18,
@@ -263,8 +263,8 @@ class ChallengeDetailPage extends StatelessWidget {
           Expanded(
             child: Text(
               idea,
-              style: const TextStyle(
-                color: Colors.white70,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.70),
                 fontSize: 13,
                 height: 1.4,
               ),
@@ -275,32 +275,32 @@ class ChallengeDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildReadyCard() {
+  Widget _buildReadyCard(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: const Color(0xFF111419),
         borderRadius: BorderRadius.circular(22),
         border: Border.all(
-          color: const Color(0xFFFF7668).withOpacity(0.5),
+          color: const Color(0xFFFF7668).withValues(alpha: 0.5),
         ),
       ),
       child: Column(
         children: [
-          const Text(
+          Text(
             'Ready to start?',
             style: TextStyle(
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.onSurface,
               fontSize: 21,
               fontWeight: FontWeight.w900,
             ),
           ),
           const SizedBox(height: 8),
-          const Text(
+          Text(
             'This quest begins in groups. Complete the task and upload your proof once your journey begins.',
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: Colors.white54,
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54),
               fontSize: 13,
               height: 1.4,
             ),
@@ -327,10 +327,10 @@ class ChallengeDetailPage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          const Text(
+          Text(
             'SAVE FOR LATER',
             style: TextStyle(
-              color: Colors.white38,
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38),
               fontSize: 10,
               fontWeight: FontWeight.w800,
             ),

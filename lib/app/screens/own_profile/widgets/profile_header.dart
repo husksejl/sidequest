@@ -235,9 +235,9 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                           ? NetworkImage(profileImageUrl!)
                           : null,
                       child: profileImageUrl == null
-                          ? const Icon(
+                          ? Icon(
                         Icons.person_rounded,
-                        color: Colors.white54,
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54),
                         size: 48,
                       )
                           : null,
@@ -281,8 +281,8 @@ class _ProfileHeaderState extends State<ProfileHeader> {
               children: [
                 Text(
                   data['username'] ?? l10n.unknownUser,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface,
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
                   ),
@@ -294,8 +294,8 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                   (data['firstName'] ?? '')
                       .toString()
                       .toUpperCase(),
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface,
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 1.2,
@@ -330,7 +330,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                 Text(
                   bio,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: Color(0xFFC8CDD5),
                     fontSize: 13,
                     height: 1.45,
@@ -359,7 +359,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.location_on_rounded,
                           color: Color(0xFF00B2AA),
                           size: 15,
@@ -371,8 +371,8 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                           child: Text(
                             location,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              color: Colors.white,
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onSurface,
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
                             ),
@@ -411,7 +411,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.link_rounded,
                           color: Color(0xFFEB5D4F),
                           size: 15,
@@ -423,8 +423,8 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                           child: Text(
                             website,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              color: Colors.white,
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onSurface,
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
                               decoration: TextDecoration.underline,
@@ -461,8 +461,8 @@ class _ProfileStat extends StatelessWidget {
       children: [
         Text(
           number,
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurface,
             fontSize: 19,
             fontWeight: FontWeight.w800,
           ),
@@ -470,7 +470,7 @@ class _ProfileStat extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           label.toUpperCase(),
-          style: const TextStyle(
+          style: TextStyle(
             color: Color(0xFF8A8F98),
             fontSize: 10,
             fontWeight: FontWeight.w700,
@@ -505,9 +505,9 @@ class _ProfileImageOption extends StatelessWidget {
             height: 64,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: const Color(0xFF15181D),
+              color: Theme.of(context).colorScheme.surface,
               border: Border.all(
-                color: const Color(0xFF18D7FF).withOpacity(0.4),
+                color: const Color(0xFF18D7FF).withValues(alpha: 0.4),
               ),
             ),
             child: Icon(
@@ -519,8 +519,8 @@ class _ProfileImageOption extends StatelessWidget {
           const SizedBox(height: 10),
           Text(
             label,
-            style: const TextStyle(
-              color: Colors.white70,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.70),
               fontSize: 11,
               fontWeight: FontWeight.w800,
               letterSpacing: 1.2,

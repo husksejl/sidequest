@@ -9,6 +9,8 @@ import 'widgets/settings_section.dart';
 import 'widgets/settings_switch_tile.dart';
 import 'widgets/settings_tile.dart';
 import '../../shared/widgets/top_bar.dart';
+import '../../shared/services/theme_service.dart';
+import '../../shared/theme/app_theme.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -35,7 +37,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      backgroundColor: SettingsScreen.bgColor,
+      backgroundColor: context.appBackground,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
@@ -155,6 +157,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
               SettingsSection(
                 title: l10n.appExperience,
                 children: [
+                  ValueListenableBuilder<ThemeMode>(
+                    valueListenable: ThemeService.themeMode,
+                    builder: (context, themeMode, _) {
+                      final isLightMode = themeMode == ThemeMode.light;
+
+                      return SettingsSwitchTile(
+                        icon: Icons.light_mode_rounded,
+                        title: 'Light Mode',
+                        subtitle: isLightMode
+                            ? 'Die App wird aktuell hell dargestellt.'
+                            : 'Aktivieren, um die App hell darzustellen.',
+                        value: isLightMode,
+                        onChanged: ThemeService.setLightMode,
+                      );
+                    },
+                  ),
                   SettingsSwitchTile(
                     icon: Icons.vibration_rounded,
                     title: l10n.hapticFeedback,
@@ -169,13 +187,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     value: saveUploadedPhotos,
                     onChanged: (value) => setState(() => saveUploadedPhotos = value),
                   ),
-                  SettingsTile(
-                    icon: Icons.palette_rounded,
-                    title: l10n.appearance,
-                    subtitle: l10n.appearanceSubtitle,
-                    trailingText: l10n.dark,
-                    onTap: () {},
-                  ),
+
                   SettingsTile(
                     icon: Icons.language_rounded,
                     title: l10n.language,
@@ -217,7 +229,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 child: Text(
                   l10n.keepExploring,
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.32),
+                    color: context.appMutedTextColor.withOpacity(0.7),
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                     letterSpacing: 0.8,

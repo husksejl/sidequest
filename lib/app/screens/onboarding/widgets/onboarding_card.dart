@@ -21,7 +21,7 @@ class OnboardingCard extends StatelessWidget {
           Text(
             step.eyebrow,
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: TextStyle(
               color: Color(0xFFFF7F6F),
               fontSize: 15,
               fontWeight: FontWeight.w800,
@@ -43,16 +43,16 @@ class OnboardingCard extends StatelessWidget {
                   ],
                 ),
                 border: Border.all(
-                  color: Colors.white.withOpacity(0.05),
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05),
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF00D9E8).withOpacity(0.08),
+                    color: const Color(0xFF00D9E8).withValues(alpha: 0.08),
                     blurRadius: 40,
                     offset: const Offset(0, 20),
                   ),
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.35),
+                    color: Colors.black.withValues(alpha: 0.35),
                     blurRadius: 28,
                     offset: const Offset(0, 18),
                   ),
@@ -100,14 +100,14 @@ class OnboardingCard extends StatelessWidget {
                                         fontSize: compact ? 23 : 27,
                                         height: 1.08,
                                         fontWeight: FontWeight.w900,
-                                        color: Colors.white,
+                                        color: Theme.of(context).colorScheme.onSurface,
                                         letterSpacing: -0.8,
                                       ),
                                       children: [
                                         TextSpan(text: step.title),
                                         TextSpan(
                                           text: step.highlightedTitle,
-                                          style: const TextStyle(
+                                          style: TextStyle(
                                             color: Color(0xFF00D9E8),
                                           ),
                                         ),
@@ -122,7 +122,7 @@ class OnboardingCard extends StatelessWidget {
                                       maxLines: compact ? 3 : 4,
                                       overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
-                                        color: Colors.white.withOpacity(0.68),
+                                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.68),
                                         fontSize: compact ? 12.5 : 14,
                                         height: 1.45,
                                         fontWeight: FontWeight.w500,
@@ -159,7 +159,7 @@ class _CardBackground extends StatelessWidget {
           right: -60,
           child: _GlowBlob(
             size: 190,
-            color: const Color(0xFF00D9E8).withOpacity(0.10),
+            color: const Color(0xFF00D9E8).withValues(alpha: 0.10),
           ),
         ),
         Positioned(
@@ -167,7 +167,7 @@ class _CardBackground extends StatelessWidget {
           left: -70,
           child: _GlowBlob(
             size: 190,
-            color: const Color(0xFFFF7F6F).withOpacity(0.08),
+            color: const Color(0xFFFF7F6F).withValues(alpha: 0.08),
           ),
         ),
         Positioned(
@@ -175,7 +175,7 @@ class _CardBackground extends StatelessWidget {
           left: -40,
           child: _GlowBlob(
             size: 120,
-            color: Colors.white.withOpacity(0.02),
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.02),
           ),
         ),
       ],
@@ -241,10 +241,10 @@ class _VisualStoryArea extends StatelessWidget {
                     height: imageHeight,
                     width: imageWidth,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.03),
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.03),
                       borderRadius: BorderRadius.circular(26),
                       border: Border.all(
-                        color: Colors.white.withOpacity(0.05),
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05),
                       ),
                     ),
                   ),
@@ -293,14 +293,14 @@ class _PreviewCard extends StatelessWidget {
       width: width,
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.06),
+        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(26),
         border: Border.all(
-          color: Colors.white.withOpacity(0.08),
+          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.08),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.24),
+            color: Colors.black.withValues(alpha: 0.24),
             blurRadius: 24,
             offset: const Offset(0, 16),
           ),
@@ -328,7 +328,7 @@ class _PreviewCard extends StatelessWidget {
                   ),
                   child: Icon(
                     Icons.image_rounded,
-                    color: Colors.white.withOpacity(0.35),
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.35),
                     size: 42,
                   ),
                 );
@@ -341,9 +341,9 @@ class _PreviewCard extends StatelessWidget {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      Colors.black.withOpacity(0.02),
-                      Colors.black.withOpacity(0.08),
-                      Colors.black.withOpacity(0.22),
+                      Colors.black.withValues(alpha: 0.02),
+                      Colors.black.withValues(alpha: 0.08),
+                      Colors.black.withValues(alpha: 0.22),
                     ],
                   ),
                 ),
@@ -381,10 +381,10 @@ class _StepBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
       decoration: BoxDecoration(
-        color: const Color(0xFF00D9E8).withOpacity(0.10),
+        color: const Color(0xFF00D9E8).withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(99),
         border: Border.all(
-          color: const Color(0xFF00D9E8).withOpacity(0.18),
+          color: const Color(0xFF00D9E8).withValues(alpha: 0.18),
         ),
       ),
       child: Row(
@@ -398,7 +398,7 @@ class _StepBadge extends StatelessWidget {
           const SizedBox(width: 7),
           Text(
             text,
-            style: const TextStyle(
+            style: TextStyle(
               color: Color(0xFF00D9E8),
               fontSize: 11,
               fontWeight: FontWeight.w900,
@@ -436,7 +436,7 @@ class _FloatingIcon extends StatelessWidget {
           borderRadius: BorderRadius.circular(18),
           boxShadow: [
             BoxShadow(
-              color: color.withOpacity(0.24),
+              color: color.withValues(alpha: 0.24),
               blurRadius: 18,
               offset: const Offset(0, 10),
             ),
@@ -477,10 +477,10 @@ class _TinyPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.28),
+        color: Colors.black.withValues(alpha: 0.28),
         borderRadius: BorderRadius.circular(99),
         border: Border.all(
-          color: Colors.white.withOpacity(0.08),
+          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.08),
         ),
       ),
       child: Row(
@@ -495,7 +495,7 @@ class _TinyPill extends StatelessWidget {
           Text(
             text,
             style: TextStyle(
-              color: Colors.white.withOpacity(0.78),
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.78),
               fontSize: 11,
               fontWeight: FontWeight.w700,
             ),

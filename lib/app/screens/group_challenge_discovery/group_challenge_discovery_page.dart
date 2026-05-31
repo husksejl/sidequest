@@ -124,12 +124,12 @@ class _GroupChallengeDiscoveryPageState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF050608),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       floatingActionButton: FloatingActionButton(
         backgroundColor: const Color(0xFFFF7668),
-        foregroundColor: Colors.black,
+        foregroundColor: Theme.of(context).brightness == Brightness.light ? Colors.white : Colors.black,
         onPressed: () {},
-        child: const Icon(Icons.add),
+        child: Icon(Icons.add),
       ),
       body: SafeArea(
         child: Padding(
@@ -168,12 +168,12 @@ class _GroupChallengeDiscoveryPageState
   Widget _buildTopBar() {
     return Row(
       children: [
-        const CircleAvatar(
+        CircleAvatar(
           radius: 16,
-          backgroundColor: Color(0xFF1C1F24),
+          backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.10),
           child: Icon(
             Icons.person,
-            color: Colors.white,
+            color: Theme.of(context).colorScheme.onSurface,
             size: 18,
           ),
         ),
@@ -181,15 +181,15 @@ class _GroupChallengeDiscoveryPageState
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
           decoration: BoxDecoration(
-            color: const Color(0xFF15181D),
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(20),
           ),
-          child: const Row(
+          child: Row(
             children: [
               Text(
                 'Your Groups',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.onSurface,
                   fontWeight: FontWeight.w600,
                   fontSize: 12,
                 ),
@@ -197,7 +197,7 @@ class _GroupChallengeDiscoveryPageState
               SizedBox(width: 6),
               Icon(
                 Icons.notifications_none,
-                color: Colors.white54,
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.54),
                 size: 15,
               ),
             ],
@@ -221,13 +221,13 @@ class _GroupChallengeDiscoveryPageState
       height: 42,
       padding: const EdgeInsets.symmetric(horizontal: 14),
       decoration: BoxDecoration(
-        color: const Color(0xFF101317),
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: const Color(0xFF1E252C),
+          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.12),
         ),
       ),
-      child: const Row(
+      child: Row(
         children: [
           Icon(
             Icons.search,
@@ -238,7 +238,7 @@ class _GroupChallengeDiscoveryPageState
           Text(
             'Find your next group quest',
             style: TextStyle(
-              color: Colors.white38,
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.38),
               fontSize: 13,
             ),
           ),

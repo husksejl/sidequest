@@ -35,7 +35,7 @@ class _SocialHubPageState extends State<SocialHubPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF050608),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       bottomNavigationBar: const CustomBottomNav(currentIndex: 1),
       body: SafeArea(
         child: Column(

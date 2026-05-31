@@ -21,16 +21,17 @@ class SocialHubTabs extends StatelessWidget {
         height: 54,
         padding: const EdgeInsets.all(5),
         decoration: BoxDecoration(
-          color: const Color(0xFF0B0E0F),
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
-            color: const Color(0xFF1C2A2C),
+            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.25),
           ),
         ),
         child: Row(
           children: [
             Expanded(
               child: buildTabButton(
+                context: context,
                 text: l10n.activity,
                 index: 0,
                 icon: Icons.notifications_none_rounded,
@@ -39,6 +40,7 @@ class SocialHubTabs extends StatelessWidget {
             const SizedBox(width: 6),
             Expanded(
               child: buildTabButton(
+                context: context,
                 text: l10n.messages,
                 index: 1,
                 icon: Icons.chat_bubble_outline_rounded,
@@ -51,6 +53,7 @@ class SocialHubTabs extends StatelessWidget {
   }
 
   Widget buildTabButton({
+    required BuildContext context,
     required String text,
     required int index,
     required IconData icon,
@@ -66,17 +69,17 @@ class SocialHubTabs extends StatelessWidget {
         curve: Curves.easeOut,
         height: double.infinity,
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF102326) : Colors.transparent,
+          color: isSelected ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.10) : Colors.transparent,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: isSelected
-                ? const Color(0xFF00E5FF).withOpacity(0.6)
+                ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.60)
                 : Colors.transparent,
           ),
           boxShadow: isSelected
               ? [
             BoxShadow(
-              color: const Color(0xFF00E5FF).withOpacity(0.15),
+              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.15),
               blurRadius: 14,
               offset: const Offset(0, 4),
             ),
@@ -88,14 +91,14 @@ class SocialHubTabs extends StatelessWidget {
           children: [
             Icon(
               icon,
-              color: isSelected ? const Color(0xFF00E5FF) : Colors.grey,
+              color: isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54),
               size: 20,
             ),
             const SizedBox(width: 8),
             Text(
               text,
               style: TextStyle(
-                color: isSelected ? const Color(0xFF00E5FF) : Colors.grey,
+                color: isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54),
                 fontSize: 15,
                 fontWeight: FontWeight.bold,
               ),

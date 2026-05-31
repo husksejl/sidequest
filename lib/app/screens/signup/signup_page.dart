@@ -14,7 +14,7 @@ class CreateAccountScreen extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      backgroundColor: bgColor,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
@@ -24,7 +24,7 @@ class CreateAccountScreen extends StatelessWidget {
               const SizedBox(height: 34),
               Text(
                 l10n.joinTheQuest,
-                style: const TextStyle(
+                style: TextStyle(
                   color: Color(0xFF18D7FF),
                   fontSize: 13,
                   letterSpacing: 4.5,
@@ -34,8 +34,8 @@ class CreateAccountScreen extends StatelessWidget {
               const SizedBox(height: 14),
               Text(
                 l10n.createAccountTitle,
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface,
                   fontSize: 42,
                   height: 0.95,
                   letterSpacing: -1.2,
@@ -45,7 +45,7 @@ class CreateAccountScreen extends StatelessWidget {
               const SizedBox(height: 12),
               Text(
                 l10n.createAccountSubtitle,
-                style: const TextStyle(
+                style: TextStyle(
                   color: Color(0xFF9AA0AA),
                   fontSize: 15,
                   height: 1.45,
@@ -58,7 +58,7 @@ class CreateAccountScreen extends StatelessWidget {
               Center(
                 child: Text(
                   l10n.signupFooter,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: Color(0xFF66707C),
                     fontSize: 13,
                     letterSpacing: 0.4,

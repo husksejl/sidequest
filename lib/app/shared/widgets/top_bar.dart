@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 
 class AppTopBar extends StatelessWidget {
   const AppTopBar({
@@ -28,9 +29,9 @@ class AppTopBar extends StatelessWidget {
               onTap: () {
                 Navigator.pop(context);
               },
-              child: const Icon(
+              child: Icon(
                 Icons.arrow_forward_ios_rounded,
-                color: Colors.white70,
+                color: context.appIconColor,
                 size: 20,
               ),
             )
@@ -40,9 +41,9 @@ class AppTopBar extends StatelessWidget {
               onTap: () {
                 Navigator.pushNamed(context, '/settings');
               },
-              child: const Icon(
+              child: Icon(
                 Icons.settings,
-                color: Colors.white70,
+                color: context.appIconColor,
                 size: 24,
               ),
             )

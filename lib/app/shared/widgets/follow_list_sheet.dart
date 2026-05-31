@@ -30,15 +30,15 @@ class FollowListSheet extends StatelessWidget {
             width: 42,
             height: 5,
             decoration: BoxDecoration(
-              color: Colors.white24,
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.24),
               borderRadius: BorderRadius.circular(999),
             ),
           ),
           const SizedBox(height: 18),
           Text(
             title.toUpperCase(),
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurface,
               fontSize: 15,
               fontWeight: FontWeight.w900,
               letterSpacing: 1.4,
@@ -47,10 +47,10 @@ class FollowListSheet extends StatelessWidget {
           const SizedBox(height: 18),
           Expanded(
             child: userIds.isEmpty
-                ? const Center(
+                ? Center(
               child: Text(
                 'No users yet.',
-                style: TextStyle(color: Colors.white54),
+                style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.54)),
               ),
             )
                 : ListView.builder(
@@ -107,16 +107,16 @@ class FollowListSheet extends StatelessWidget {
                             : null,
                         child: profileImageUrl == null ||
                             profileImageUrl.isEmpty
-                            ? const Icon(
+                            ? Icon(
                           Icons.person_rounded,
-                          color: Colors.white54,
+                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.54),
                         )
                             : null,
                       ),
                       title: Text(
                         username,
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface,
                           fontWeight: FontWeight.w800,
                         ),
                       ),

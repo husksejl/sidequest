@@ -23,7 +23,7 @@ class OtherProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF050608),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       bottomNavigationBar: const CustomBottomNav(currentIndex: 0),
       body: SafeArea(
         child: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
@@ -43,10 +43,10 @@ class OtherProfilePage extends StatelessWidget {
             final userData = userSnapshot.data!.data();
 
             if (userData == null) {
-              return const Center(
+              return Center(
                 child: Text(
                   'User not found',
-                  style: TextStyle(color: Colors.white),
+                  style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
                 ),
               );
             }
@@ -81,10 +81,10 @@ class OtherProfilePage extends StatelessWidget {
                       const SizedBox(width: 48),
                       const Spacer(),
                       PopupMenuButton<String>(
-                        color: const Color(0xFF15181D),
-                        icon: const Icon(
+                        color: Theme.of(context).colorScheme.surface,
+                        icon: Icon(
                           Icons.more_horiz_rounded,
-                          color: Colors.white70,
+                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.70),
                         ),
                         onSelected: (value) {
                           ScaffoldMessenger.of(context).showSnackBar(
@@ -113,9 +113,9 @@ class OtherProfilePage extends StatelessWidget {
                       ),
                       IconButton(
                         onPressed: () => Navigator.pop(context),
-                        icon: const Icon(
+                        icon: Icon(
                           Icons.arrow_forward_rounded,
-                          color: Colors.white70,
+                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.70),
                         ),
                       ),
                     ],
@@ -234,11 +234,11 @@ class OtherProfilePage extends StatelessWidget {
                   const SizedBox(height: 28),
 
                   Row(
-                    children: const [
+                    children: [
                       Text(
                         'POSTED SIDEQUESTS',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: Theme.of(context).colorScheme.onSurface,
                           fontSize: 14,
                           fontWeight: FontWeight.w800,
                           letterSpacing: 1,
@@ -268,11 +268,11 @@ class OtherProfilePage extends StatelessWidget {
                       final docs = postsSnapshot.data!.docs;
 
                       if (docs.isEmpty) {
-                        return const Padding(
+                        return Padding(
                           padding: EdgeInsets.only(top: 24),
                           child: Text(
                             'No posts yet.',
-                            style: TextStyle(color: Colors.white54),
+                            style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54)),
                           ),
                         );
                       }

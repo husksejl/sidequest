@@ -47,13 +47,13 @@ class _LoginFormCardState extends State<LoginFormCard> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(18),
           side: BorderSide(
-            color: const Color(0xFFFF9B8F).withOpacity(0.55),
+            color: const Color(0xFFFF9B8F).withValues(alpha: 0.55),
           ),
         ),
         content: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Icon(
+            Icon(
               Icons.error_outline_rounded,
               color: Color(0xFFFF9B8F),
               size: 22,
@@ -62,8 +62,8 @@ class _LoginFormCardState extends State<LoginFormCard> {
             Expanded(
               child: Text(
                 message,
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface,
                   fontSize: 14,
                   height: 1.35,
                   fontWeight: FontWeight.w700,
@@ -249,10 +249,10 @@ class _LoginFormCardState extends State<LoginFormCard> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        border: Border.all(color: Colors.white12),
+        border: Border.all(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.12)),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF18D7FF).withOpacity(0.08),
+            color: const Color(0xFF18D7FF).withValues(alpha: 0.08),
             blurRadius: 30,
             spreadRadius: 1,
           ),
@@ -278,13 +278,13 @@ class _LoginFormCardState extends State<LoginFormCard> {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF18D7FF).withOpacity(0.18),
+                    color: const Color(0xFF18D7FF).withValues(alpha: 0.18),
                     blurRadius: 28,
                     spreadRadius: 2,
                     offset: const Offset(-8, 0),
                   ),
                   BoxShadow(
-                    color: const Color(0xFFFF8D84).withOpacity(0.15),
+                    color: const Color(0xFFFF8D84).withValues(alpha: 0.15),
                     blurRadius: 28,
                     spreadRadius: 2,
                     offset: const Offset(8, 0),
@@ -296,9 +296,9 @@ class _LoginFormCardState extends State<LoginFormCard> {
                   shape: BoxShape.circle,
                   color: Color(0xFF111317),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.person_rounded,
-                  color: Colors.white70,
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.70),
                   size: 42,
                 ),
               ),
@@ -342,7 +342,7 @@ class _LoginFormCardState extends State<LoginFormCard> {
                 _showPassword
                     ? Icons.visibility_off_outlined
                     : Icons.visibility_outlined,
-                color: Colors.white70,
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.70),
                 size: 22,
               ),
             ),
@@ -371,11 +371,11 @@ class _LoginFormCardState extends State<LoginFormCard> {
                         border: Border.all(
                           color: _rememberMe
                               ? const Color(0xFF18D7FF)
-                              : Colors.white.withOpacity(0.22),
+                              : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.22),
                         ),
                       ),
                       child: _rememberMe
-                          ? const Icon(
+                          ? Icon(
                         Icons.check_rounded,
                         color: Colors.black,
                         size: 16,
@@ -479,9 +479,9 @@ class _CreateProfileButton extends StatelessWidget {
       child: DecoratedBox(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(999),
-          color: Colors.white.withOpacity(0.08),
+          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.08),
           border: Border.all(
-            color: Colors.white.withOpacity(0.10),
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.10),
           ),
         ),
         child: ElevatedButton(
@@ -496,7 +496,7 @@ class _CreateProfileButton extends StatelessWidget {
           child: Text(
             AppLocalizations.of(context)!.createProfile,
             style: TextStyle(
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.onSurface,
               fontSize: 16,
               fontWeight: FontWeight.w900,
               letterSpacing: 0.5,

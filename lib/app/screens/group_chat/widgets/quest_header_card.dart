@@ -198,7 +198,7 @@ class _PendingInviteCard extends StatelessWidget {
               children: [
                 Text(
                   AppLocalizations.of(context)!.sideQuestInvite,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: Color(0xFF00E5FF),
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
@@ -208,8 +208,8 @@ class _PendingInviteCard extends StatelessWidget {
                 const SizedBox(height: 5),
                 Text(
                   title,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface,
                     fontSize: 13,
                     fontWeight: FontWeight.bold,
                     height: 1.25,
@@ -291,8 +291,8 @@ class _AcceptedInviteCard extends StatelessWidget {
                 const SizedBox(height: 5),
                 Text(
                   title,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface,
                     fontSize: 13,
                     fontWeight: FontWeight.bold,
                     height: 1.25,
@@ -325,7 +325,7 @@ class _HeaderIcon extends StatelessWidget {
       width: 42,
       height: 42,
       decoration: BoxDecoration(
-        color: const Color(0xFF00E5FF).withOpacity(0.14),
+        color: const Color(0xFF00E5FF).withValues(alpha: 0.14),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Icon(
@@ -364,7 +364,7 @@ class _SmallActionButton extends StatelessWidget {
           color: isFilled ? color : Colors.transparent,
           borderRadius: BorderRadius.circular(999),
           border: Border.all(
-            color: color.withOpacity(0.75),
+            color: color.withValues(alpha: 0.75),
           ),
         ),
         child: Text(

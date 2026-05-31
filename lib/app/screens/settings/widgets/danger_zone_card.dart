@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import '../../../shared/theme/app_theme.dart';
 import 'package:sidequest/l10n/app_localizations.dart';
 
 import '../../login/login_page.dart';
@@ -235,7 +236,7 @@ class _DangerZoneCardState extends State<DangerZoneCard> {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF0B0E12),
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
           color: const Color(0xFFFF8D84).withOpacity(0.18),
@@ -256,7 +257,7 @@ class _DangerZoneCardState extends State<DangerZoneCard> {
                     color: const Color(0xFFFF8D84).withOpacity(0.18),
                   ),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.warning_rounded,
                   color: Color(0xFFFF8D84),
                   size: 20,
@@ -270,7 +271,7 @@ class _DangerZoneCardState extends State<DangerZoneCard> {
                     Text(
                       l10n.dangerZone,
                       style: TextStyle(
-                        color: Colors.white,
+                        color: Theme.of(context).colorScheme.onSurface,
                         fontSize: 15,
                         fontWeight: FontWeight.w800,
                       ),
@@ -385,7 +386,7 @@ class _DeleteAccountPasswordDialogState
       title: Text(
         l10n.deleteAccountTitle,
         style: TextStyle(
-          color: Colors.white,
+          color: Theme.of(context).colorScheme.onSurface,
           fontWeight: FontWeight.w900,
         ),
       ),
@@ -409,16 +410,16 @@ class _DeleteAccountPasswordDialogState
               enableSuggestions: false,
               keyboardType: TextInputType.visiblePassword,
               textCapitalization: TextCapitalization.none,
-              style: const TextStyle(
-                color: Colors.white,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface,
               ),
               decoration: InputDecoration(
                 hintText: l10n.passwordHint,
-                hintStyle: const TextStyle(
+                hintStyle: TextStyle(
                   color: Color(0xFF747D8C),
                 ),
                 filled: true,
-                fillColor: Colors.black,
+                fillColor: Theme.of(context).colorScheme.surface,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
                   borderSide: const BorderSide(

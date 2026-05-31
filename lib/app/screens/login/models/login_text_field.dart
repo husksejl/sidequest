@@ -29,7 +29,7 @@ class LoginTextField extends StatelessWidget {
           padding: const EdgeInsets.only(left: 2, bottom: 8),
           child: Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               color: Color(0xFFE1E5EC),
               fontSize: 12,
               letterSpacing: 0.8,
@@ -40,12 +40,12 @@ class LoginTextField extends StatelessWidget {
         Container(
           height: 58,
           decoration: BoxDecoration(
-            color: const Color(0xFF080D12),
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.white.withOpacity(0.09)),
+            border: Border.all(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.09)),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.26),
+                color: Colors.black.withValues(alpha: 0.26),
                 blurRadius: 18,
                 offset: const Offset(0, 10),
               ),
@@ -55,15 +55,15 @@ class LoginTextField extends StatelessWidget {
             controller: controller,
             obscureText: obscureText,
             keyboardType: keyboardType,
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurface,
               fontSize: 16,
               fontWeight: FontWeight.w600,
             ),
             cursorColor: const Color(0xFF18D7FF),
             decoration: InputDecoration(
               hintText: hintText,
-              hintStyle: const TextStyle(
+              hintStyle: TextStyle(
                 color: Color(0xFF68717E),
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
@@ -78,7 +78,7 @@ class LoginTextField extends StatelessWidget {
                 children: [
                   Icon(
                     trailingIcon,
-                    color: Colors.white70,
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.70),
                     size: 22,
                   ),
                   if (extraTrailing != null) ...[

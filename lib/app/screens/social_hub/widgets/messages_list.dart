@@ -178,15 +178,20 @@ class _MessagesListState extends State<MessagesList> {
       return Center(
         child: Text(
           l10n.youNeedToBeLoggedInToSeeChats,
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: Theme
+                .of(context)
+                .colorScheme
+                .onSurface,
             fontSize: 14,
           ),
         ),
       );
     }
 
-    final bool isSearching = _searchText.trim().isNotEmpty;
+    final bool isSearching = _searchText
+        .trim()
+        .isNotEmpty;
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
@@ -205,7 +210,7 @@ class _MessagesListState extends State<MessagesList> {
                   child: Center(
                     child: Text(
                       l10n.usersCouldNotBeLoaded,
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: Colors.grey,
                         fontSize: 14,
                       ),
@@ -233,7 +238,7 @@ class _MessagesListState extends State<MessagesList> {
                   child: Center(
                     child: Text(
                       l10n.noUsersFound,
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: Colors.grey,
                         fontSize: 14,
                       ),
@@ -271,8 +276,11 @@ class _MessagesListState extends State<MessagesList> {
                     child: Text(
                       l10n.chatsCouldNotBeLoaded(snapshot.error.toString()),
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: Theme
+                            .of(context)
+                            .colorScheme
+                            .onSurface,
                         fontSize: 14,
                       ),
                     ),
@@ -292,7 +300,9 @@ class _MessagesListState extends State<MessagesList> {
               }
 
               final chats = snapshot.data!.where((chat) {
-                return chat.lastMessage.trim().isNotEmpty || chat.isGroup;
+                return chat.lastMessage
+                    .trim()
+                    .isNotEmpty || chat.isGroup;
               }).toList();
 
               if (chats.isEmpty) {
@@ -302,7 +312,7 @@ class _MessagesListState extends State<MessagesList> {
                     child: Text(
                       l10n.noConversationsYet,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: Colors.grey,
                         fontSize: 14,
                         height: 1.5,
@@ -329,6 +339,7 @@ class _MessagesListState extends State<MessagesList> {
     );
   }
 
+
   Widget buildActionRow(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
@@ -348,7 +359,7 @@ class _MessagesListState extends State<MessagesList> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.groups_rounded,
                     color: Colors.black,
                     size: 19,
@@ -356,7 +367,7 @@ class _MessagesListState extends State<MessagesList> {
                   const SizedBox(width: 8),
                   Text(
                     l10n.newGroup,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: Colors.black,
                       fontSize: 12,
                       fontWeight: FontWeight.w900,
@@ -398,19 +409,37 @@ class _MessagesListState extends State<MessagesList> {
 
   Widget buildSearchBar(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final isLight = theme.brightness == Brightness.light;
 
     return Container(
       height: 48,
       padding: const EdgeInsets.symmetric(horizontal: 14),
       decoration: BoxDecoration(
-        color: Colors.black,
-        borderRadius: BorderRadius.circular(10),
+        color: isLight
+            ? theme.colorScheme.surface
+            : theme.colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: theme.colorScheme.outline.withValues(
+            alpha: isLight ? 0.35 : 0.18,
+          ),
+        ),
+        boxShadow: isLight
+            ? [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 14,
+            offset: const Offset(0, 6),
+          ),
+        ]
+            : null,
       ),
       child: Row(
         children: [
-          const Icon(
+          Icon(
             Icons.search,
-            color: Colors.grey,
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.58),
             size: 22,
           ),
           const SizedBox(width: 10),
@@ -422,14 +451,14 @@ class _MessagesListState extends State<MessagesList> {
                   _searchText = value;
                 });
               },
-              style: const TextStyle(
-                color: Colors.white,
+              style: TextStyle(
+                color: theme.colorScheme.onSurface,
                 fontSize: 13,
               ),
               decoration: InputDecoration(
                 hintText: l10n.searchUsersOrConversations,
-                hintStyle: const TextStyle(
-                  color: Colors.grey,
+                hintStyle: TextStyle(
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.48),
                   fontSize: 13,
                 ),
                 border: InputBorder.none,
@@ -445,9 +474,9 @@ class _MessagesListState extends State<MessagesList> {
                   _searchText = '';
                 });
               },
-              child: const Icon(
+              child: Icon(
                 Icons.close_rounded,
-                color: Colors.grey,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.58),
                 size: 20,
               ),
             ),
@@ -563,7 +592,7 @@ class _UserSearchCard extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 14),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: const Color(0xFF151515),
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(24),
         ),
         child: Row(
@@ -572,16 +601,16 @@ class _UserSearchCard extends StatelessWidget {
               width: 54,
               height: 54,
               decoration: BoxDecoration(
-                color: const Color(0xFF102326),
+                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.12),
                 shape: BoxShape.circle,
                 border: Border.all(
                   color: const Color(0xFF00E5FF),
                   width: 1.5,
                 ),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.person_add_alt_1_rounded,
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.onSurface,
                 size: 25,
               ),
             ),
@@ -592,8 +621,8 @@ class _UserSearchCard extends StatelessWidget {
                 children: [
                   Text(
                     user.username,
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
                       fontWeight: FontWeight.bold,
                       fontSize: 15,
                     ),
@@ -602,7 +631,7 @@ class _UserSearchCard extends StatelessWidget {
                   Text(
                     subtitle,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: Colors.grey,
                       fontSize: 12,
                     ),
@@ -610,7 +639,7 @@ class _UserSearchCard extends StatelessWidget {
                 ],
               ),
             ),
-            const Icon(
+            Icon(
               Icons.chevron_right_rounded,
               color: Colors.grey,
             ),

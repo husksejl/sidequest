@@ -259,8 +259,8 @@ class ActivityList extends StatelessWidget {
       return Center(
         child: Text(
           l10n.youNeedToBeLoggedInToSeeActivity,
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurface,
             fontSize: 14,
           ),
         ),
@@ -285,7 +285,7 @@ class ActivityList extends StatelessWidget {
           return Center(
             child: Text(
               l10n.yourActivityCouldNotBeLoaded,
-              style: const TextStyle(
+              style: TextStyle(
                 color: Colors.grey,
                 fontSize: 14,
               ),
@@ -338,7 +338,7 @@ class ActivityList extends StatelessWidget {
                   return Center(
                     child: Text(
                       l10n.activityCouldNotBeLoaded,
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: Colors.grey,
                         fontSize: 14,
                       ),
@@ -353,7 +353,7 @@ class ActivityList extends StatelessWidget {
                     padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
                     children: [
                       const SizedBox(height: 80),
-                      const Icon(
+                      Icon(
                         Icons.notifications_none_rounded,
                         color: Color(0xFF18D7FF),
                         size: 42,
@@ -362,8 +362,8 @@ class ActivityList extends StatelessWidget {
                       Center(
                         child: Text(
                           l10n.noActivitiesYet,
-                          style: const TextStyle(
-                            color: Colors.white,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface,
                             fontSize: 17,
                             fontWeight: FontWeight.bold,
                           ),
@@ -374,7 +374,7 @@ class ActivityList extends StatelessWidget {
                         child: Text(
                           l10n.activity,
                           textAlign: TextAlign.center,
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: Colors.grey,
                             fontSize: 13,
                           ),

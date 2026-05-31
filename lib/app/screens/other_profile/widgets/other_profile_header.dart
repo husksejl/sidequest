@@ -24,7 +24,7 @@ class OtherProfileHeader extends StatelessWidget {
       children: [
         Text(
           'LEVEL $level',
-          style: const TextStyle(
+          style: TextStyle(
             color: Color(0xFF00B2AA),
             fontSize: 13,
             fontWeight: FontWeight.w900,
@@ -62,9 +62,9 @@ class OtherProfileHeader extends StatelessWidget {
                     ? NetworkImage(profileImageUrl!)
                     : null,
                 child: profileImageUrl == null
-                    ? const Icon(
+                    ? Icon(
                   Icons.person_rounded,
-                  color: Colors.white54,
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54),
                   size: 48,
                 )
                     : null,
@@ -100,8 +100,8 @@ class _OtherProfileStat extends StatelessWidget {
       children: [
         Text(
           number,
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurface,
             fontSize: 19,
             fontWeight: FontWeight.w800,
           ),
@@ -109,7 +109,7 @@ class _OtherProfileStat extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           label.toUpperCase(),
-          style: const TextStyle(
+          style: TextStyle(
             color: Color(0xFF8A8F98),
             fontSize: 10,
             fontWeight: FontWeight.w700,

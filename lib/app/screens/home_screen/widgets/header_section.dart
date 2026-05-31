@@ -19,9 +19,9 @@ class HeaderSection extends StatelessWidget {
         IconButton(
           tooltip: 'Settings',
           onPressed: () => Navigator.pushNamed(context, SettingsScreen.routeName),
-          icon: const Icon(
+          icon: Icon(
             Icons.settings_rounded,
-            color: Colors.white70,
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.70),
           ),
         ),
       ],

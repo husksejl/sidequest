@@ -20,18 +20,18 @@ class ChallengeCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: const Color(0xFF111419),
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
-            color: const Color(0xFF20262E),
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.12),
           ),
         ),
         child: Row(
           children: [
-            _buildImage(),
+            _buildImage(context),
             const SizedBox(width: 12),
             Expanded(
-              child: _buildContent(),
+              child: _buildContent(context),
             ),
           ],
         ),
@@ -39,12 +39,12 @@ class ChallengeCard extends StatelessWidget {
     );
   }
 
-  Widget _buildImage() {
+  Widget _buildImage(BuildContext context) {
     return Container(
       width: 70,
       height: 70,
       decoration: BoxDecoration(
-        color: const Color(0xFF1C222A),
+        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(14),
       ),
       clipBehavior: Clip.antiAlias,
@@ -52,7 +52,7 @@ class ChallengeCard extends StatelessWidget {
         challenge.imagePath,
         fit: BoxFit.cover,
         errorBuilder: (context, error, stackTrace) {
-          return const Icon(
+          return Icon(
             Icons.landscape_rounded,
             color: Color(0xFF00D7E8),
             size: 32,
@@ -62,14 +62,14 @@ class ChallengeCard extends StatelessWidget {
     );
   }
 
-  Widget _buildContent() {
+  Widget _buildContent(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           challenge.title,
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurface,
             fontWeight: FontWeight.w700,
             fontSize: 15,
           ),
@@ -79,8 +79,8 @@ class ChallengeCard extends StatelessWidget {
           children: [
             Text(
               '${challenge.members} Members',
-              style: const TextStyle(
-                color: Colors.white38,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38),
                 fontSize: 11,
               ),
             ),
@@ -88,16 +88,16 @@ class ChallengeCard extends StatelessWidget {
             Container(
               width: 4,
               height: 4,
-              decoration: const BoxDecoration(
-                color: Colors.white24,
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.24),
                 shape: BoxShape.circle,
               ),
             ),
             const SizedBox(width: 8),
             Text(
               '${challenge.quests} Quests',
-              style: const TextStyle(
-                color: Colors.white38,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38),
                 fontSize: 11,
               ),
             ),
@@ -106,7 +106,7 @@ class ChallengeCard extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           challenge.category,
-          style: const TextStyle(
+          style: TextStyle(
             color: Color(0xFF00D7E8),
             fontSize: 11,
             fontWeight: FontWeight.w600,
@@ -120,11 +120,11 @@ class ChallengeCard extends StatelessWidget {
             color: const Color(0xFFFF7668),
             borderRadius: BorderRadius.circular(20),
           ),
-          child: const Center(
+          child: Center(
             child: Text(
               'Start Group Challenge',
               style: TextStyle(
-                color: Colors.black,
+                color: Theme.of(context).brightness == Brightness.light ? Colors.white : Colors.black,
                 fontSize: 11,
                 fontWeight: FontWeight.w800,
               ),

@@ -11,6 +11,8 @@ import 'app/screens/signup/signup_page.dart';
 import 'app/screens/login/login_page.dart';
 import 'app/screens/settings/settings_page.dart';
 import 'app/screens/splash_screen/splash_screen_page.dart';
+import 'app/shared/services/theme_service.dart';
+import 'app/shared/theme/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,37 +27,39 @@ class SideQuestApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: ThemeService.themeMode,
+      builder: (context, themeMode, _) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
 
-      title: 'SideQuest',
+          title: 'SideQuest',
 
-      localizationsDelegates: const [
-        AppLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-      ],
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
 
-      supportedLocales: const [
-        Locale('en'),
-        Locale('de'),
-      ],
+          supportedLocales: const [
+            Locale('en'),
+            Locale('de'),
+          ],
 
-      theme: ThemeData(
-        brightness: Brightness.dark,
-        scaffoldBackgroundColor: const Color(0xFF050608),
-        useMaterial3: true,
-        fontFamily: 'Inter',
-      ),
+          theme: AppTheme.light(),
+          darkTheme: AppTheme.dark(),
+          themeMode: themeMode,
 
-      routes: {
-        SettingsScreen.routeName: (context) => const SettingsScreen(),
-        CreateAccountScreen.routeName: (context) => const CreateAccountScreen(),
-        LoginScreen.routeName: (context) => const LoginScreen(),
+          routes: {
+            SettingsScreen.routeName: (context) => const SettingsScreen(),
+            CreateAccountScreen.routeName: (context) => const CreateAccountScreen(),
+            LoginScreen.routeName: (context) => const LoginScreen(),
+          },
+
+          home: const SplashScreenPage(),
+        );
       },
-
-      home: const SplashScreenPage(),
     );
   }
 }
@@ -103,9 +107,9 @@ class AuthGate extends StatelessWidget {
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(
-            backgroundColor: Color(0xFF050608),
-            body: Center(
+          return Scaffold(
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+            body: const Center(
               child: CircularProgressIndicator(
                 color: Color(0xFF18D7FF),
               ),

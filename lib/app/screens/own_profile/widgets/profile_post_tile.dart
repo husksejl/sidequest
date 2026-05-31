@@ -89,7 +89,7 @@ class ProfilePostTile extends StatelessWidget {
             isTie ? 3 : (hasFrame ? 2 : 0),
           ),
           decoration: BoxDecoration(
-            color: const Color(0xFF050608),
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(16),
           ),
           child: ClipRRect(
@@ -103,9 +103,9 @@ class ProfilePostTile extends StatelessWidget {
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
-                        const Color(0xFFEB5D4F).withOpacity(0.22),
-                        const Color(0xFF050608),
-                        const Color(0xFF00B2AA).withOpacity(0.18),
+                        const Color(0xFFEB5D4F).withValues(alpha: 0.22),
+                        Theme.of(context).brightness == Brightness.light ? const Color(0xFFF6F8FA) : const Color(0xFF050608),
+                        const Color(0xFF00B2AA).withValues(alpha: 0.18),
                       ],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
@@ -113,16 +113,16 @@ class ProfilePostTile extends StatelessWidget {
                   ),
                   child: Center(
                     child: post.type == ProfilePostType.audio
-                        ? const Icon(
+                        ? Icon(
                       Icons.graphic_eq_rounded,
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.onSurface,
                       size: 44,
                     )
-                        : const Text(
+                        : Text(
                       '"I complimented\nthree strangers today\nand honestly... it healed me a little."',
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        color: Colors.white,
+                        color: Theme.of(context).colorScheme.onSurface,
                         fontSize: 8,
                         height: 1.3,
                         fontWeight: FontWeight.w800,
@@ -151,11 +151,11 @@ class ProfilePostTile extends StatelessWidget {
                     post.type != ProfilePostType.audio &&
                     post.type != ProfilePostType.text)
                   Container(
-                    color: Colors.black.withOpacity(0.18),
+                    color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.70),
                     child: Center(
                       child: Icon(
                         overlayIcon,
-                        color: Colors.white,
+                        color: Theme.of(context).colorScheme.onSurface,
                         size: 32,
                       ),
                     ),

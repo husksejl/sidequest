@@ -55,7 +55,7 @@ class OwnProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF050608),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       bottomNavigationBar: const CustomBottomNav(currentIndex: 4),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -75,11 +75,11 @@ class OwnProfilePage extends StatelessWidget {
               const SizedBox(height: 28),
 
               Row(
-                children: const [
+                children: [
                   Text(
                     'POSTED SIDEQUESTS',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.onSurface,
                       fontSize: 14,
                       fontWeight: FontWeight.w800,
                       letterSpacing: 1,

@@ -15,7 +15,7 @@ class CreateActionButton extends StatelessWidget {
       height: 70,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: const Color(0xFF121212),
+        color: Theme.of(context).colorScheme.surface,
         border: Border.all(
           color: const Color(0xFFEB5D4F),
           width: 1.5,

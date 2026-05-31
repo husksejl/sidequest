@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../shared/theme/app_theme.dart';
 
 class SettingsTile extends StatelessWidget {
   final IconData icon;
@@ -37,8 +38,8 @@ class SettingsTile extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: context.appTextColor,
                         fontSize: 15,
                         fontWeight: FontWeight.w800,
                       ),
@@ -48,8 +49,8 @@ class SettingsTile extends StatelessWidget {
                       subtitle,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: Color(0xFF8A8F98),
+                      style: TextStyle(
+                        color: context.appMutedTextColor,
                         fontSize: 12.5,
                         height: 1.25,
                       ),
@@ -61,17 +62,17 @@ class SettingsTile extends StatelessWidget {
               if (trailingText != null) ...[
                 Text(
                   trailingText!,
-                  style: const TextStyle(
-                    color: Color(0xFF8A8F98),
+                  style: TextStyle(
+                    color: context.appMutedTextColor,
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
                 const SizedBox(width: 4),
               ],
-              const Icon(
+              Icon(
                 Icons.chevron_right_rounded,
-                color: Colors.white38,
+                color: context.appMutedTextColor,
                 size: 24,
               ),
             ],

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../shared/theme/app_theme.dart';
 
 class SettingsSwitchTile extends StatelessWidget {
   final IconData icon;
@@ -45,8 +46,8 @@ class SettingsSwitchTile extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: context.appTextColor,
                     fontSize: 15,
                     fontWeight: FontWeight.w800,
                   ),
@@ -56,8 +57,8 @@ class SettingsSwitchTile extends StatelessWidget {
                   subtitle,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: Color(0xFF8A8F98),
+                  style: TextStyle(
+                    color: context.appMutedTextColor,
                     fontSize: 12.5,
                     height: 1.25,
                   ),
@@ -69,10 +70,10 @@ class SettingsSwitchTile extends StatelessWidget {
           Switch(
             value: value,
             onChanged: onChanged,
-            activeColor: Colors.black,
+            activeColor: context.isLightMode ? Colors.white : Colors.black,
             activeTrackColor: accentColor,
-            inactiveThumbColor: const Color(0xFF6D727B),
-            inactiveTrackColor: const Color(0xFF1A222B),
+            inactiveThumbColor: context.isLightMode ? const Color(0xFF9AA3AF) : const Color(0xFF6D727B),
+            inactiveTrackColor: context.isLightMode ? const Color(0xFFE1E6EE) : const Color(0xFF1A222B),
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
           ),
         ],
