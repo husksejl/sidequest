@@ -4,10 +4,12 @@ import '../models/create_quest.dart';
 
 class SoloQuestCard extends StatelessWidget {
   final CreateQuest quest;
+  final bool isSelected;
 
   const SoloQuestCard({
     super.key,
     required this.quest,
+    this.isSelected = false,
   });
 
   @override
@@ -18,7 +20,7 @@ class SoloQuestCard extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(42),
         border: Border.all(
-          color: const Color(0xFFEB5D4F),
+          color: isSelected ? const Color(0xFFEB5D4F) : Colors.transparent,
           width: 7,
         ),
         gradient: const LinearGradient(

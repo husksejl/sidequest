@@ -39,6 +39,84 @@ class ActivityList extends StatelessWidget {
     return activities;
   }
 
+  Stream<QuerySnapshot<Map<String, dynamic>>> _watchPendingGroupInvites(
+      String currentUserID,
+      ) {
+    return FirebaseFirestore.instance
+        .collection('challengeInvites')
+        .where('toUserId', isEqualTo: currentUserID)
+        .where('status', isEqualTo: 'pending')
+        .snapshots();
+  }
+
+  Future<void> _acceptGroupInvite({
+    required String inviteId,
+    required String runId,
+    required String currentUserID,
+  }) async {
+    final firestore = FirebaseFirestore.instance;
+
+    await firestore.collection('challengeInvites').doc(inviteId).update({
+      'status': 'accepted',
+      'respondedAt': FieldValue.serverTimestamp(),
+    });
+
+    final runRef = firestore.collection('group_challenge_runs').doc(runId);
+
+    await runRef.update({
+      'acceptedUserIds': FieldValue.arrayUnion([currentUserID]),
+      'participantIds': FieldValue.arrayUnion([currentUserID]),
+    });
+
+    final runDoc = await runRef.get();
+    final data = runDoc.data();
+
+    if (data == null) return;
+
+    final invitedUserIds = List<String>.from(
+      (data['invitedUserIds'] ?? []).map((e) => e.toString()),
+    );
+
+    final acceptedUserIds = List<String>.from(
+      (data['acceptedUserIds'] ?? []).map((e) => e.toString()),
+    );
+
+    final updatedAcceptedUserIds = {...acceptedUserIds, currentUserID}.toList();
+
+    final allAccepted = invitedUserIds.isNotEmpty &&
+        invitedUserIds.every((id) => updatedAcceptedUserIds.contains(id));
+
+    if (allAccepted && data['startedAt'] == null) {
+      final now = Timestamp.now();
+      final expiresAt = Timestamp.fromDate(
+        now.toDate().add(const Duration(hours: 24)),
+      );
+
+      await runRef.update({
+        'status': 'active',
+        'startedAt': now,
+        'expiresAt': expiresAt,
+      });
+    }
+  }
+
+  Future<void> _declineGroupInvite({
+    required String inviteId,
+    required String runId,
+    required String currentUserID,
+  }) async {
+    final firestore = FirebaseFirestore.instance;
+
+    await firestore.collection('challengeInvites').doc(inviteId).update({
+      'status': 'declined',
+      'respondedAt': FieldValue.serverTimestamp(),
+    });
+
+    await firestore.collection('group_challenge_runs').doc(runId).update({
+      'declinedUserIds': FieldValue.arrayUnion([currentUserID]),
+    });
+  }
+
   Future<void> _addFollowerActivities({
     required BuildContext context,
     required List<ActivityItem> activities,
@@ -348,54 +426,194 @@ class ActivityList extends StatelessWidget {
 
                 final activities = activitySnapshot.data ?? [];
 
-                if (activities.isEmpty) {
-                  return ListView(
-                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
-                    children: [
-                      const SizedBox(height: 80),
-                      Icon(
-                        Icons.notifications_none_rounded,
-                        color: Color(0xFF18D7FF),
-                        size: 42,
-                      ),
-                      const SizedBox(height: 18),
-                      Center(
-                        child: Text(
-                          l10n.noActivitiesYet,
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.onSurface,
-                            fontSize: 17,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Center(
-                        child: Text(
-                          l10n.activity,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Colors.grey,
-                            fontSize: 13,
-                          ),
-                        ),
-                      ),
-                    ],
-                  );
-                }
+                return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                  stream: _watchPendingGroupInvites(currentUser.uid),
+                  builder: (context, inviteSnapshot) {
+                    final invites = inviteSnapshot.data?.docs ?? [];
 
-                return ListView(
-                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
-                  children: [
-                    for (int i = 0; i < activities.length; i++)
-                      ActivityCard(activity: activities[i]),
-                  ],
+                    if (invites.isEmpty && activities.isEmpty) {
+                      return ListView(
+                        padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
+                        children: [
+                          const SizedBox(height: 80),
+                          Icon(
+                            Icons.notifications_none_rounded,
+                            color: Theme.of(context).colorScheme.primary,
+                            size: 42,
+                          ),
+                          const SizedBox(height: 18),
+                          Center(
+                            child: Text(
+                              l10n.noActivitiesYet,
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.onSurface,
+                                fontSize: 17,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
+                    }
+
+                    return ListView(
+                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
+                      children: [
+                        for (final invite in invites)
+                          _GroupInviteCard(
+                            inviteDoc: invite,
+                            onAccept: () async {
+                              final data = invite.data();
+                              await _acceptGroupInvite(
+                                inviteId: invite.id,
+                                runId: data['runId']?.toString() ?? '',
+                                currentUserID: currentUser.uid,
+                              );
+                            },
+                            onDecline: () async {
+                              final data = invite.data();
+                              await _declineGroupInvite(
+                                inviteId: invite.id,
+                                runId: data['runId']?.toString() ?? '',
+                                currentUserID: currentUser.uid,
+                              );
+                            },
+                          ),
+
+                        for (final activity in activities)
+                          ActivityCard(activity: activity),
+                      ],
+                    );
+                  },
                 );
+
               },
             );
           },
         );
       },
+    );
+  }
+}
+
+class _GroupInviteCard extends StatelessWidget {
+  final QueryDocumentSnapshot<Map<String, dynamic>> inviteDoc;
+  final Future<void> Function() onAccept;
+  final Future<void> Function() onDecline;
+
+  const _GroupInviteCard({
+    required this.inviteDoc,
+    required this.onAccept,
+    required this.onDecline,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    final data = inviteDoc.data();
+
+    final fromUsername = data['fromUsername']?.toString() ?? 'Someone';
+    final title = data['title']?.toString() ?? 'Group SideQuest';
+    final description = data['description']?.toString() ?? '';
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 14),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: colors.primary.withOpacity(0.35),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              CircleAvatar(
+                backgroundColor: colors.primary.withOpacity(0.13),
+                child: Icon(Icons.groups_rounded, color: colors.primary),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  '$fromUsername invited you to a Group SideQuest',
+                  style: TextStyle(
+                    color: colors.onSurface,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 13,
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 12),
+
+          Text(
+            title,
+            style: TextStyle(
+              color: colors.onSurface,
+              fontSize: 16,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+
+          const SizedBox(height: 6),
+
+          Text(
+            description,
+            style: TextStyle(
+              color: colors.onSurface.withOpacity(0.58),
+              fontSize: 12,
+              height: 1.35,
+            ),
+          ),
+
+          const SizedBox(height: 14),
+
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: onAccept,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: colors.primary,
+                    foregroundColor: Colors.black,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                  ),
+                  child: const Text(
+                    'Accept',
+                    style: TextStyle(fontWeight: FontWeight.w900),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: onDecline,
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: colors.onSurface.withOpacity(0.75),
+                    side: BorderSide(
+                      color: colors.onSurface.withOpacity(0.18),
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                  ),
+                  child: const Text(
+                    'Decline',
+                    style: TextStyle(fontWeight: FontWeight.w900),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

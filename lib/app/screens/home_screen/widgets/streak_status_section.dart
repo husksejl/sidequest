@@ -39,7 +39,7 @@ class StreakStatusSection extends StatelessWidget {
             Text(
               'STATUS',
               style: TextStyle(
-                color: Color(0xFF18D7FF),
+                color: Color(0xFF00B2AA),
                 fontSize: 12,
                 letterSpacing: 1.2,
                 fontWeight: FontWeight.w700,
@@ -49,7 +49,7 @@ class StreakStatusSection extends StatelessWidget {
             Text(
               'Ready for Adventure',
               style: TextStyle(
-                color: Color(0xFF18D7FF),
+                color: Color(0xFF00B2AA),
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
               ),

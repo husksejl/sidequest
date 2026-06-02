@@ -15,6 +15,7 @@ import 'photo_preview_page.dart';
 import 'widgets/create_action_button.dart';
 import 'widgets/quest_section_label.dart';
 import 'widgets/solo_quest_card.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CreateScreenPage extends StatefulWidget {
   const CreateScreenPage({super.key});
@@ -32,6 +33,8 @@ class _CreateScreenPageState extends State<CreateScreenPage> {
   late Timer _timer;
 
   String _expiresIn = '';
+  CreateQuest? _selectedQuest;
+  String? _selectedQuestKey;
 
   @override
   void initState() {
@@ -86,12 +89,32 @@ class _CreateScreenPageState extends State<CreateScreenPage> {
     );
   }
 
-  Future<void> _openCamera(DailySideQuest sideQuest) async {
-    final ImagePicker picker = ImagePicker();
+  String _formatGroupExpiresIn(dynamic expiresAtValue) {
+    if (expiresAtValue is! Timestamp) {
+      return 'Waiting';
+    }
 
-    final XFile? photo = await picker.pickImage(
-      source: ImageSource.camera,
-    );
+    final expiresAt = expiresAtValue.toDate();
+    final remaining = expiresAt.difference(DateTime.now());
+
+    if (remaining.isNegative) {
+      return '00  :  00  :  00';
+    }
+
+    String twoDigits(int number) {
+      return number.toString().padLeft(2, '0');
+    }
+
+    final hours = twoDigits(remaining.inHours);
+    final minutes = twoDigits(remaining.inMinutes.remainder(60));
+    final seconds = twoDigits(remaining.inSeconds.remainder(60));
+
+    return '$hours  :  $minutes  :  $seconds';
+  }
+
+  Future<void> _openCamera(CreateQuest quest) async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? photo = await picker.pickImage(source: ImageSource.camera);
 
     if (photo == null || !mounted) return;
 
@@ -100,18 +123,15 @@ class _CreateScreenPageState extends State<CreateScreenPage> {
       MaterialPageRoute(
         builder: (context) => PhotoPreviewPage(
           imagePath: photo.path,
-          quest: _toCreateQuest(sideQuest),
+          quest: quest,
         ),
       ),
     );
   }
 
-  Future<void> _openGallery(DailySideQuest sideQuest) async {
+  Future<void> _openGallery(CreateQuest quest) async {
     final ImagePicker picker = ImagePicker();
-
-    final XFile? image = await picker.pickImage(
-      source: ImageSource.gallery,
-    );
+    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
 
     if (image == null || !mounted) return;
 
@@ -120,19 +140,17 @@ class _CreateScreenPageState extends State<CreateScreenPage> {
       MaterialPageRoute(
         builder: (context) => PhotoPreviewPage(
           imagePath: image.path,
-          quest: _toCreateQuest(sideQuest),
+          quest: quest,
         ),
       ),
     );
   }
 
-  void _openAudio(DailySideQuest sideQuest) {
+  void _openAudio(CreateQuest quest) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => AudioRecordPage(
-          quest: _toCreateQuest(sideQuest),
-        ),
+        builder: (context) => AudioRecordPage(quest: quest),
       ),
     );
   }
@@ -237,57 +255,241 @@ class _CreateScreenPageState extends State<CreateScreenPage> {
 
             final quest = _toCreateQuest(sideQuest);
 
-            return Column(
-              children: [
-                SoloQuestCard(quest: quest),
-                const SizedBox(height: 28),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    GestureDetector(
-                      onTap: () => _openCamera(sideQuest),
-                      child: const CreateActionButton(
-                        icon: Icons.camera_alt_rounded,
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () => _openGallery(sideQuest),
-                      child: const CreateActionButton(
-                        icon: Icons.image_rounded,
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () => _openAudio(sideQuest),
-                      child: const CreateActionButton(
-                        icon: Icons.mic_rounded,
-                      ),
-                    ),
-                    //IgnorePointer(
-                    //   child: Opacity(
-                    //     opacity: 0.35,
-                    //     child: const CreateActionButton(
-                    //       icon: Icons.mic_rounded,
-                    //     ),
-                    //   ),
-                    // ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  l10n.uploadPhotoOrAudio,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Color(0xFF777982),
-                    fontSize: 12,
-                    height: 1.4,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
+            _selectedQuest ??= quest;
+            _selectedQuestKey ??= 'daily_${quest.id}';
+
+            return GestureDetector(
+              onTap: () {
+                setState(() {
+                  _selectedQuest = quest;
+                  _selectedQuestKey = 'daily_${quest.id}';
+                });
+              },
+              child: SoloQuestCard(
+                quest: quest,
+                isSelected: _selectedQuestKey == 'daily_${quest.id}',
+              ),
             );
           },
         );
       },
+    );
+  }
+
+  Widget _buildGroupQuestContent() {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return const SizedBox.shrink();
+
+    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+      stream: FirebaseFirestore.instance
+          .collection('group_challenge_runs')
+          .where('acceptedUserIds', arrayContains: user.uid)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return const SizedBox.shrink();
+        }
+
+        final docs = snapshot.data!.docs;
+
+        final sortedDocs = [...docs];
+
+        sortedDocs.sort((a, b) {
+          final aTime = a.data()['createdAt'] as Timestamp?;
+          final bTime = b.data()['createdAt'] as Timestamp?;
+
+          if (aTime == null || bTime == null) return 0;
+
+          return bTime.compareTo(aTime);
+        });
+
+        final uniqueDocs = <String, QueryDocumentSnapshot<Map<String, dynamic>>>{};
+
+        for (final doc in sortedDocs) {
+          final data = doc.data();
+          final templateId = data['templateId']?.toString() ?? doc.id;
+
+          uniqueDocs.putIfAbsent(templateId, () => doc);
+        }
+
+        final filteredDocs = uniqueDocs.values.toList();
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 34),
+            const QuestSectionLabel(label: 'GROUP SIDEQUESTS'),
+            const SizedBox(height: 18),
+
+            ...filteredDocs.map((doc) {
+              final data = doc.data();
+
+              final invitedUserIds = List<String>.from(
+                (data['invitedUserIds'] ?? []).map((e) => e.toString()),
+              );
+
+              final acceptedUserIds = List<String>.from(
+                (data['acceptedUserIds'] ?? []).map((e) => e.toString()),
+              );
+
+              final allAccepted = invitedUserIds.isNotEmpty &&
+                  invitedUserIds.every((id) => acceptedUserIds.contains(id));
+
+              final expiresAt = data['expiresAt'];
+
+              final isExpired = expiresAt is Timestamp &&
+                  expiresAt.toDate().isBefore(DateTime.now());
+
+              if (isExpired) {
+                if (_selectedQuestKey == 'group_${doc.id}') {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (!mounted) return;
+
+                    setState(() {
+                      _selectedQuest = null;
+                      _selectedQuestKey = null;
+                    });
+                  });
+                }
+
+                WidgetsBinding.instance.addPostFrameCallback((_) async {
+                  await doc.reference.update({
+                    'status': 'expired',
+                  });
+                });
+
+                return const SizedBox.shrink();
+              }
+
+
+              if (allAccepted && data['startedAt'] == null) {
+                WidgetsBinding.instance.addPostFrameCallback((_) async {
+                  if (!mounted) return;
+
+                  final now = Timestamp.now();
+                  final expiresAt = Timestamp.fromDate(
+                    now.toDate().add(const Duration(hours: 24)),
+                  );
+
+                  await doc.reference.update({
+                    'status': 'active',
+                    'startedAt': now,
+                    'expiresAt': expiresAt,
+                  });
+                });
+              }
+
+              if (!allAccepted && _selectedQuestKey == 'group_${doc.id}') {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (!mounted) return;
+
+                  setState(() {
+                    _selectedQuest = null;
+                    _selectedQuestKey = null;
+                  });
+                });
+              }
+
+              final quest = CreateQuest(
+                id: doc.id,
+                title: data['title'] ?? '',
+                description: data['description'] ?? '',
+                difficulty: '',
+                expiresIn: _formatGroupExpiresIn(data['expiresAt']),
+                xp: 200,
+                isGroupQuest: true,
+                date: DateTime.now().toIso8601String().split('T').first,
+              );
+
+              final key = 'group_${doc.id}';
+
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: Column(
+                  children: [
+                    Opacity(
+                      opacity: allAccepted ? 1 : 0.45,
+                      child: GestureDetector(
+                        onTap: allAccepted
+                            ? () {
+                          setState(() {
+                            _selectedQuest = quest;
+                            _selectedQuestKey = key;
+                          });
+                        }
+                            : null,
+                        child: SoloQuestCard(
+                          quest: quest,
+                          isSelected: allAccepted && _selectedQuestKey == key,
+                        ),
+                      ),
+                    ),
+
+                    if (!allAccepted)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: Text(
+                          'Waiting for all invited members to accept',
+                          style: TextStyle(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withOpacity(0.55),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              );
+            }),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildUploadActions() {
+    final l10n = AppLocalizations.of(context)!;
+    final quest = _selectedQuest;
+
+    if (quest == null) return const SizedBox.shrink();
+
+    return Column(
+      children: [
+        const SizedBox(height: 28),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            GestureDetector(
+              onTap: () => _openCamera(quest),
+              child: const CreateActionButton(icon: Icons.camera_alt_rounded),
+            ),
+            GestureDetector(
+              onTap: () => _openGallery(quest),
+              child: const CreateActionButton(icon: Icons.image_rounded),
+            ),
+            GestureDetector(
+              onTap: () => _openAudio(quest),
+              child: const CreateActionButton(icon: Icons.mic_rounded),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Text(
+          quest.isGroupQuest
+              ? 'Upload a photo or audio to complete this Group SideQuest.'
+              : l10n.uploadPhotoOrAudio,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            color: Color(0xFF777982),
+            fontSize: 12,
+            height: 1.4,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
     );
   }
 
@@ -307,6 +509,8 @@ class _CreateScreenPageState extends State<CreateScreenPage> {
               QuestSectionLabel(label: AppLocalizations.of(context)!.dailySideQuest),
               const SizedBox(height: 18),
               _buildDailyQuestContent(),
+              _buildGroupQuestContent(),
+              _buildUploadActions(),
             ],
           ),
         ),

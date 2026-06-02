@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class AppTheme {
   AppTheme._();
 
-  static const Color accent = Color(0xFF18D7FF);
+  static const Color accent = Color(0xFF00B2AA);
   static const Color danger = Color(0xFFFF8D84);
 
   static ThemeData dark() {
@@ -28,7 +28,7 @@ class AppTheme {
       useMaterial3: true,
       fontFamily: 'Inter',
       colorScheme: const ColorScheme.light(
-        primary: Color(0xFF009CC2),
+        primary: Color(0xFF00B2AA),
         secondary: Color(0xFFE65F58),
         surface: Colors.white,
         onSurface: Color(0xFF101317),

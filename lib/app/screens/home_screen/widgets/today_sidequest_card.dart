@@ -94,7 +94,7 @@ class _TodaySideQuestCardState extends State<TodaySideQuestCard> {
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF18D7FF).withValues(alpha: 0.08),
+            color: const Color(0xFF00B2AA).withValues(alpha: 0.08),
             blurRadius: 28,
             spreadRadius: 1,
           ),
