@@ -7,6 +7,8 @@ class CreateQuest {
   final int xp;
   final bool isGroupQuest;
   final String date;
+  final List<String> participantIds;
+  final List<String> participantNames;
 
   const CreateQuest({
     required this.id,
@@ -17,5 +19,7 @@ class CreateQuest {
     required this.xp,
     required this.isGroupQuest,
     required this.date,
+    this.participantIds = const [],
+    this.participantNames = const [],
   });
 }

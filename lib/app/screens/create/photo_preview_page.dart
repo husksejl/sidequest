@@ -129,6 +129,11 @@ class _PhotoPreviewPageState extends State<PhotoPreviewPage> {
         'completedVotedBy': [],
         'failedVotedBy': [],
         'xpAwarded': false,
+        'isGroupQuest': widget.quest.isGroupQuest,
+        'groupRunId': widget.quest.isGroupQuest ? widget.quest.id : null,
+        'participantIds': widget.quest.participantIds,
+        'participantNames': widget.quest.participantNames,
+        'xpReward': widget.quest.isGroupQuest ? 200 : 100,
       });
 
       ProfilePostStorage.posts.insert(

@@ -390,6 +390,14 @@ class _CreateScreenPageState extends State<CreateScreenPage> {
                 });
               }
 
+              final participantIds = List<String>.from(
+                (data['acceptedUserIds'] ?? []).map((e) => e.toString()),
+              );
+
+              final participantNames = List<String>.from(
+                (data['participantNames'] ?? []).map((e) => e.toString()),
+              );
+
               final quest = CreateQuest(
                 id: doc.id,
                 title: data['title'] ?? '',
@@ -399,6 +407,8 @@ class _CreateScreenPageState extends State<CreateScreenPage> {
                 xp: 200,
                 isGroupQuest: true,
                 date: DateTime.now().toIso8601String().split('T').first,
+                participantIds: participantIds,
+                participantNames: participantNames,
               );
 
               final key = 'group_${doc.id}';
