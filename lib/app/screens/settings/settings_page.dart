@@ -1,9 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:sidequest/l10n/app_localizations.dart';
 
-import '../signup/signup_page.dart';
 import '../login/login_page.dart';
 import '../settings/widgets/danger_zone_card.dart';
+import '../own_profile/widgets/edit_profile.dart';
 import 'widgets/settings_profile_card.dart';
 import 'widgets/settings_section.dart';
 import 'widgets/settings_switch_tile.dart';
@@ -23,18 +25,368 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  bool pushNotifications = true;
-  bool dailyQuestReminder = true;
-  bool streakWarning = true;
-  bool privateProfile = false;
-  bool allowFriendRequests = true;
-  bool locationHints = true;
-  bool hapticFeedback = true;
-  bool saveUploadedPhotos = false;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  Future<void> _updateSetting(String key, bool value) async {
+    final uid = _auth.currentUser?.uid;
+
+    if (uid == null) {
+      return;
+    }
+
+    await _firestore.collection('users').doc(uid).set({
+      'settings': {
+        key: value,
+      },
+    }, SetOptions(merge: true));
+  }
+
+  Future<void> _submitBugReport({
+    required String title,
+    required String description,
+  }) async {
+    final user = _auth.currentUser;
+    final uid = user?.uid;
+
+    if (uid == null) {
+      throw Exception('You need to be logged in to send a bug report.');
+    }
+
+    await _firestore.collection('bug_reports').add({
+      'userId': uid,
+      'email': user?.email ?? '',
+      'title': title,
+      'description': description,
+      'createdAt': Timestamp.now(),
+      'status': 'open',
+    });
+  }
+
+  void _openEditProfile() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return const EditProfileBottomSheet();
+      },
+    );
+  }
+
+  void _showFaqDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Help / FAQ'),
+          content: const SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'What is SideQuest?',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  'SideQuest gives you small daily challenges that you can complete and share with others.',
+                ),
+                SizedBox(height: 16),
+
+                Text(
+                  'How do daily SideQuests work?',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  'A new SideQuest appears every day. After completing it, you can upload your solution.',
+                ),
+                SizedBox(height: 16),
+
+                Text(
+                  'Can I change my profile?',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  'Yes. Use the Edit Profile option in the account section.',
+                ),
+                SizedBox(height: 16),
+
+                Text(
+                  'Why are some features still basic?',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  'Some parts are currently simplified because SideQuest is still a student project prototype.',
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showPrivacyDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Privacy & Data Protection'),
+          content: const SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'SideQuest only stores the data needed for the app prototype to work.',
+                ),
+                SizedBox(height: 16),
+
+                Text(
+                  'Stored account data',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  'Your profile information, email address, settings and uploaded SideQuest content may be stored in Firebase.',
+                ),
+                SizedBox(height: 16),
+
+                Text(
+                  'Bug reports',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  'If you submit a bug report, the report text and your account email may be saved so the team can understand the issue.',
+                ),
+                SizedBox(height: 16),
+
+                Text(
+                  'Prototype note',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  'This privacy section is a simplified information page for the university prototype and not a full legal privacy policy.',
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showAboutDialog(AppLocalizations l10n) {
+    showAboutDialog(
+      context: context,
+      applicationName: 'SideQuest',
+      applicationVersion: '1.0.0',
+      applicationIcon: const Icon(
+        Icons.explore_rounded,
+        color: Color(0xFF18D7FF),
+      ),
+      children: const [
+        Text(
+          'SideQuest gives you small daily challenges and lets you share your solutions with others.',
+        ),
+      ],
+    );
+  }
+
+  void _openBugReportDialog() {
+    final rootContext = context;
+    final titleController = TextEditingController();
+    final descriptionController = TextEditingController();
+
+    showDialog(
+      context: rootContext,
+      builder: (dialogContext) {
+        bool isSending = false;
+
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            Future<void> sendReport() async {
+              final title = titleController.text.trim();
+              final description = descriptionController.text.trim();
+
+              if (title.isEmpty || description.isEmpty) {
+                ScaffoldMessenger.of(rootContext).showSnackBar(
+                  const SnackBar(
+                    content: Text('Please fill out both fields.'),
+                  ),
+                );
+                return;
+              }
+
+              setDialogState(() {
+                isSending = true;
+              });
+
+              try {
+                await _submitBugReport(
+                  title: title,
+                  description: description,
+                );
+
+                if (!mounted) return;
+
+                Navigator.of(dialogContext).pop();
+
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (!rootContext.mounted) return;
+
+                  ScaffoldMessenger.of(rootContext).showSnackBar(
+                    const SnackBar(
+                      content: Text('Bug report sent. Thank you!'),
+                    ),
+                  );
+                });
+              } catch (error) {
+                if (!mounted) return;
+
+                setDialogState(() {
+                  isSending = false;
+                });
+
+                ScaffoldMessenger.of(rootContext).showSnackBar(
+                  SnackBar(
+                    content: Text('Could not send bug report: $error'),
+                  ),
+                );
+              }
+            }
+
+            return AlertDialog(
+              title: const Text('Report a Bug'),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: titleController,
+                      decoration: const InputDecoration(
+                        labelText: 'Bug title',
+                        hintText: 'Example: App crashes on upload',
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: descriptionController,
+                      maxLines: 5,
+                      decoration: const InputDecoration(
+                        labelText: 'Description',
+                        hintText: 'What happened? What did you try to do?',
+                        alignLabelWithHint: true,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: isSending
+                      ? null
+                      : () {
+                    Navigator.of(dialogContext).pop();
+                  },
+                  child: const Text('Cancel'),
+                ),
+                FilledButton(
+                  onPressed: isSending ? null : sendReport,
+                  child: isSending
+                      ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                    ),
+                  )
+                      : const Text('Send'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    ).whenComplete(() {
+      titleController.dispose();
+      descriptionController.dispose();
+    });
+  }
+
+  String _displayNameFromData(Map<String, dynamic>? data, User? user) {
+    final fullName = data?['fullName']?.toString().trim() ?? '';
+    final firstName = data?['firstName']?.toString().trim() ?? '';
+    final username = data?['username']?.toString().trim() ?? '';
+    final firebaseName = user?.displayName?.trim() ?? '';
+    final email = user?.email?.trim() ?? '';
+
+    if (fullName.isNotEmpty) return fullName;
+    if (firstName.isNotEmpty) return firstName;
+    if (username.isNotEmpty) return username;
+    if (firebaseName.isNotEmpty) return firebaseName;
+    if (email.isNotEmpty) return email.split('@').first;
+
+    return 'SideQuest User';
+  }
+
+  String _handleFromData(Map<String, dynamic>? data, User? user) {
+    final username = data?['username']?.toString().trim() ?? '';
+    final userEmail = user?.email?.trim() ?? '';
+    final dataEmail = data?['email']?.toString().trim() ?? '';
+    final email = userEmail.isNotEmpty ? userEmail : dataEmail;
+
+    if (username.isNotEmpty) return '@$username';
+    if (email.isNotEmpty) return email;
+
+    return '@sidequest';
+  }
+
+  void _setLightMode(bool value) {
+    ThemeService.setLightMode(value);
+    _updateSetting('lightMode', value);
+  }
+
+  bool _settingValue(
+      Map<String, dynamic>? data,
+      String key,
+      bool fallback,
+      ) {
+    final settings = data?['settings'];
+
+    if (settings is Map<String, dynamic>) {
+      final value = settings[key];
+
+      if (value is bool) {
+        return value;
+      }
+    }
+
+    return fallback;
+  }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final user = _auth.currentUser;
+    final uid = user?.uid;
 
     return Scaffold(
       backgroundColor: context.appBackground,
@@ -48,13 +400,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 showSettings: false,
                 showBackButton: true,
               ),
-              SettingsProfileCard(
-                userName: 'Alex Explorer',
-                userHandle: '@alexexplores',
-                streak: 5,
-                level: l10n.rookieAdventurer,
-              ),
+
+              if (uid == null)
+                SettingsProfileCard(
+                  userName: 'SideQuest User',
+                  userHandle: l10n.pleaseLogIn,
+                  streak: 0,
+                  level: l10n.rookieAdventurer,
+                )
+              else
+                StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+                  stream: _firestore.collection('users').doc(uid).snapshots(),
+                  builder: (context, snapshot) {
+                    final data = snapshot.data?.data();
+
+                    return SettingsProfileCard(
+                      userName: _displayNameFromData(data, user),
+                      userHandle: _handleFromData(data, user),
+                      streak: data?['streak'] ?? 0,
+                      level: l10n.rookieAdventurer,
+                    );
+                  },
+                ),
+
               const SizedBox(height: 18),
+
               SettingsSection(
                 title: l10n.account,
                 children: [
@@ -62,169 +432,166 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     icon: Icons.person_rounded,
                     title: l10n.editProfile,
                     subtitle: l10n.editProfileSubtitle,
-                    onTap: () {},
+                    onTap: uid == null
+                        ? () => Navigator.pushNamed(
+                      context,
+                      LoginScreen.routeName,
+                    )
+                        : _openEditProfile,
                   ),
                   SettingsTile(
                     icon: Icons.mail_rounded,
                     title: l10n.emailAndLogin,
-                    subtitle: l10n.emailAndLoginSubtitle,
+                    subtitle: user?.email ?? l10n.emailAndLoginSubtitle,
                     onTap: () => Navigator.pushNamed(
                       context,
                       LoginScreen.routeName,
                     ),
                   ),
-                  SettingsTile(
-                    icon: Icons.person_add_alt_1_rounded,
-                    title: l10n.createNewProfile,
-                    subtitle: l10n.createNewProfileSubtitle,
-                    accentColor: const Color(0xFF18D7FF),
-                    onTap: () => Navigator.pushNamed(
-                      context,
-                      CreateAccountScreen.routeName,
+                ],
+              ),
+
+              const SizedBox(height: 16),
+
+              if (uid == null)
+                SettingsSection(
+                  title: l10n.appExperience,
+                  children: [
+                    ValueListenableBuilder<ThemeMode>(
+                      valueListenable: ThemeService.themeMode,
+                      builder: (context, themeMode, _) {
+                        final isLightMode = themeMode == ThemeMode.light;
+
+                        return SettingsSwitchTile(
+                          icon: Icons.light_mode_rounded,
+                          title: 'Light Mode',
+                          subtitle: isLightMode
+                              ? 'Die App wird aktuell hell dargestellt.'
+                              : 'Aktivieren, um die App hell darzustellen.',
+                          value: isLightMode,
+                          onChanged: _setLightMode,
+                        );
+                      },
                     ),
-                  ),
-                  SettingsTile(
-                    icon: Icons.emoji_events_rounded,
-                    title: l10n.questPreferences,
-                    subtitle: l10n.questPreferencesSubtitle,
-                    onTap: () {},
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              SettingsSection(
-                title: l10n.notifications.toUpperCase(),
-                children: [
-                  SettingsSwitchTile(
-                    icon: Icons.notifications_rounded,
-                    title: l10n.pushNotifications,
-                    subtitle: l10n.pushNotificationsSubtitle,
-                    value: pushNotifications,
-                    onChanged: (value) => setState(() => pushNotifications = value),
-                  ),
-                  SettingsSwitchTile(
-                    icon: Icons.today_rounded,
-                    title: l10n.dailySideQuestReminder,
-                    subtitle: l10n.dailySideQuestReminderSubtitle,
-                    value: dailyQuestReminder,
-                    onChanged: (value) => setState(() => dailyQuestReminder = value),
-                  ),
-                  SettingsSwitchTile(
-                    icon: Icons.local_fire_department_rounded,
-                    title: l10n.streakWarning,
-                    subtitle: l10n.streakWarningSubtitle,
-                    value: streakWarning,
-                    onChanged: (value) => setState(() => streakWarning = value),
-                    accentColor: const Color(0xFFFF8D84),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              SettingsSection(
-                title: l10n.privacyAndSafety,
-                children: [
-                  SettingsSwitchTile(
-                    icon: Icons.lock_rounded,
-                    title: l10n.privateProfile,
-                    subtitle: l10n.privateProfileSubtitle,
-                    value: privateProfile,
-                    onChanged: (value) => setState(() => privateProfile = value),
-                  ),
-                  SettingsSwitchTile(
-                    icon: Icons.group_add_rounded,
-                    title: l10n.allowFriendRequests,
-                    subtitle: l10n.allowFriendRequestsSubtitle,
-                    value: allowFriendRequests,
-                    onChanged: (value) => setState(() => allowFriendRequests = value),
-                  ),
-                  SettingsSwitchTile(
-                    icon: Icons.location_on_rounded,
-                    title: l10n.locationHints,
-                    subtitle: l10n.locationHintsSubtitle,
-                    value: locationHints,
-                    onChanged: (value) => setState(() => locationHints = value),
-                    accentColor: const Color(0xFFFF8D84),
-                  ),
-                  SettingsTile(
-                    icon: Icons.visibility_off_rounded,
-                    title: l10n.blockedAccounts,
-                    subtitle: l10n.blockedAccountsSubtitle,
-                    onTap: () {},
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              SettingsSection(
-                title: l10n.appExperience,
-                children: [
-                  ValueListenableBuilder<ThemeMode>(
-                    valueListenable: ThemeService.themeMode,
-                    builder: (context, themeMode, _) {
-                      final isLightMode = themeMode == ThemeMode.light;
+                  ],
+                )
+              else
+                StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+                  stream: _firestore.collection('users').doc(uid).snapshots(),
+                  builder: (context, snapshot) {
+                    final data = snapshot.data?.data();
 
-                      return SettingsSwitchTile(
-                        icon: Icons.light_mode_rounded,
-                        title: 'Light Mode',
-                        subtitle: isLightMode
-                            ? 'Die App wird aktuell hell dargestellt.'
-                            : 'Aktivieren, um die App hell darzustellen.',
-                        value: isLightMode,
-                        onChanged: ThemeService.setLightMode,
-                      );
-                    },
-                  ),
-                  SettingsSwitchTile(
-                    icon: Icons.vibration_rounded,
-                    title: l10n.hapticFeedback,
-                    subtitle: l10n.hapticFeedbackSubtitle,
-                    value: hapticFeedback,
-                    onChanged: (value) => setState(() => hapticFeedback = value),
-                  ),
-                  SettingsSwitchTile(
-                    icon: Icons.photo_library_rounded,
-                    title: l10n.saveUploadedPhotos,
-                    subtitle: l10n.saveUploadedPhotosSubtitle,
-                    value: saveUploadedPhotos,
-                    onChanged: (value) => setState(() => saveUploadedPhotos = value),
-                  ),
+                    final dailyQuestReminder = _settingValue(
+                      data,
+                      'dailyQuestReminder',
+                      true,
+                    );
 
-                  SettingsTile(
-                    icon: Icons.language_rounded,
-                    title: l10n.language,
-                    subtitle: l10n.languageSubtitle,
-                    trailingText: l10n.english,
-                    onTap: () {},
-                  ),
-                ],
-              ),
+                    final hapticFeedback = _settingValue(
+                      data,
+                      'hapticFeedback',
+                      true,
+                    );
+
+                    final saveUploadedPhotos = _settingValue(
+                      data,
+                      'saveUploadedPhotos',
+                      false,
+                    );
+
+                    return SettingsSection(
+                      title: l10n.appExperience,
+                      children: [
+                        ValueListenableBuilder<ThemeMode>(
+                          valueListenable: ThemeService.themeMode,
+                          builder: (context, themeMode, _) {
+                            final isLightMode = themeMode == ThemeMode.light;
+
+                            return SettingsSwitchTile(
+                              icon: Icons.light_mode_rounded,
+                              title: 'Light Mode',
+                              subtitle: isLightMode
+                                  ? 'Die App wird aktuell hell dargestellt.'
+                                  : 'Aktivieren, um die App hell darzustellen.',
+                              value: isLightMode,
+                              onChanged: _setLightMode,
+                            );
+                          },
+                        ),
+
+                        SettingsSwitchTile(
+                          icon: Icons.today_rounded,
+                          title: l10n.dailySideQuestReminder,
+                          subtitle: l10n.dailySideQuestReminderSubtitle,
+                          value: dailyQuestReminder,
+                          onChanged: (value) {
+                            _updateSetting('dailyQuestReminder', value);
+                          },
+                        ),
+
+                        SettingsSwitchTile(
+                          icon: Icons.vibration_rounded,
+                          title: l10n.hapticFeedback,
+                          subtitle: l10n.hapticFeedbackSubtitle,
+                          value: hapticFeedback,
+                          onChanged: (value) {
+                            _updateSetting('hapticFeedback', value);
+                          },
+                        ),
+
+                        SettingsSwitchTile(
+                          icon: Icons.photo_library_rounded,
+                          title: l10n.saveUploadedPhotos,
+                          subtitle: l10n.saveUploadedPhotosSubtitle,
+                          value: saveUploadedPhotos,
+                          onChanged: (value) {
+                            _updateSetting('saveUploadedPhotos', value);
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                ),
+
               const SizedBox(height: 16),
+
               SettingsSection(
-                title: l10n.support,
+                title: 'Help & Info',
                 children: [
                   SettingsTile(
                     icon: Icons.help_rounded,
-                    title: l10n.helpCenter,
-                    subtitle: l10n.helpCenterSubtitle,
-                    onTap: () {},
+                    title: 'Help / FAQ',
+                    subtitle: 'Read quick answers about SideQuest.',
+                    onTap: _showFaqDialog,
                   ),
                   SettingsTile(
                     icon: Icons.bug_report_rounded,
-                    title: l10n.reportProblem,
-                    subtitle: l10n.reportProblemSubtitle,
-                    onTap: () {},
+                    title: 'Report a Bug',
+                    subtitle: 'Tell us if something does not work.',
+                    onTap: _openBugReportDialog,
+                  ),
+                  SettingsTile(
+                    icon: Icons.privacy_tip_rounded,
+                    title: 'Privacy & Data Protection',
+                    subtitle: 'Read how your data is handled.',
+                    onTap: _showPrivacyDialog,
                   ),
                   SettingsTile(
                     icon: Icons.info_rounded,
                     title: l10n.aboutSideQuest,
                     subtitle: l10n.aboutSideQuestSubtitle,
                     trailingText: 'v1.0.0',
-                    onTap: () {},
+                    onTap: () => _showAboutDialog(l10n),
                   ),
                 ],
               ),
+
               const SizedBox(height: 16),
+
               const DangerZoneCard(),
+
               const SizedBox(height: 18),
+
               Center(
                 child: Text(
                   l10n.keepExploring,

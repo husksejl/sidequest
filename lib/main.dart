@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'l10n/app_localizations.dart';
 
@@ -118,7 +119,7 @@ class AuthGate extends StatelessWidget {
         }
 
         if (snapshot.hasData) {
-          return const HomeScreen();
+          return const _HomeWithSavedSettings();
         }
 
         return OnboardingPage(
@@ -126,6 +127,68 @@ class AuthGate extends StatelessWidget {
             _goToSignup(context);
           },
         );
+      },
+    );
+  }
+}
+
+class _HomeWithSavedSettings extends StatefulWidget {
+  const _HomeWithSavedSettings();
+
+  @override
+  State<_HomeWithSavedSettings> createState() => _HomeWithSavedSettingsState();
+}
+
+class _HomeWithSavedSettingsState extends State<_HomeWithSavedSettings> {
+  late final Future<void> _loadSettingsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSettingsFuture = _loadSavedTheme();
+  }
+
+  Future<void> _loadSavedTheme() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+
+    if (uid == null) {
+      return;
+    }
+
+    final doc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .get();
+
+    final data = doc.data();
+    final settings = data?['settings'];
+
+    if (settings is Map<String, dynamic>) {
+      final lightMode = settings['lightMode'];
+
+      if (lightMode is bool) {
+        ThemeService.setLightMode(lightMode);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<void>(
+      future: _loadSettingsFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState != ConnectionState.done) {
+          return Scaffold(
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+            body: const Center(
+              child: CircularProgressIndicator(
+                color: Color(0xFF18D7FF),
+              ),
+            ),
+          );
+        }
+
+        return const HomeScreen();
       },
     );
   }
