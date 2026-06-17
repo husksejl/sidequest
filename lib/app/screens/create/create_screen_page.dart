@@ -113,10 +113,18 @@ class _CreateScreenPageState extends State<CreateScreenPage> {
   }
 
   Future<void> _openCamera(CreateQuest quest) async {
+    final claimed = await _claimGroupQuest(quest);
+    if (!claimed) return;
+
     final ImagePicker picker = ImagePicker();
     final XFile? photo = await picker.pickImage(source: ImageSource.camera);
 
-    if (photo == null || !mounted) return;
+    if (photo == null) {
+      await _releaseGroupQuestLock(quest);
+      return;
+    }
+
+    if (!mounted) return;
 
     Navigator.push(
       context,
@@ -130,10 +138,18 @@ class _CreateScreenPageState extends State<CreateScreenPage> {
   }
 
   Future<void> _openGallery(CreateQuest quest) async {
+    final claimed = await _claimGroupQuest(quest);
+    if (!claimed) return;
+
     final ImagePicker picker = ImagePicker();
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
 
-    if (image == null || !mounted) return;
+    if (image == null) {
+      await _releaseGroupQuestLock(quest);
+      return;
+    }
+
+    if (!mounted) return;
 
     Navigator.push(
       context,
@@ -146,7 +162,10 @@ class _CreateScreenPageState extends State<CreateScreenPage> {
     );
   }
 
-  void _openAudio(CreateQuest quest) {
+  void _openAudio(CreateQuest quest) async {
+    final claimed = await _claimGroupQuest(quest);
+    if (!claimed) return;
+
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -154,6 +173,78 @@ class _CreateScreenPageState extends State<CreateScreenPage> {
       ),
     );
   }
+
+
+  Future<bool> _claimGroupQuest(CreateQuest quest) async {
+    if (!quest.isGroupQuest) return true;
+
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return false;
+
+    final runRef = FirebaseFirestore.instance
+        .collection('group_challenge_runs')
+        .doc(quest.id);
+
+    bool canStart = false;
+
+    await FirebaseFirestore.instance.runTransaction((transaction) async {
+      final snapshot = await transaction.get(runRef);
+      final data = snapshot.data();
+
+      if (data == null) return;
+
+      final status = data['status'];
+      final lockedBy = data['lockedBy'];
+
+      if (status == 'completed') return;
+
+      if (lockedBy != null && lockedBy != user.uid) {
+        return;
+      }
+
+      transaction.update(runRef, {
+        'status': 'in_progress',
+        'lockedBy': user.uid,
+        'lockedAt': FieldValue.serverTimestamp(),
+      });
+
+      canStart = true;
+    });
+
+    if (!canStart && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Someone is already completing this Group SideQuest.'),
+        ),
+      );
+    }
+
+    return canStart;
+  }
+
+  Future<void> _releaseGroupQuestLock(CreateQuest quest) async {
+    if (!quest.isGroupQuest) return;
+
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final runRef = FirebaseFirestore.instance
+        .collection('group_challenge_runs')
+        .doc(quest.id);
+
+    final snapshot = await runRef.get();
+    final data = snapshot.data();
+
+    if (data?['lockedBy'] == user.uid && data?['status'] == 'in_progress') {
+      await runRef.update({
+        'status': 'active',
+        'lockedBy': FieldValue.delete(),
+        'lockedAt': FieldValue.delete(),
+      });
+    }
+  }
+
+
 
   Widget _buildCompletedCard() {
     final l10n = AppLocalizations.of(context)!;
@@ -324,6 +415,12 @@ class _CreateScreenPageState extends State<CreateScreenPage> {
             ...filteredDocs.map((doc) {
               final data = doc.data();
 
+              final lockedBy = data['lockedBy']?.toString();
+              final isBeingDoneByOther =
+                  lockedBy != null &&
+                      lockedBy != user.uid &&
+                      data['status'] == 'in_progress';
+
               final invitedUserIds = List<String>.from(
                 (data['invitedUserIds'] ?? []).map((e) => e.toString()),
               );
@@ -418,9 +515,9 @@ class _CreateScreenPageState extends State<CreateScreenPage> {
                 child: Column(
                   children: [
                     Opacity(
-                      opacity: allAccepted ? 1 : 0.45,
+                      opacity: allAccepted && !isBeingDoneByOther ? 1 : 0.45,
                       child: GestureDetector(
-                        onTap: allAccepted
+                        onTap: allAccepted && !isBeingDoneByOther
                             ? () {
                           setState(() {
                             _selectedQuest = quest;
@@ -434,6 +531,19 @@ class _CreateScreenPageState extends State<CreateScreenPage> {
                         ),
                       ),
                     ),
+
+                    if (isBeingDoneByOther)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: Text(
+                          'This Group SideQuest is currently being completed.',
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.55),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
 
                     if (!allAccepted)
                       Padding(

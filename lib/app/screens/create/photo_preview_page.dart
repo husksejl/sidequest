@@ -136,6 +136,19 @@ class _PhotoPreviewPageState extends State<PhotoPreviewPage> {
         'xpReward': widget.quest.isGroupQuest ? 200 : 100,
       });
 
+      if (widget.quest.isGroupQuest) {
+        await FirebaseFirestore.instance
+            .collection('group_challenge_runs')
+            .doc(widget.quest.id)
+            .update({
+          'status': 'completed',
+          'completedBy': user.uid,
+          'completedAt': FieldValue.serverTimestamp(),
+          'lockedBy': FieldValue.delete(),
+          'lockedAt': FieldValue.delete(),
+        });
+      }
+
       ProfilePostStorage.posts.insert(
         0,
         ProfilePost(
