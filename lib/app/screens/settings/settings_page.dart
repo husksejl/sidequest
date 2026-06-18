@@ -42,25 +42,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }, SetOptions(merge: true));
   }
 
-  Future<void> _submitBugReport({
-    required String title,
-    required String description,
-  }) async {
-    final user = _auth.currentUser;
-    final uid = user?.uid;
+  Future<void> _updateAppearanceMode(ThemeMode mode) async {
+    ThemeService.setThemeMode(mode);
+
+    final uid = _auth.currentUser?.uid;
 
     if (uid == null) {
-      throw Exception('You need to be logged in to send a bug report.');
+      return;
     }
 
-    await _firestore.collection('bug_reports').add({
-      'userId': uid,
-      'email': user?.email ?? '',
-      'title': title,
-      'description': description,
-      'createdAt': Timestamp.now(),
-      'status': 'open',
-    });
+    await _firestore.collection('users').doc(uid).set({
+      'settings': {
+        'appearanceMode': ThemeService.modeToString(mode),
+      },
+    }, SetOptions(merge: true));
   }
 
   void _openEditProfile() {
@@ -70,125 +65,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
       backgroundColor: Colors.transparent,
       builder: (context) {
         return const EditProfileBottomSheet();
-      },
-    );
-  }
-
-  void _showFaqDialog() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Help / FAQ'),
-          content: const SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'What is SideQuest?',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 4),
-                Text(
-                  'SideQuest gives you small daily challenges that you can complete and share with others.',
-                ),
-                SizedBox(height: 16),
-
-                Text(
-                  'How do daily SideQuests work?',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 4),
-                Text(
-                  'A new SideQuest appears every day. After completing it, you can upload your solution.',
-                ),
-                SizedBox(height: 16),
-
-                Text(
-                  'Can I change my profile?',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 4),
-                Text(
-                  'Yes. Use the Edit Profile option in the account section.',
-                ),
-                SizedBox(height: 16),
-
-                Text(
-                  'Why are some features still basic?',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 4),
-                Text(
-                  'Some parts are currently simplified because SideQuest is still a student project prototype.',
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Close'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _showPrivacyDialog() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Privacy & Data Protection'),
-          content: const SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'SideQuest only stores the data needed for the app prototype to work.',
-                ),
-                SizedBox(height: 16),
-
-                Text(
-                  'Stored account data',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 4),
-                Text(
-                  'Your profile information, email address, settings and uploaded SideQuest content may be stored in Firebase.',
-                ),
-                SizedBox(height: 16),
-
-                Text(
-                  'Bug reports',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 4),
-                Text(
-                  'If you submit a bug report, the report text and your account email may be saved so the team can understand the issue.',
-                ),
-                SizedBox(height: 16),
-
-                Text(
-                  'Prototype note',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 4),
-                Text(
-                  'This privacy section is a simplified information page for the university prototype and not a full legal privacy policy.',
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Close'),
-            ),
-          ],
-        );
       },
     );
   }
@@ -210,28 +86,160 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  void _openBugReportDialog() {
+  void _showAppearanceDialog() {
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return ValueListenableBuilder<ThemeMode>(
+          valueListenable: ThemeService.themeMode,
+          builder: (context, selectedMode, _) {
+            return AlertDialog(
+              backgroundColor: dialogContext.appCardColor,
+              title: Text(
+                'Appearance',
+                style: TextStyle(color: dialogContext.appTextColor),
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  RadioListTile<ThemeMode>(
+                    value: ThemeMode.system,
+                    groupValue: selectedMode,
+                    title: Text(
+                      'System',
+                      style: TextStyle(color: dialogContext.appTextColor),
+                    ),
+                    subtitle: Text(
+                      'Follow your phone theme automatically.',
+                      style: TextStyle(color: dialogContext.appMutedTextColor),
+                    ),
+                    onChanged: (value) {
+                      if (value == null) return;
+                      _updateAppearanceMode(value);
+                      Navigator.pop(dialogContext);
+                    },
+                  ),
+                  RadioListTile<ThemeMode>(
+                    value: ThemeMode.light,
+                    groupValue: selectedMode,
+                    title: Text(
+                      'Light',
+                      style: TextStyle(color: dialogContext.appTextColor),
+                    ),
+                    subtitle: Text(
+                      'Always use light mode.',
+                      style: TextStyle(color: dialogContext.appMutedTextColor),
+                    ),
+                    onChanged: (value) {
+                      if (value == null) return;
+                      _updateAppearanceMode(value);
+                      Navigator.pop(dialogContext);
+                    },
+                  ),
+                  RadioListTile<ThemeMode>(
+                    value: ThemeMode.dark,
+                    groupValue: selectedMode,
+                    title: Text(
+                      'Dark',
+                      style: TextStyle(color: dialogContext.appTextColor),
+                    ),
+                    subtitle: Text(
+                      'Always use dark mode.',
+                      style: TextStyle(color: dialogContext.appMutedTextColor),
+                    ),
+                    onChanged: (value) {
+                      if (value == null) return;
+                      _updateAppearanceMode(value);
+                      Navigator.pop(dialogContext);
+                    },
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(dialogContext),
+                  child: const Text('Close'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _showFaqDialog() {
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          backgroundColor: dialogContext.appCardColor,
+          title: Text(
+            'Help & FAQ',
+            style: TextStyle(color: dialogContext.appTextColor),
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: const [
+                _DialogQuestion(
+                  question: 'What is a SideQuest?',
+                  answer:
+                  'A SideQuest is a small daily challenge that gives you something fun or creative to do.',
+                ),
+                _DialogQuestion(
+                  question: 'When does the daily SideQuest change?',
+                  answer:
+                  'The daily SideQuest changes at the start of a new day.',
+                ),
+                _DialogQuestion(
+                  question: 'Can I edit my profile?',
+                  answer:
+                  'Yes. Open Settings, tap Edit Profile and update your visible profile information.',
+                ),
+                _DialogQuestion(
+                  question: 'How does Appearance work?',
+                  answer:
+                  'You can choose System, Light or Dark. System follows your phone theme automatically.',
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _showBugReportDialog() async {
     final rootContext = context;
     final titleController = TextEditingController();
-    final descriptionController = TextEditingController();
+    final detailsController = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+    bool isSending = false;
 
-    showDialog(
+    await showDialog(
       context: rootContext,
+      barrierDismissible: false,
       builder: (dialogContext) {
-        bool isSending = false;
-
         return StatefulBuilder(
-          builder: (context, setDialogState) {
-            Future<void> sendReport() async {
-              final title = titleController.text.trim();
-              final description = descriptionController.text.trim();
+          builder: (dialogContext, setDialogState) {
+            Future<void> submitReport() async {
+              if (!formKey.currentState!.validate()) {
+                return;
+              }
 
-              if (title.isEmpty || description.isEmpty) {
-                ScaffoldMessenger.of(rootContext).showSnackBar(
-                  const SnackBar(
-                    content: Text('Please fill out both fields.'),
-                  ),
-                );
+              final user = _auth.currentUser;
+
+              if (user == null) {
+                Navigator.of(dialogContext).pop();
+                Navigator.pushNamed(rootContext, LoginScreen.routeName);
                 return;
               }
 
@@ -240,25 +248,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
               });
 
               try {
-                await _submitBugReport(
-                  title: title,
-                  description: description,
-                );
+                await _firestore.collection('bug_reports').add({
+                  'userId': user.uid,
+                  'email': user.email ?? '',
+                  'title': titleController.text.trim(),
+                  'details': detailsController.text.trim(),
+                  'createdAt': Timestamp.now(),
+                  'status': 'open',
+                });
 
                 if (!mounted) return;
 
                 Navigator.of(dialogContext).pop();
 
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  if (!rootContext.mounted) return;
-
-                  ScaffoldMessenger.of(rootContext).showSnackBar(
-                    const SnackBar(
-                      content: Text('Bug report sent. Thank you!'),
-                    ),
-                  );
-                });
-              } catch (error) {
+                ScaffoldMessenger.of(rootContext).showSnackBar(
+                  const SnackBar(
+                    content: Text('Bug report saved. Thank you!'),
+                  ),
+                );
+              } catch (_) {
                 if (!mounted) return;
 
                 setDialogState(() {
@@ -266,37 +274,62 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 });
 
                 ScaffoldMessenger.of(rootContext).showSnackBar(
-                  SnackBar(
-                    content: Text('Could not send bug report: $error'),
+                  const SnackBar(
+                    content: Text('Could not save the bug report.'),
                   ),
                 );
               }
             }
 
             return AlertDialog(
-              title: const Text('Report a Bug'),
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextField(
-                      controller: titleController,
-                      decoration: const InputDecoration(
-                        labelText: 'Bug title',
-                        hintText: 'Example: App crashes on upload',
+              backgroundColor: dialogContext.appCardColor,
+              title: Text(
+                'Report a Bug',
+                style: TextStyle(color: dialogContext.appTextColor),
+              ),
+              content: Form(
+                key: formKey,
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      TextFormField(
+                        controller: titleController,
+                        enabled: !isSending,
+                        maxLength: 60,
+                        decoration: const InputDecoration(
+                          labelText: 'Short title',
+                          hintText: 'Example: Chat input does not send',
+                        ),
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Please enter a title.';
+                          }
+
+                          return null;
+                        },
                       ),
-                    ),
-                    const SizedBox(height: 12),
-                    TextField(
-                      controller: descriptionController,
-                      maxLines: 5,
-                      decoration: const InputDecoration(
-                        labelText: 'Description',
-                        hintText: 'What happened? What did you try to do?',
-                        alignLabelWithHint: true,
+                      const SizedBox(height: 12),
+                      TextFormField(
+                        controller: detailsController,
+                        enabled: !isSending,
+                        minLines: 4,
+                        maxLines: 6,
+                        decoration: const InputDecoration(
+                          labelText: 'What happened?',
+                          hintText:
+                          'Describe what you clicked and what went wrong.',
+                        ),
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Please describe the bug.';
+                          }
+
+                          return null;
+                        },
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
               actions: [
@@ -309,14 +342,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   child: const Text('Cancel'),
                 ),
                 FilledButton(
-                  onPressed: isSending ? null : sendReport,
+                  onPressed: isSending ? null : submitReport,
                   child: isSending
                       ? const SizedBox(
                     width: 18,
                     height: 18,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                    ),
+                    child: CircularProgressIndicator(strokeWidth: 2),
                   )
                       : const Text('Send'),
                 ),
@@ -325,10 +356,59 @@ class _SettingsScreenState extends State<SettingsScreen> {
           },
         );
       },
-    ).whenComplete(() {
-      titleController.dispose();
-      descriptionController.dispose();
-    });
+    );
+
+    titleController.dispose();
+    detailsController.dispose();
+  }
+
+  void _showPrivacyDialog() {
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          backgroundColor: dialogContext.appCardColor,
+          title: Text(
+            'Privacy & Data Protection',
+            style: TextStyle(color: dialogContext.appTextColor),
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: const [
+                _DialogQuestion(
+                  question: 'Account data',
+                  answer:
+                  'SideQuest uses your account information so you can log in and keep your profile connected to your activity.',
+                ),
+                _DialogQuestion(
+                  question: 'Profile data',
+                  answer:
+                  'Your visible profile information can be changed through Edit Profile.',
+                ),
+                _DialogQuestion(
+                  question: 'Settings data',
+                  answer:
+                  'Basic app settings like reminders and appearance are saved so your app behaves the way you selected.',
+                ),
+                _DialogQuestion(
+                  question: 'Bug reports',
+                  answer:
+                  'If you send a bug report, the report text and your account email may be saved so the team can understand the issue.',
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   String _displayNameFromData(Map<String, dynamic>? data, User? user) {
@@ -359,11 +439,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return '@sidequest';
   }
 
-  void _setLightMode(bool value) {
-    ThemeService.setLightMode(value);
-    _updateSetting('lightMode', value);
-  }
-
   bool _settingValue(
       Map<String, dynamic>? data,
       String key,
@@ -380,6 +455,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
 
     return fallback;
+  }
+
+  String _appearanceSubtitle() {
+    final mode = ThemeService.currentMode;
+    final label = ThemeService.labelForMode(mode);
+
+    if (mode == ThemeMode.system) {
+      return 'Current: $label - follows your phone theme.';
+    }
+
+    return 'Current: $label mode.';
   }
 
   @override
@@ -459,17 +545,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   children: [
                     ValueListenableBuilder<ThemeMode>(
                       valueListenable: ThemeService.themeMode,
-                      builder: (context, themeMode, _) {
-                        final isLightMode = themeMode == ThemeMode.light;
-
-                        return SettingsSwitchTile(
-                          icon: Icons.light_mode_rounded,
-                          title: 'Light Mode',
-                          subtitle: isLightMode
-                              ? 'Die App wird aktuell hell dargestellt.'
-                              : 'Aktivieren, um die App hell darzustellen.',
-                          value: isLightMode,
-                          onChanged: _setLightMode,
+                      builder: (context, mode, _) {
+                        return SettingsTile(
+                          icon: Icons.brightness_auto_rounded,
+                          title: 'Appearance',
+                          subtitle: _appearanceSubtitle(),
+                          onTap: _showAppearanceDialog,
                         );
                       },
                     ),
@@ -504,17 +585,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       children: [
                         ValueListenableBuilder<ThemeMode>(
                           valueListenable: ThemeService.themeMode,
-                          builder: (context, themeMode, _) {
-                            final isLightMode = themeMode == ThemeMode.light;
-
-                            return SettingsSwitchTile(
-                              icon: Icons.light_mode_rounded,
-                              title: 'Light Mode',
-                              subtitle: isLightMode
-                                  ? 'Die App wird aktuell hell dargestellt.'
-                                  : 'Aktivieren, um die App hell darzustellen.',
-                              value: isLightMode,
-                              onChanged: _setLightMode,
+                          builder: (context, mode, _) {
+                            return SettingsTile(
+                              icon: Icons.brightness_auto_rounded,
+                              title: 'Appearance',
+                              subtitle: _appearanceSubtitle(),
+                              onTap: _showAppearanceDialog,
                             );
                           },
                         ),
@@ -561,19 +637,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   SettingsTile(
                     icon: Icons.help_rounded,
                     title: 'Help / FAQ',
-                    subtitle: 'Read quick answers about SideQuest.',
+                    subtitle: 'Read quick answers about using SideQuest.',
                     onTap: _showFaqDialog,
                   ),
                   SettingsTile(
                     icon: Icons.bug_report_rounded,
                     title: 'Report a Bug',
-                    subtitle: 'Tell us if something does not work.',
-                    onTap: _openBugReportDialog,
+                    subtitle: 'Send a short report if something is broken.',
+                    onTap: _showBugReportDialog,
                   ),
                   SettingsTile(
                     icon: Icons.privacy_tip_rounded,
                     title: 'Privacy & Data Protection',
-                    subtitle: 'Read how your data is handled.',
+                    subtitle: 'See what data SideQuest stores and why.',
                     onTap: _showPrivacyDialog,
                   ),
                   SettingsTile(
@@ -606,6 +682,45 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _DialogQuestion extends StatelessWidget {
+  final String question;
+  final String answer;
+
+  const _DialogQuestion({
+    required this.question,
+    required this.answer,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            question,
+            style: TextStyle(
+              color: context.appTextColor,
+              fontSize: 14,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            answer,
+            style: TextStyle(
+              color: context.appMutedTextColor,
+              fontSize: 13,
+              height: 1.35,
+            ),
+          ),
+        ],
       ),
     );
   }

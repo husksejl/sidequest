@@ -32,18 +32,18 @@ class SocialHubTabs extends StatelessWidget {
             Expanded(
               child: buildTabButton(
                 context: context,
-                text: l10n.activity,
+                text: l10n.messages,
                 index: 0,
-                icon: Icons.notifications_none_rounded,
+                icon: Icons.chat_bubble_outline_rounded,
               ),
             ),
             const SizedBox(width: 6),
             Expanded(
               child: buildTabButton(
                 context: context,
-                text: l10n.messages,
+                text: l10n.activity,
                 index: 1,
-                icon: Icons.chat_bubble_outline_rounded,
+                icon: Icons.notifications_none_rounded,
               ),
             ),
           ],
@@ -69,7 +69,9 @@ class SocialHubTabs extends StatelessWidget {
         curve: Curves.easeOut,
         height: double.infinity,
         decoration: BoxDecoration(
-          color: isSelected ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.10) : Colors.transparent,
+          color: isSelected
+              ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.10)
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: isSelected
@@ -91,14 +93,18 @@ class SocialHubTabs extends StatelessWidget {
           children: [
             Icon(
               icon,
-              color: isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54),
+              color: isSelected
+                  ? Theme.of(context).colorScheme.primary
+                  : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54),
               size: 20,
             ),
             const SizedBox(width: 8),
             Text(
               text,
               style: TextStyle(
-                color: isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54),
+                color: isSelected
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54),
                 fontSize: 15,
                 fontWeight: FontWeight.bold,
               ),

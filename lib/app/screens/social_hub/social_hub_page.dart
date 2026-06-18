@@ -47,8 +47,8 @@ class _SocialHubPageState extends State<SocialHubPage> {
             ),
             Expanded(
               child: selectedTabIndex == 0
-                  ? const ActivityList()
-                  : const MessagesList(),
+                  ? const MessagesList()
+                  : const ActivityList(),
             ),
           ],
         ),

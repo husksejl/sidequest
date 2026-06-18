@@ -20,6 +20,8 @@ void main() async {
 
   await Firebase.initializeApp();
 
+  ThemeService.useSystemTheme();
+
   runApp(const SideQuestApp());
 }
 
@@ -119,7 +121,7 @@ class AuthGate extends StatelessWidget {
         }
 
         if (snapshot.hasData) {
-          return const _HomeWithSavedSettings();
+          return const _HomeWithSavedAppearance();
         }
 
         return OnboardingPage(
@@ -132,26 +134,28 @@ class AuthGate extends StatelessWidget {
   }
 }
 
-class _HomeWithSavedSettings extends StatefulWidget {
-  const _HomeWithSavedSettings();
+class _HomeWithSavedAppearance extends StatefulWidget {
+  const _HomeWithSavedAppearance();
 
   @override
-  State<_HomeWithSavedSettings> createState() => _HomeWithSavedSettingsState();
+  State<_HomeWithSavedAppearance> createState() =>
+      _HomeWithSavedAppearanceState();
 }
 
-class _HomeWithSavedSettingsState extends State<_HomeWithSavedSettings> {
-  late final Future<void> _loadSettingsFuture;
+class _HomeWithSavedAppearanceState extends State<_HomeWithSavedAppearance> {
+  late final Future<void> _loadAppearanceFuture;
 
   @override
   void initState() {
     super.initState();
-    _loadSettingsFuture = _loadSavedTheme();
+    _loadAppearanceFuture = _loadSavedAppearance();
   }
 
-  Future<void> _loadSavedTheme() async {
+  Future<void> _loadSavedAppearance() async {
     final uid = FirebaseAuth.instance.currentUser?.uid;
 
     if (uid == null) {
+      ThemeService.useSystemTheme();
       return;
     }
 
@@ -164,18 +168,33 @@ class _HomeWithSavedSettingsState extends State<_HomeWithSavedSettings> {
     final settings = data?['settings'];
 
     if (settings is Map<String, dynamic>) {
-      final lightMode = settings['lightMode'];
+      final appearanceMode = settings['appearanceMode'];
 
-      if (lightMode is bool) {
-        ThemeService.setLightMode(lightMode);
+      if (appearanceMode is String) {
+        ThemeService.setThemeMode(
+          ThemeService.modeFromString(appearanceMode),
+        );
+        return;
+      }
+
+      // fallback für alte gespeicherte lightMode-Werte
+      final oldLightMode = settings['lightMode'];
+
+      if (oldLightMode is bool) {
+        ThemeService.setThemeMode(
+          oldLightMode ? ThemeMode.light : ThemeMode.dark,
+        );
+        return;
       }
     }
+
+    ThemeService.useSystemTheme();
   }
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<void>(
-      future: _loadSettingsFuture,
+      future: _loadAppearanceFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
           return Scaffold(
