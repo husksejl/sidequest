@@ -42,14 +42,19 @@ class SoloQuestCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Text(
-            quest.title,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Color(0xFFE5ECEC),
-              fontSize: 20,
-              height: 1.35,
-              fontWeight: FontWeight.w700,
+          Padding(
+            padding: const EdgeInsets.only(right: 150),
+            child: Text(
+              quest.title,
+              textAlign: TextAlign.left,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: Color(0xFFE5ECEC),
+                fontSize: 30,
+                height: 1.35,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
 
@@ -84,7 +89,7 @@ class SoloQuestCard extends StatelessWidget {
             quest.expiresIn,
             style: TextStyle(
               color: Theme.of(context).colorScheme.onSurface,
-              fontSize: 32,
+              fontSize: 20,
               fontWeight: FontWeight.w800,
             ),
           ),

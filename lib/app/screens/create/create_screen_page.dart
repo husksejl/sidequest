@@ -245,6 +245,181 @@ class _CreateScreenPageState extends State<CreateScreenPage> {
   }
 
 
+  Future<List<Map<String, dynamic>>> _loadGroupMembers(List<String> userIds) async {
+    final users = <Map<String, dynamic>>[];
+
+    for (final id in userIds) {
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(id)
+          .get();
+
+      final data = doc.data();
+
+      if (data != null) {
+        users.add({
+          'id': id,
+          'username': data['username'] ?? data['firstName'] ?? 'Unknown user',
+          'profileImageUrl':
+          data['profileImageUrl'] ?? data['profileimageURL'] ?? '',
+        });
+      }
+    }
+
+    return users;
+  }
+
+  Widget _buildGroupMembersPreview(List<String> userIds) {
+    if (userIds.isEmpty) return const SizedBox.shrink();
+
+    final visibleCount = userIds.length > 3 ? 3 : userIds.length;
+    final remainingCount = userIds.length - visibleCount;
+
+    return FutureBuilder<List<Map<String, dynamic>>>(
+      future: _loadGroupMembers(userIds),
+      builder: (context, snapshot) {
+        final members = snapshot.data ?? [];
+
+        return GestureDetector(
+          onTap: () => _showGroupMembersSheet(userIds),
+          child: SizedBox(
+            width: 120,
+            height: 38,
+            child: Stack(
+              children: [
+                for (int i = 0; i < visibleCount; i++)
+                  Positioned(
+                    left: i * 24,
+                    child: _buildMiniAvatar(
+                      imageUrl: i < members.length
+                          ? members[i]['profileImageUrl']
+                          : '',
+                    ),
+                  ),
+
+                if (remainingCount > 0)
+                  Positioned(
+                    left: visibleCount * 24,
+                    child: Container(
+                      width: 34,
+                      height: 34,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: const Color(0xFF171A20),
+                        border: Border.all(
+                          color: const Color(0xFFEB5D4F),
+                          width: 1.5,
+                        ),
+                      ),
+                      child: Center(
+                        child: Text(
+                          '+$remainingCount',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildMiniAvatar({required String imageUrl}) {
+    return Container(
+      width: 30,
+      height: 30,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: const Color(0xFF242730),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.85),
+          width: 1.4,
+        ),
+        image: imageUrl.isNotEmpty
+            ? DecorationImage(
+          image: NetworkImage(imageUrl),
+          fit: BoxFit.cover,
+        )
+            : null,
+      ),
+      child: imageUrl.isEmpty
+          ? const Icon(
+        Icons.person_rounded,
+        size: 18,
+        color: Colors.white70,
+      )
+          : null,
+    );
+  }
+
+  void _showGroupMembersSheet(List<String> userIds) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF0E1014),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(28),
+        ),
+      ),
+      builder: (context) {
+        return FutureBuilder<List<Map<String, dynamic>>>(
+          future: _loadGroupMembers(userIds),
+          builder: (context, snapshot) {
+            final members = snapshot.data ?? [];
+
+            return Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    'Group Members',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 19,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+
+                  ...members.map((member) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 14),
+                      child: Row(
+                        children: [
+                          _buildMiniAvatar(
+                            imageUrl: member['profileImageUrl'] ?? '',
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            member['username'] ?? 'Unknown user',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+
 
   Widget _buildCompletedCard() {
     final l10n = AppLocalizations.of(context)!;
@@ -346,8 +521,8 @@ class _CreateScreenPageState extends State<CreateScreenPage> {
 
             final quest = _toCreateQuest(sideQuest);
 
-            _selectedQuest ??= quest;
-            _selectedQuestKey ??= 'daily_${quest.id}';
+            /*_selectedQuest ??= quest;
+            _selectedQuestKey ??= 'daily_${quest.id}';*/
 
             return GestureDetector(
               onTap: () {
@@ -438,28 +613,11 @@ class _CreateScreenPageState extends State<CreateScreenPage> {
                   expiresAt.toDate().isBefore(DateTime.now());
 
               if (isExpired) {
-                if (_selectedQuestKey == 'group_${doc.id}') {
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    if (!mounted) return;
-
-                    setState(() {
-                      _selectedQuest = null;
-                      _selectedQuestKey = null;
-                    });
-                  });
-                }
-
-                WidgetsBinding.instance.addPostFrameCallback((_) async {
-                  await doc.reference.update({
-                    'status': 'expired',
-                  });
-                });
-
                 return const SizedBox.shrink();
               }
 
 
-              if (allAccepted && data['startedAt'] == null) {
+              /*if (allAccepted && data['startedAt'] == null) {
                 WidgetsBinding.instance.addPostFrameCallback((_) async {
                   if (!mounted) return;
 
@@ -474,22 +632,16 @@ class _CreateScreenPageState extends State<CreateScreenPage> {
                     'expiresAt': expiresAt,
                   });
                 });
-              }
-
-              if (!allAccepted && _selectedQuestKey == 'group_${doc.id}') {
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  if (!mounted) return;
-
-                  setState(() {
-                    _selectedQuest = null;
-                    _selectedQuestKey = null;
-                  });
-                });
-              }
+              }*/
 
               final participantIds = List<String>.from(
-                (data['acceptedUserIds'] ?? []).map((e) => e.toString()),
+                (data['participantIds'] ?? []).map((e) => e.toString()),
               );
+
+              final allParticipantIds = {
+                ...participantIds,
+                ...acceptedUserIds,
+              }.toList();
 
               final participantNames = List<String>.from(
                 (data['participantNames'] ?? []).map((e) => e.toString()),
@@ -525,9 +677,19 @@ class _CreateScreenPageState extends State<CreateScreenPage> {
                           });
                         }
                             : null,
-                        child: SoloQuestCard(
-                          quest: quest,
-                          isSelected: allAccepted && _selectedQuestKey == key,
+                        child: Stack(
+                          children: [
+                            SoloQuestCard(
+                              quest: quest,
+                              isSelected: allAccepted && _selectedQuestKey == key,
+                            ),
+
+                            Positioned(
+                              top: 30,
+                              right: 30,
+                              child: _buildGroupMembersPreview(allParticipantIds),
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -573,43 +735,49 @@ class _CreateScreenPageState extends State<CreateScreenPage> {
   Widget _buildUploadActions() {
     final l10n = AppLocalizations.of(context)!;
     final quest = _selectedQuest;
+    final hasQuest = quest != null;
 
-    if (quest == null) return const SizedBox.shrink();
-
-    return Column(
-      children: [
-        const SizedBox(height: 28),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+    return Opacity(
+      opacity: hasQuest ? 1 : 0.35,
+      child: IgnorePointer(
+        ignoring: !hasQuest,
+        child: Column(
           children: [
-            GestureDetector(
-              onTap: () => _openCamera(quest),
-              child: const CreateActionButton(icon: Icons.camera_alt_rounded),
+            const SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                GestureDetector(
+                  onTap: hasQuest ? () => _openCamera(quest) : null,
+                  child: const CreateActionButton(icon: Icons.camera_alt_rounded),
+                ),
+                GestureDetector(
+                  onTap: hasQuest ? () => _openGallery(quest) : null,
+                  child: const CreateActionButton(icon: Icons.image_rounded),
+                ),
+                GestureDetector(
+                  onTap: hasQuest ? () => _openAudio(quest) : null,
+                  child: const CreateActionButton(icon: Icons.mic_rounded),
+                ),
+              ],
             ),
-            GestureDetector(
-              onTap: () => _openGallery(quest),
-              child: const CreateActionButton(icon: Icons.image_rounded),
+            const SizedBox(height: 12),
+            Text(
+              hasQuest && quest.isGroupQuest
+                  ? 'Upload a photo or audio to complete this Group SideQuest.'
+                  : l10n.uploadPhotoOrAudio,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Color(0xFF777982),
+                fontSize: 12,
+                height: 1.4,
+                fontWeight: FontWeight.w600,
+              ),
             ),
-            GestureDetector(
-              onTap: () => _openAudio(quest),
-              child: const CreateActionButton(icon: Icons.mic_rounded),
-            ),
+            const SizedBox(height: 20),
           ],
         ),
-        const SizedBox(height: 12),
-        Text(
-          quest.isGroupQuest
-              ? 'Upload a photo or audio to complete this Group SideQuest.'
-              : l10n.uploadPhotoOrAudio,
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            color: Color(0xFF777982),
-            fontSize: 12,
-            height: 1.4,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ],
+      ),
     );
   }
 
@@ -619,20 +787,37 @@ class _CreateScreenPageState extends State<CreateScreenPage> {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       bottomNavigationBar: const CustomBottomNav(currentIndex: 2),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(16, 10, 16, 26),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const AppTopBar(),
-              const SizedBox(height: 28),
-              QuestSectionLabel(label: AppLocalizations.of(context)!.dailySideQuest),
-              const SizedBox(height: 18),
-              _buildDailyQuestContent(),
-              _buildGroupQuestContent(),
-              _buildUploadActions(),
-            ],
-          ),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const AppTopBar(),
+                  const SizedBox(height: 20),
+                  _buildUploadActions(),
+                ],
+              ),
+            ),
+
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(16, 10, 16, 26),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    QuestSectionLabel(
+                      label: AppLocalizations.of(context)!.dailySideQuest,
+                    ),
+                    const SizedBox(height: 18),
+                    _buildDailyQuestContent(),
+                    _buildGroupQuestContent(),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
