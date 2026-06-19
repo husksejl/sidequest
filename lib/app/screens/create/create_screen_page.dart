@@ -616,6 +616,10 @@ class _CreateScreenPageState extends State<CreateScreenPage> {
                 return const SizedBox.shrink();
               }
 
+              if (data['status'] == 'completed') {
+                return const SizedBox.shrink();
+              }
+
 
               /*if (allAccepted && data['startedAt'] == null) {
                 WidgetsBinding.instance.addPostFrameCallback((_) async {
@@ -656,7 +660,7 @@ class _CreateScreenPageState extends State<CreateScreenPage> {
                 xp: 200,
                 isGroupQuest: true,
                 date: DateTime.now().toIso8601String().split('T').first,
-                participantIds: participantIds,
+                participantIds: allParticipantIds,
                 participantNames: participantNames,
               );
 

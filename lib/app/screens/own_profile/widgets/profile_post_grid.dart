@@ -89,6 +89,8 @@ class _ProfilePostDetailPageState extends State<ProfilePostDetailPage> {
       voteStatus: post.voteStatus.name,
       votingOpen: post.votingOpen,
       mediaType: post.type == ProfilePostType.audio ? 'audio' : 'image',
+      isGroupQuest: post.isGroupQuest,
+      participantIds: post.participantIds,
     );
   }
 

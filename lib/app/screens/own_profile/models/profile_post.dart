@@ -28,6 +28,8 @@ class ProfilePost {
   final String? firestoreId;
   final int completedVotes;
   final int notCompletedVotes;
+  final bool isGroupQuest;
+  final List<String> participantIds;
 
   const ProfilePost({
     required this.userName,
@@ -45,5 +47,7 @@ class ProfilePost {
     this.firestoreId,
     this.completedVotes = 0,
     this.notCompletedVotes = 0,
+    this.isGroupQuest = false,
+    this.participantIds = const [],
   });
 }

@@ -275,10 +275,25 @@ class _HomeScreenState extends State<HomeScreen>
             final filteredDocs = docs.where((doc) {
               final data = doc.data();
               final postUserId = data['userId'];
+              final isGroupQuest = data['isGroupQuest'] == true;
+
+              final participantIds = List<String>.from(
+                (data['participantIds'] ?? []).map((e) => e.toString()),
+              );
 
               if (selectedFeedTab == 0) {
+                if (isGroupQuest) {
+                  return participantIds.contains(currentUserId) ||
+                      participantIds.any((id) => following.contains(id));
+                }
+
                 return postUserId == currentUserId ||
                     following.contains(postUserId);
+              }
+
+              if (isGroupQuest) {
+                return !participantIds.contains(currentUserId) &&
+                    !participantIds.any((id) => following.contains(id));
               }
 
               return postUserId != currentUserId &&
@@ -338,6 +353,10 @@ class _HomeScreenState extends State<HomeScreen>
                       isFirestorePost: true,
                       audioUrl: data['audioUrl'],
                       mediaType: data['mediaType'] ?? 'image',
+                      isGroupQuest: data['isGroupQuest'] ?? false,
+                      participantIds: List<String>.from(
+                        (data['participantIds'] ?? []).map((e) => e.toString()),
+                      ),
                     ),
                   ),
                 );

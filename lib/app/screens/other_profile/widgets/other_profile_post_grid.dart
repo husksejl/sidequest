@@ -76,6 +76,12 @@ class OtherProfilePostGrid extends StatelessWidget {
             votingOpen: getVoteStatus(data) == 'open',
             likes: data['likes'] ?? 0,
             comments: data['comments'] ?? 0,
+            profileImageUrl: data['profileImageUrl'],
+            firestoreId: docs[index].id,
+            isGroupQuest: data['isGroupQuest'] ?? false,
+            participantIds: List<String>.from(
+              (data['participantIds'] ?? []).map((e) => e.toString()),
+            ),
           ),
           onTap: () {
             Navigator.push(
@@ -196,6 +202,10 @@ class _FirestorePostDetailPageState extends State<FirestorePostDetailPage> {
       firestoreId: doc.id,
       isOwnPost: data['userId'] == FirebaseAuth.instance.currentUser?.uid,
       isFirestorePost: true,
+      isGroupQuest: data['isGroupQuest'] ?? false,
+      participantIds: List<String>.from(
+        (data['participantIds'] ?? []).map((e) => e.toString()),
+      ),
     );
   }
 

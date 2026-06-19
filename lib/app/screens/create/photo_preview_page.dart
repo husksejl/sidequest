@@ -131,7 +131,10 @@ class _PhotoPreviewPageState extends State<PhotoPreviewPage> {
         'xpAwarded': false,
         'isGroupQuest': widget.quest.isGroupQuest,
         'groupRunId': widget.quest.isGroupQuest ? widget.quest.id : null,
-        'participantIds': widget.quest.participantIds,
+        'participantIds': <String>{
+          ...widget.quest.participantIds,
+          user.uid,
+        }.toList(),
         'participantNames': widget.quest.participantNames,
         'xpReward': widget.quest.isGroupQuest ? 200 : 100,
       });

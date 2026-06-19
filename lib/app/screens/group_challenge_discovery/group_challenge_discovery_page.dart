@@ -148,6 +148,8 @@ class _GroupQuestCardWithRunState extends StatelessWidget {
         acceptedUserIds: const [],
         hasRun: false,
         isActive: false,
+        successfulCount: 0,
+        runId: null,
       );
     }
 
@@ -155,7 +157,7 @@ class _GroupQuestCardWithRunState extends StatelessWidget {
       stream: FirebaseFirestore.instance
           .collection('group_challenge_runs')
           .where('templateId', isEqualTo: challenge.id)
-          .where('creatorId', isEqualTo: currentUser.uid)
+          .where('participantIds', arrayContains: currentUser.uid)
           .snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
@@ -166,10 +168,52 @@ class _GroupQuestCardWithRunState extends StatelessWidget {
             acceptedUserIds: const [],
             hasRun: false,
             isActive: false,
+            successfulCount: 0,
+            runId: null,
           );
         }
 
-        final runData = snapshot.data!.docs.first.data();
+        final allRuns = snapshot.data!.docs;
+
+        final successfulCount = allRuns.where((doc) {
+          final data = doc.data();
+
+          final status = data['status'];
+          final completedVotes = data['completedVotes'] ?? 0;
+          final failedVotes = data['failedVotes'] ?? 0;
+
+          return status == 'closed_successful' ||
+              (status == 'completed' && completedVotes > failedVotes);
+        }).length;
+
+        final activeRuns = allRuns.where((doc) {
+          final data = doc.data();
+          final status = data['status'];
+          final expiresAt = data['expiresAt'];
+
+          final isExpired = expiresAt is Timestamp &&
+              expiresAt.toDate().isBefore(DateTime.now());
+
+          return status != 'completed' &&
+              status != 'closed_successful' &&
+              status != 'expired' &&
+              !isExpired;
+        }).toList();
+
+        if (activeRuns.isEmpty) {
+          return _GroupQuestCard(
+            challenge: challenge,
+            onInvite: onInvite,
+            invitedUsers: const [],
+            acceptedUserIds: const [],
+            hasRun: false,
+            isActive: false,
+            successfulCount: successfulCount,
+            runId: null,
+          );
+        }
+
+        final runData = activeRuns.first.data();
 
         final invitedUserIds = List<String>.from(
           (runData['invitedUserIds'] ?? []).map((e) => e.toString()),
@@ -192,6 +236,8 @@ class _GroupQuestCardWithRunState extends StatelessWidget {
               acceptedUserIds: acceptedUserIds,
               hasRun: true,
               isActive: isActive,
+              successfulCount: successfulCount,
+              runId: activeRuns.first.id,
             );
           },
         );
@@ -275,6 +321,8 @@ class _GroupQuestCard extends StatelessWidget {
   final List<String> acceptedUserIds;
   final bool hasRun;
   final bool isActive;
+  final int successfulCount;
+  final String? runId;
 
   const _GroupQuestCard({
     required this.challenge,
@@ -283,15 +331,41 @@ class _GroupQuestCard extends StatelessWidget {
     required this.acceptedUserIds,
     required this.hasRun,
     this.isActive = false,
+    this.successfulCount = 0,
+    this.runId,
   });
+
+  Future<void> _deleteGroupRequest() async {
+    if (runId == null) return;
+
+    final firestore = FirebaseFirestore.instance;
+    final batch = firestore.batch();
+
+    final invites = await firestore
+        .collection('challengeInvites')
+        .where('runId', isEqualTo: runId)
+        .get();
+
+    for (final invite in invites.docs) {
+      batch.delete(invite.reference);
+    }
+
+    batch.delete(
+      firestore.collection('group_challenge_runs').doc(runId),
+    );
+
+    await batch.commit();
+  }
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     final isLight = Theme.of(context).brightness == Brightness.light;
 
-    return Container(
-      padding: const EdgeInsets.all(18),
+    return Stack(
+      children: [
+        Container(
+    padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: isLight ? Colors.white : colors.surface,
         borderRadius: BorderRadius.circular(28),
@@ -427,41 +501,103 @@ class _GroupQuestCard extends StatelessWidget {
 
               const SizedBox(height: 14),
 
-              GestureDetector(
-                onTap: onInvite,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                  decoration: BoxDecoration(
-                    color: hasRun ? Colors.transparent : colors.secondary,
-                    borderRadius: BorderRadius.circular(999),
-                    border: hasRun
-                        ? Border.all(
-                      color: colors.secondary,
-                      width: 1.5,
-                    )
-                        : null,
-                  ),
-                  child: Text(
-                    hasRun ? 'Invite more people' : 'Invite',
-                    style: TextStyle(
-                      color: hasRun
-                          ? colors.secondary
-                          : Theme.of(context).brightness == Brightness.light
-                          ? Colors.white
-                          : Colors.black,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w900,
+              Row(
+                children: [
+                  GestureDetector(
+                    onTap: onInvite,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: hasRun ? Colors.transparent : colors.secondary,
+                        borderRadius: BorderRadius.circular(999),
+                        border: hasRun
+                            ? Border.all(
+                          color: colors.secondary,
+                          width: 1.5,
+                        )
+                            : null,
+                      ),
+                      child: Text(
+                        hasRun ? 'Invite more people' : 'Invite',
+                        style: TextStyle(
+                          color: hasRun
+                              ? colors.secondary
+                              : Theme.of(context).brightness == Brightness.light
+                              ? Colors.white
+                              : Colors.black,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
                     ),
                   ),
-                ),
+
+                  if (hasRun && runId != null) ...[
+                    const SizedBox(width: 10),
+                    GestureDetector(
+                      onTap: _deleteGroupRequest,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: Colors.transparent,
+                          borderRadius: BorderRadius.circular(999),
+                          border: Border.all(
+                            color: const Color(0xFFEB5D4F),
+                            width: 1.5,
+                          ),
+                        ),
+                        child: const Text(
+                          'Cancel request',
+                          style: TextStyle(
+                            color: Color(0xFFEB5D4F),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ],
           ),
         ],
       ),
+    ),
+
+    if (successfulCount > 0)
+    Positioned(
+    right: 14,
+    bottom: 14,
+    child: Container(
+    width: 30,
+    height: 30,
+    decoration: BoxDecoration(
+    shape: BoxShape.circle,
+    color: colors.secondary.withOpacity(0.18),
+    border: Border.all(
+    color: colors.secondary,
+    width: 2,
+    ),
+    ),
+    child: Center(
+    child: Text(
+    '$successfulCount',
+    style: TextStyle(
+    color: colors.secondary,
+    fontSize: 14,
+    fontWeight: FontWeight.w900,
+    ),
+    ),
+    ),
+    ),
+    ),
+    ],
     );
   }
 }
+
+
 
 class _InvitePeopleSheet extends StatefulWidget {
   final GroupChallenge challenge;
@@ -503,8 +639,19 @@ class _InvitePeopleSheetState extends State<_InvitePeopleSheet> {
     late final DocumentReference<Map<String, dynamic>> runRef;
     List<String> alreadyInvitedUserIds = [];
 
-    if (existingRunSnapshot.docs.isNotEmpty) {
-      final existingRunDoc = existingRunSnapshot.docs.first;
+    final reusableRunDocs = existingRunSnapshot.docs.where((doc) {
+      final data = doc.data();
+      final status = data['status'];
+      final expiresAt = data['expiresAt'];
+
+      final isExpired = expiresAt is Timestamp &&
+          expiresAt.toDate().isBefore(DateTime.now());
+
+      return status != 'completed' && status != 'expired' && !isExpired;
+    }).toList();
+
+    if (reusableRunDocs.isNotEmpty) {
+      final existingRunDoc = reusableRunDocs.first;
       final existingRunData = existingRunDoc.data();
 
       runRef = existingRunDoc.reference;

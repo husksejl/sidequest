@@ -93,7 +93,12 @@ class OwnProfilePage extends StatelessWidget {
               StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                 stream: FirebaseFirestore.instance
                     .collection('posts')
-                    .where('userId', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+                    .where(
+                  Filter.or(
+                    Filter('userId', isEqualTo: FirebaseAuth.instance.currentUser!.uid),
+                    Filter('participantIds', arrayContains: FirebaseAuth.instance.currentUser!.uid),
+                  ),
+                )
                     .snapshots(),
                 builder: (context, snapshot) {
                   if (!snapshot.hasData) {
@@ -144,6 +149,10 @@ class OwnProfilePage extends StatelessWidget {
                       completedVotes: data['completedVotes'] ?? 0,
                       notCompletedVotes: data['failedVotes'] ?? 0,
                       profileImageUrl: data['profileImageUrl'],
+                      isGroupQuest: data['isGroupQuest'] ?? false,
+                      participantIds: List<String>.from(
+                        (data['participantIds'] ?? []).map((e) => e.toString()),
+                      ),
                     );
                   }).toList();
 

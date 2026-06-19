@@ -12,6 +12,7 @@ import 'package:gallery_saver_plus/gallery_saver.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
+import '../../own_profile/own_profile_page.dart';
 
 
 class SideQuestPostCard extends StatefulWidget {
@@ -143,6 +144,21 @@ class _SideQuestPostCardState extends State<SideQuestPostCard> {
     await postRef.delete();
   }
 
+  Future<void> deleteParticipation() async {
+    if (post.firestoreId == null) return;
+
+    final currentUserId = FirebaseAuth.instance.currentUser?.uid;
+    if (currentUserId == null) return;
+
+    final postRef = FirebaseFirestore.instance
+        .collection('posts')
+        .doc(post.firestoreId);
+
+    await postRef.update({
+      'participantIds': FieldValue.arrayRemove([currentUserId]),
+    });
+  }
+
   Future<void> reportPost() async {
     if (post.firestoreId == null) return;
 
@@ -215,6 +231,161 @@ class _SideQuestPostCardState extends State<SideQuestPostCard> {
   }
 
 
+  Future<List<Map<String, dynamic>>> _loadParticipants(List<String> ids) async {
+    final users = <Map<String, dynamic>>[];
+
+    for (final id in ids) {
+      final doc = await FirebaseFirestore.instance.collection('users').doc(id).get();
+      final data = doc.data();
+
+      if (data != null) {
+        users.add({
+          'id': id,
+          'username': data['username'] ?? data['firstName'] ?? 'Unknown user',
+          'profileImageUrl': data['profileImageUrl'] ?? data['profileimageURL'] ?? '',
+        });
+      }
+    }
+
+    return users;
+  }
+
+  Widget _buildGroupAvatars() {
+    final ids = post.participantIds;
+    if (ids.isEmpty) return const SizedBox.shrink();
+
+    final visibleCount = ids.length > 3 ? 3 : ids.length;
+    final remainingCount = ids.length - visibleCount;
+
+    return FutureBuilder<List<Map<String, dynamic>>>(
+      future: _loadParticipants(ids),
+      builder: (context, snapshot) {
+        final members = snapshot.data ?? [];
+
+        return GestureDetector(
+          onTap: () => _showParticipantsSheet(ids),
+          child: SizedBox(
+            width: 110,
+            height: 44,
+            child: Stack(
+              children: [
+                for (int i = 0; i < visibleCount; i++)
+                  Positioned(
+                    left: i * 26,
+                    child: CircleAvatar(
+                      radius: 22,
+                      backgroundImage: i < members.length &&
+                          members[i]['profileImageUrl'].toString().isNotEmpty
+                          ? NetworkImage(members[i]['profileImageUrl'])
+                          : null,
+                      child: i >= members.length ||
+                          members[i]['profileImageUrl'].toString().isEmpty
+                          ? const Icon(Icons.person_rounded)
+                          : null,
+                    ),
+                  ),
+                if (remainingCount > 0)
+                  Positioned(
+                    left: visibleCount * 26,
+                    child: CircleAvatar(
+                      radius: 22,
+                      backgroundColor: const Color(0xFF171A20),
+                      child: Text(
+                        '+$remainingCount',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w900,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showParticipantsSheet(List<String> ids) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF0E1014),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      builder: (context) {
+        return FutureBuilder<List<Map<String, dynamic>>>(
+          future: _loadParticipants(ids),
+          builder: (context, snapshot) {
+            final members = snapshot.data ?? [];
+
+            return Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: members.map((member) {
+                  return GestureDetector(
+                    onTap: () {
+                      final currentUserId = FirebaseAuth.instance.currentUser?.uid;
+                      final tappedUserId = member['id'].toString();
+
+                      Navigator.pop(context);
+
+                      if (tappedUserId == currentUserId) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const OwnProfilePage(),
+                          ),
+                        );
+                      } else {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => OtherProfilePage(
+                              userId: tappedUserId,
+                            ),
+                          ),
+                        );
+                      }
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 14),
+                      child: Row(
+                        children: [
+                          CircleAvatar(
+                            radius: 22,
+                            backgroundImage: member['profileImageUrl'].toString().isNotEmpty
+                                ? NetworkImage(member['profileImageUrl'])
+                                : null,
+                            child: member['profileImageUrl'].toString().isEmpty
+                                ? const Icon(Icons.person_rounded)
+                                : null,
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            member['username'],
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -233,7 +404,9 @@ class _SideQuestPostCardState extends State<SideQuestPostCard> {
         children: [
           Row(
             children: [
-              CircleAvatar(
+              post.isGroupQuest
+                  ? _buildGroupAvatars()
+                  : CircleAvatar(
                 radius: 22,
                 backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.10),
                 backgroundImage: post.profileImageUrl != null &&
@@ -251,7 +424,18 @@ class _SideQuestPostCardState extends State<SideQuestPostCard> {
               ),
               const SizedBox(width: 10),
               Expanded(
-                child: Column(
+                child: post.isGroupQuest
+                    ? Padding(
+                  padding: const EdgeInsets.only(left: 100),
+                  child: Text(
+                    post.timeAgo,
+                    style: const TextStyle(
+                      color: Color(0xFF8A8F98),
+                      fontSize: 11,
+                    ),
+                  ),
+                )
+                    : Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     GestureDetector(
@@ -280,7 +464,7 @@ class _SideQuestPostCardState extends State<SideQuestPostCard> {
                       post.location.isEmpty
                           ? post.timeAgo
                           : '${post.timeAgo} • ${post.location}',
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Color(0xFF8A8F98),
                         fontSize: 11,
                       ),
@@ -581,6 +765,44 @@ class _SideQuestPostCardState extends State<SideQuestPostCard> {
                               );
                             }
 
+                            if (value == 'deleteParticipation') {
+                              showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return AlertDialog(
+                                    backgroundColor: Theme.of(context).colorScheme.surface,
+                                    title: Text(
+                                      'Delete participation?',
+                                      style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                                    ),
+                                    content: Text(
+                                      'This post will be permanently removed from your profile, but it will stay visible for the other participants.',
+                                      style: TextStyle(
+                                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.70),
+                                      ),
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Navigator.pop(context),
+                                        child: const Text('Cancel'),
+                                      ),
+                                      TextButton(
+                                        onPressed: () async {
+                                          Navigator.pop(context);
+                                          await deleteParticipation();
+                                        },
+                                        child: const Text(
+                                          'Delete participation',
+                                          style: TextStyle(color: Color(0xFFEB5D4F)),
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            }
+
+
                             if (value == 'delete') {
                               showDialog(
                                 context: context,
@@ -620,6 +842,45 @@ class _SideQuestPostCardState extends State<SideQuestPostCard> {
                           },
                           itemBuilder: (context) {
                             final canSaveImage = post.mediaType != 'audio';
+                            final currentUserId = FirebaseAuth.instance.currentUser?.uid ?? '';
+
+                            final isParticipant =
+                            post.participantIds.contains(currentUserId);
+
+                            final isOwner =
+                                post.userId == currentUserId;
+
+                            if (post.isGroupQuest) {
+                              return [
+                                if (canSaveImage)
+                                  const PopupMenuItem(
+                                    value: 'save',
+                                    child: Text('Save image'),
+                                  ),
+                                const PopupMenuItem(
+                                  value: 'share',
+                                  child: Text('Share post'),
+                                ),
+                                const PopupMenuDivider(),
+
+                                if (isParticipant || isOwner)
+                                  const PopupMenuItem(
+                                    value: 'deleteParticipation',
+                                    child: Text(
+                                      'Delete participation',
+                                      style: TextStyle(color: Color(0xFFEB5D4F)),
+                                    ),
+                                  )
+                                else
+                                  const PopupMenuItem(
+                                    value: 'report',
+                                    child: Text(
+                                      'Report post',
+                                      style: TextStyle(color: Color(0xFFEB5D4F)),
+                                    ),
+                                  ),
+                              ];
+                            }
 
                             if (post.isOwnPost) {
                               return [
@@ -794,6 +1055,9 @@ class _SideQuestPostCardState extends State<SideQuestPostCard> {
 
               final currentUserId = FirebaseAuth.instance.currentUser?.uid ?? '';
 
+              final isParticipant =
+              post.participantIds.contains(currentUserId);
+
               final completedVotedBy =
               List<String>.from(data?['completedVotedBy'] ?? []);
               final failedVotedBy =
@@ -853,7 +1117,7 @@ class _SideQuestPostCardState extends State<SideQuestPostCard> {
                 }
               }
 
-              if (post.isOwnPost) {
+              if (post.isOwnPost || isParticipant) {
                 return Row(
                   children: [
                     _SmallStat(

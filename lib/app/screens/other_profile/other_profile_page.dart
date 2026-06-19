@@ -253,7 +253,12 @@ class OtherProfilePage extends StatelessWidget {
                   StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                     stream: FirebaseFirestore.instance
                         .collection('posts')
-                        .where('userId', isEqualTo: userId)
+                        .where(
+                      Filter.or(
+                        Filter('userId', isEqualTo: userId),
+                        Filter('participantIds', arrayContains: userId),
+                      ),
+                    )
                         .snapshots(),
                     builder: (context, postsSnapshot) {
                       if (!postsSnapshot.hasData) {

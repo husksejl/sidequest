@@ -22,6 +22,8 @@ class SideQuestPost {
   final bool votingOpen;
   final String mediaType;
   final String? audioUrl;
+  final bool isGroupQuest;
+  final List<String> participantIds;
 
   const SideQuestPost({
     required this.userName,
@@ -48,5 +50,7 @@ class SideQuestPost {
     this.votingOpen = true,
     this.mediaType = 'image',
     this.audioUrl,
+    this.isGroupQuest = false,
+    this.participantIds = const [],
   });
 }
