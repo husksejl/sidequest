@@ -39,7 +39,7 @@ class _HomeScreenState extends State<HomeScreen>
   late Timer _dateTimer;
   late String _todayDate;
 
-  int selectedFeedTab = 0;
+  int selectedFeedTab = 1;
   List<String> forYouOrder = [];
 
 
@@ -442,15 +442,15 @@ class MissionTabs extends StatelessWidget {
     return Row(
       children: [
         _TabButton(
-          label: l10n.following,
-          isActive: selectedIndex == 0,
-          onTap: () => onChanged(0),
-        ),
-        const SizedBox(width: 26),
-        _TabButton(
           label: l10n.forYou,
           isActive: selectedIndex == 1,
           onTap: () => onChanged(1),
+        ),
+        const SizedBox(width: 26),
+        _TabButton(
+          label: l10n.following,
+          isActive: selectedIndex == 0,
+          onTap: () => onChanged(0),
         ),
       ],
     );

@@ -28,8 +28,8 @@ class AppTheme {
       useMaterial3: true,
       fontFamily: 'Inter',
       colorScheme: const ColorScheme.light(
-        primary: Color(0xFF00B2AA),
-        secondary: Color(0xFFE65F58),
+        primary: Color(0xFF008FA3),
+        secondary: Color(0xFFD94A3D),
         surface: Colors.white,
         onSurface: Color(0xFF101317),
       ),

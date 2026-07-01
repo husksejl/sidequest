@@ -156,6 +156,9 @@ class _SideQuestPostCardState extends State<SideQuestPostCard> {
 
     await postRef.update({
       'participantIds': FieldValue.arrayRemove([currentUserId]),
+      'deletedParticipationUserIds': FieldValue.arrayUnion([currentUserId]),
+      'completedVotedBy': FieldValue.arrayRemove([currentUserId]),
+      'failedVotedBy': FieldValue.arrayRemove([currentUserId]),
     });
   }
 
@@ -406,21 +409,51 @@ class _SideQuestPostCardState extends State<SideQuestPostCard> {
             children: [
               post.isGroupQuest
                   ? _buildGroupAvatars()
-                  : CircleAvatar(
-                radius: 22,
-                backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.10),
-                backgroundImage: post.profileImageUrl != null &&
-                    post.profileImageUrl!.isNotEmpty
-                    ? NetworkImage(post.profileImageUrl!)
-                    : null,
-                child: post.profileImageUrl == null ||
-                    post.profileImageUrl!.isEmpty
-                    ? Icon(
-                  Icons.person_rounded,
-                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54),
-                  size: 24,
-                )
-                    : null,
+                  : GestureDetector(
+                onTap: () {
+                  if (post.userId == null) return;
+
+                  if (post.isOwnPost) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const OwnProfilePage(),
+                      ),
+                    );
+                    return;
+                  }
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => OtherProfilePage(
+                        userId: post.userId!,
+                      ),
+                    ),
+                  );
+                },
+                child: CircleAvatar(
+                  radius: 22,
+                  backgroundColor: Theme.of(context)
+                      .colorScheme
+                      .primary
+                      .withValues(alpha: 0.10),
+                  backgroundImage: post.profileImageUrl != null &&
+                      post.profileImageUrl!.isNotEmpty
+                      ? NetworkImage(post.profileImageUrl!)
+                      : null,
+                  child: post.profileImageUrl == null ||
+                      post.profileImageUrl!.isEmpty
+                      ? Icon(
+                    Icons.person_rounded,
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withValues(alpha: 0.54),
+                    size: 24,
+                  )
+                      : null,
+                ),
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -440,12 +473,22 @@ class _SideQuestPostCardState extends State<SideQuestPostCard> {
                   children: [
                     GestureDetector(
                       onTap: () {
-                        if (post.userId == null || post.isOwnPost) return;
+                        if (post.userId == null) return;
+
+                        if (post.isOwnPost) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const OwnProfilePage(),
+                            ),
+                          );
+                          return;
+                        }
 
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => OtherProfilePage(
+                            builder: (_) => OtherProfilePage(
                               userId: post.userId!,
                             ),
                           ),
@@ -1055,8 +1098,21 @@ class _SideQuestPostCardState extends State<SideQuestPostCard> {
 
               final currentUserId = FirebaseAuth.instance.currentUser?.uid ?? '';
 
-              final isParticipant =
-              post.participantIds.contains(currentUserId);
+              final liveParticipantIds = List<String>.from(
+                (data?['participantIds'] ?? []).map((e) => e.toString()),
+              );
+
+              final deletedParticipationUserIds = List<String>.from(
+                (data?['deletedParticipationUserIds'] ?? []).map((e) => e.toString()),
+              );
+
+              final isParticipant = liveParticipantIds.contains(currentUserId);
+
+              final hasDeletedParticipation =
+              deletedParticipationUserIds.contains(currentUserId);
+
+              final isOwnPostForVoting =
+                  post.isOwnPost && !hasDeletedParticipation;
 
               final completedVotedBy =
               List<String>.from(data?['completedVotedBy'] ?? []);
@@ -1117,7 +1173,7 @@ class _SideQuestPostCardState extends State<SideQuestPostCard> {
                 }
               }
 
-              if (post.isOwnPost || isParticipant) {
+              if (isOwnPostForVoting || isParticipant) {
                 return Row(
                   children: [
                     _SmallStat(

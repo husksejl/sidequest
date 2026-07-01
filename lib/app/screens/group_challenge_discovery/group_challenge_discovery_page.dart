@@ -5,9 +5,74 @@ import 'package:flutter/material.dart';
 import '../../shared/widgets/custom_bottom_nav.dart';
 import '../../shared/widgets/top_bar.dart';
 import 'models/group_challenge.dart';
+import '../../shared/models/app_chat.dart';
 
-class GroupChallengeDiscoveryPage extends StatelessWidget {
+class GroupChallengeDiscoveryPage extends StatefulWidget {
   const GroupChallengeDiscoveryPage({super.key});
+
+  @override
+  State<GroupChallengeDiscoveryPage> createState() =>
+      _GroupChallengeDiscoveryPageState();
+}
+
+class _GroupChallengeDiscoveryPageState
+    extends State<GroupChallengeDiscoveryPage> {
+  String selectedFilter = 'All';
+
+  Widget _buildFilterChips() {
+    final filters = ['All', 'Open', 'Invited', 'Active', 'Completed'];
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: filters.map((filter) {
+          final selected = selectedFilter == filter;
+
+          return Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  selectedFilter = filter;
+                });
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                decoration: BoxDecoration(
+                  color: selected
+                      ? const Color(0xFF00D7E8).withOpacity(0.14)
+                      : Theme.of(context).colorScheme.surface,
+                  borderRadius: BorderRadius.circular(999),
+                  border: Border.all(
+                    color: selected
+                        ? const Color(0xFF00D7E8)
+                        : Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withOpacity(0.12),
+                  ),
+                ),
+                child: Text(
+                  filter,
+                  style: TextStyle(
+                    color: selected
+                        ? const Color(0xFF00D7E8)
+                        : Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withOpacity(0.54),
+                    fontSize: 12,
+                    fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
 
   void _openInviteSheet(BuildContext context, GroupChallenge challenge) {
     showModalBottomSheet(
@@ -59,7 +124,11 @@ class GroupChallengeDiscoveryPage extends StatelessWidget {
                 ),
               ),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: 18),
+
+              _buildFilterChips(),
+
+              const SizedBox(height: 18),
 
               Expanded(
                 child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
@@ -112,6 +181,7 @@ class GroupChallengeDiscoveryPage extends StatelessWidget {
 
                         return _GroupQuestCardWithRunState(
                           challenge: challenge,
+                          selectedFilter: selectedFilter,
                           onInvite: () => _openInviteSheet(context, challenge),
                         );
                       },
@@ -130,11 +200,14 @@ class GroupChallengeDiscoveryPage extends StatelessWidget {
 class _GroupQuestCardWithRunState extends StatelessWidget {
   final GroupChallenge challenge;
   final VoidCallback onInvite;
+  final String selectedFilter;
 
   const _GroupQuestCardWithRunState({
     required this.challenge,
     required this.onInvite,
+    required this.selectedFilter,
   });
+
 
   @override
   Widget build(BuildContext context) {
@@ -161,6 +234,9 @@ class _GroupQuestCardWithRunState extends StatelessWidget {
           .snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          if (selectedFilter != 'All' && selectedFilter != 'Open') {
+            return const SizedBox.shrink();
+          }
           return _GroupQuestCard(
             challenge: challenge,
             onInvite: onInvite,
@@ -201,6 +277,11 @@ class _GroupQuestCardWithRunState extends StatelessWidget {
         }).toList();
 
         if (activeRuns.isEmpty) {
+          if (selectedFilter != 'All' &&
+              selectedFilter != 'Open' &&
+              selectedFilter != 'Completed') {
+            return const SizedBox.shrink();
+          }
           return _GroupQuestCard(
             challenge: challenge,
             onInvite: onInvite,
@@ -225,6 +306,15 @@ class _GroupQuestCardWithRunState extends StatelessWidget {
 
         final isActive = invitedUserIds.isNotEmpty &&
             invitedUserIds.every((id) => acceptedUserIds.contains(id));
+
+        final matchesFilter =
+            selectedFilter == 'All' ||
+                selectedFilter == 'Invited' ||
+                (selectedFilter == 'Active' && isActive);
+
+        if (!matchesFilter) {
+          return const SizedBox.shrink();
+        }
 
         return FutureBuilder<List<_InvitedUserInfo>>(
           future: _loadInvitedUsers(invitedUserIds),
@@ -612,8 +702,33 @@ class _InvitePeopleSheet extends StatefulWidget {
 
 class _InvitePeopleSheetState extends State<_InvitePeopleSheet> {
   final Set<String> selectedUserIds = {};
+  final Set<String> selectedChatIds = {};
+  String? selectedSourceChatId;
+  String? selectedSourceChatName;
   bool isSending = false;
   String searchQuery = '';
+
+  void _toggleUsers(List<String> userIds) {
+    final currentUserId = FirebaseAuth.instance.currentUser?.uid;
+
+    final idsToAdd = userIds
+        .where((id) => id != currentUserId)
+        .where((id) => !selectedUserIds.contains(id))
+        .toList();
+
+    if (selectedUserIds.length + idsToAdd.length > 6) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('You can invite up to 6 people total.'),
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      selectedUserIds.addAll(idsToAdd);
+    });
+  }
 
   Future<void> _sendInvites() async {
     final currentUser = FirebaseAuth.instance.currentUser;
@@ -682,6 +797,25 @@ class _InvitePeopleSheetState extends State<_InvitePeopleSheet> {
         .where((userId) => userId != currentUser.uid)
         .toList();
 
+    final totalInvitedAfterSend = {
+      ...alreadyInvitedUserIds,
+      ...newUserIds,
+    }.length;
+
+    if (totalInvitedAfterSend > 6) {
+      if (!mounted) return;
+
+      setState(() => isSending = false);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('You can invite up to 6 people total.'),
+        ),
+      );
+
+      return;
+    }
+
     if (newUserIds.isEmpty) {
       if (!mounted) return;
 
@@ -695,6 +829,7 @@ class _InvitePeopleSheetState extends State<_InvitePeopleSheet> {
 
     await runRef.update({
       'invitedUserIds': FieldValue.arrayUnion(newUserIds),
+      'chatIds': FieldValue.arrayUnion(selectedChatIds.toList()),
     });
 
     for (final userId in newUserIds) {
@@ -804,6 +939,91 @@ class _InvitePeopleSheetState extends State<_InvitePeopleSheet> {
               ),
             ),
 
+
+            const SizedBox(height: 14),
+
+            StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+              stream: FirebaseFirestore.instance
+                  .collection('chats')
+                  .where('memberIDs', arrayContains: currentUser?.uid)
+                  .where('type', isEqualTo: 'group')
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return const SizedBox.shrink();
+                }
+
+                final chats = snapshot.data!.docs;
+
+                return SizedBox(
+                  height: 92,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: chats.length,
+                    itemBuilder: (context, index) {
+                      final chat = AppChat.fromFirestore(chats[index]);
+                      final membersWithoutMe = chat.memberIDs
+                          .where((id) => id != currentUser?.uid)
+                          .toList();
+
+                      return GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            selectedChatIds.add(chat.id);
+                          });
+
+                          _toggleUsers(membersWithoutMe);
+                        },
+                        child: Container(
+                          width: 150,
+                          margin: const EdgeInsets.only(right: 10),
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: colors.primary.withOpacity(0.10),
+                            borderRadius: BorderRadius.circular(18),
+                            border: Border.all(
+                              color: colors.primary.withOpacity(0.45),
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Icon(
+                                Icons.groups_rounded,
+                                color: colors.primary,
+                                size: 22,
+                              ),
+                              const Spacer(),
+                              Text(
+                                chat.name.isEmpty ? 'Group chat' : chat.name,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: colors.onSurface,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                              Text(
+                                '${membersWithoutMe.length} people',
+                                style: TextStyle(
+                                  color: colors.onSurface.withOpacity(0.45),
+                                  fontSize: 11,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                );
+              },
+            ),
+
+            const SizedBox(height: 12),
+
+
             Expanded(
               child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                 stream: FirebaseFirestore.instance.collection('users').snapshots(),
@@ -853,6 +1073,15 @@ class _InvitePeopleSheetState extends State<_InvitePeopleSheet> {
                             if (selected) {
                               selectedUserIds.remove(user.id);
                             } else {
+                              if (selectedUserIds.length >= 6) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('You can invite up to 6 people.'),
+                                  ),
+                                );
+                                return;
+                              }
+
                               selectedUserIds.add(user.id);
                             }
                           });

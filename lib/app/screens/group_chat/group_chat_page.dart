@@ -9,6 +9,8 @@ import '../../shared/services/user_service.dart';
 import 'models/chat_message.dart';
 import 'widgets/chat_bubble.dart';
 import 'widgets/message_input_bar.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../group_challenge_discovery/group_challenge_discovery_page.dart';
 
 class GroupChatPage extends StatefulWidget {
   final String chatID;
@@ -149,6 +151,10 @@ class _GroupChatPageState extends State<GroupChatPage> {
         child: Column(
           children: [
             buildHeader(context),
+
+            if (widget.isGroup)
+              _GroupQuestChatBanner(chatID: widget.chatID),
+
             Expanded(
               child: StreamBuilder<List<firestore_message.ChatMessage>>(
                 stream: _messageService.watchMessages(widget.chatID),
@@ -320,6 +326,183 @@ class _ChatBubbleWithSenderName extends StatelessWidget {
             message: message,
             senderName: senderName,
             currentUserID: currentUserID,
+          ),
+        );
+      },
+    );
+  }
+}
+
+
+
+
+class _GroupQuestChatBanner extends StatelessWidget {
+  final String chatID;
+
+  const _GroupQuestChatBanner({
+    required this.chatID,
+  });
+
+  Future<void> _acceptInvite(String runId) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final firestore = FirebaseFirestore.instance;
+    final runRef = firestore.collection('group_challenge_runs').doc(runId);
+
+    final runDoc = await runRef.get();
+    final runData = runDoc.data();
+    if (runData == null) return;
+
+    final invitedUserIds = List<String>.from(
+      (runData['invitedUserIds'] ?? []).map((e) => e.toString()),
+    );
+
+    final acceptedUserIds = List<String>.from(
+      (runData['acceptedUserIds'] ?? []).map((e) => e.toString()),
+    );
+
+    final newAcceptedUserIds = {
+      ...acceptedUserIds,
+      user.uid,
+    }.toList();
+
+    final allAccepted = invitedUserIds.isNotEmpty &&
+        invitedUserIds.every((id) => newAcceptedUserIds.contains(id));
+
+    await runRef.update({
+      'acceptedUserIds': FieldValue.arrayUnion([user.uid]),
+      'participantIds': FieldValue.arrayUnion([user.uid]),
+      if (allAccepted) 'status': 'active',
+      if (allAccepted) 'startedAt': FieldValue.serverTimestamp(),
+      if (allAccepted)
+        'expiresAt': Timestamp.fromDate(
+          DateTime.now().add(const Duration(hours: 24)),
+        ),
+    });
+
+    final inviteSnapshot = await firestore
+        .collection('challengeInvites')
+        .where('runId', isEqualTo: runId)
+        .where('toUserId', isEqualTo: user.uid)
+        .get();
+
+    for (final invite in inviteSnapshot.docs) {
+      await invite.reference.update({
+        'status': 'accepted',
+        'respondedAt': FieldValue.serverTimestamp(),
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    final currentUserId = FirebaseAuth.instance.currentUser?.uid;
+
+    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+      stream: FirebaseFirestore.instance
+          .collection('group_challenge_runs')
+          .where('chatIds', arrayContains: chatID)
+          .snapshots(),
+      builder: (context, snapshot) {
+        final docs = snapshot.data?.docs ?? [];
+
+        final activeDocs = docs.where((doc) {
+          final data = doc.data();
+          final status = data['status'];
+
+          return status == 'waiting' || status == 'active';
+        }).toList();
+
+        if (activeDocs.isEmpty) {
+          return Padding(
+            padding: const EdgeInsets.fromLTRB(18, 0, 18, 12),
+            child: ElevatedButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const GroupChallengeDiscoveryPage(),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.flag_rounded),
+              label: const Text('Start a group quest'),
+            ),
+          );
+        }
+
+        final doc = activeDocs.first;
+        final data = doc.data();
+
+        final title = data['title'] ?? 'Group Quest';
+        final status = data['status'] ?? 'waiting';
+
+        final acceptedUserIds = List<String>.from(
+          (data['acceptedUserIds'] ?? []).map((e) => e.toString()),
+        );
+
+        final hasAccepted = currentUserId != null &&
+            acceptedUserIds.contains(currentUserId);
+
+        final invitedUserIds = List<String>.from(
+          (data['invitedUserIds'] ?? []).map((e) => e.toString()),
+        );
+
+        final isInvited = currentUserId != null &&
+            invitedUserIds.contains(currentUserId);
+
+        return Container(
+          margin: const EdgeInsets.fromLTRB(18, 0, 18, 12),
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: colors.primary.withOpacity(0.10),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: colors.primary.withOpacity(0.55),
+            ),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                status == 'active'
+                    ? Icons.local_fire_department_rounded
+                    : Icons.hourglass_top_rounded,
+                color: colors.primary,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      status == 'active'
+                          ? 'Active group quest'
+                          : 'Pending invitation',
+                      style: TextStyle(
+                        color: colors.primary,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    Text(
+                      title,
+                      style: TextStyle(
+                        color: colors.onSurface,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (status == 'waiting' && isInvited && !hasAccepted)
+                TextButton(
+                  onPressed: () => _acceptInvite(doc.id),
+                  child: const Text('Accept'),
+                ),
+            ],
           ),
         );
       },

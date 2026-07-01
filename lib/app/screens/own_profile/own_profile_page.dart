@@ -111,7 +111,19 @@ class OwnProfilePage extends StatelessWidget {
 
                   final docs = snapshot.data!.docs;
 
-                  docs.sort((a, b) {
+                  final currentUserId = FirebaseAuth.instance.currentUser!.uid;
+
+                  final visibleDocs = docs.where((doc) {
+                    final data = doc.data();
+
+                    final deletedParticipationUserIds = List<String>.from(
+                      (data['deletedParticipationUserIds'] ?? []).map((e) => e.toString()),
+                    );
+
+                    return !deletedParticipationUserIds.contains(currentUserId);
+                  }).toList();
+
+                  visibleDocs.sort((a, b) {
                     final aTime = a.data()['createdAt'] as Timestamp?;
                     final bTime = b.data()['createdAt'] as Timestamp?;
 
@@ -120,7 +132,7 @@ class OwnProfilePage extends StatelessWidget {
                     return bTime.compareTo(aTime);
                   });
 
-                  final firebasePosts = docs.map((doc) {
+                  final firebasePosts = visibleDocs.map((doc) {
                     final data = doc.data();
 
                     return ProfilePost(
